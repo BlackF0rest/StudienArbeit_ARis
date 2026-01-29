@@ -1,0 +1,89 @@
+%!TEX root = ./main.tex
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%
+%% Vorlage für Bachelor Arbeit und weitere Dokumentationen (T1000 - T3300)
+%%   von Maximilian Knopf
+%%   inspiriert von einer DHBW Heidenheim Vorlage, https://github.com/programonaut/latex-template
+%%
+%% Erstellen mitteles Kommandozeile:
+%%   pdflatex main.tex
+%%   biber main
+%%   pdflatex main.tex
+%%   pdflatex main.tex
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\input{config/config}
+\input{config/header}
+
+%% Start des Dokuments
+\begin{document}
+    %TODO: Liste aller TODOs, auskommentieren für die Abgabe!
+    %\listoftodos
+
+    %% Titelblatt
+    \input{resources/cover}
+
+    \pagestyle{scrheadings}
+    \pagenumbering{Roman}
+
+    %% Sperrvermerk
+    \ifDocType{T3\_3100}{%
+            % kein Sperrvermerk für T3100
+        }{%
+            \input{resources/restrictionNotices}
+        }%
+
+    %% Erklärung
+    \input{resources/declaration}
+
+    %% Anmerkung zum Genus des Substantivs
+    \input{resources/genus}
+
+    %% Abstract
+    \input{resources/abstract}
+
+    %% Inhaltsverzeichnis
+    \begin{spacing}{1.2}
+        \begingroup
+            \setcounter{tocdepth}{2} % subchapter Anzeigetiefe
+            \tableofcontents
+        \endgroup
+    \end{spacing}
+
+    %% ABkürzungsverezeichnis
+    \input{resources/acronyms}
+
+    \acresetall
+
+    %% Pagernumbering
+    \clearpage
+    \pagenumbering{arabic}
+
+    %% Inhalt
+    \input{content/chapters}
+
+    \clearpage
+    \pagenumbering{roman}
+    
+    %% Literaturverzeichnis
+    \printbibliography[title=Literaturverzeichnis]
+    \clearpage
+
+    %% Abbildungsverzeichnis
+    \listoffigures
+    \clearpage
+
+    %% Tabellenverzeichnis
+    \listoftables
+    \clearpage
+
+    %% Skriptverzeichnis
+    \lstlistoflistings
+    \clearpage
+
+    %% Anhang
+    \appendix
+    \input{resources/appendix}
+
+\end{document}

@@ -1,0 +1,61 @@
+
+%!TEX root = ../main.tex
+
+\chapter{Fachliche Grundlagen \& Konzeption}
+
+\section{Software-Architektur}
+Die Software-Architektur der geplanten Augmented-Reality-Brille basiert auf einem modularen Ansatz, der Flexibilität, Erweiterbarkeit und effiziente Ressourcennutzung ermöglicht. Sie vereint verschiedene Technologieebenen, die nahtlos zusammenarbeiten müssen, um eine performante AR-Erfahrung zu gewährleisten.
+In \ref{apx:software_architektur} ist eine Prototypische Software-Architektur dargestellt. Darin sind verschiedene Schichten und Module der Software-Architektur vorhanden, welche im folgenden näher erläutert werden. \autocite[vgl.]{dowalilModulareSoftwarearchitekturNachhaltiger2020}  \autocite[vgl.]{linowesAugmentedRealityDevelopers2017}
+Grundsätzlich wird die Hardware mit einem Linxus-basierten Betriebssystem betrieben, um eine hohe Kompatibilität mit verschiedenen Software-Komponenten zu gewährleisten und eine kleine Leistungsaufnahme zu ermöglichen.
+
+\subsubsection{Kommunikationsschicht}
+Die Kommunikationsinfrastruktur stellt die Grundlage für die Interaktion der AR-Brille mit externen Geräten dar. Drei Kommunikationsprotokolle werden implementiert:
+die \textbf{WLAN-Verbindung} ermöglicht die Anbindung an PC-basierte Streaming-Dienste \autocite[vgl.]{PixelStreamingUnreal}, die \textbf{Bluetooth-Konnektivität} dient der Steuerung und Datensynchronisation mit mobilen Geräten \autocite[vgl.]{PybluezPybluez2025}, und die \textbf{USB-Schnittstelle} bietet eine Möglichkeit für Datenübertragung, Firmware-Updates und Debugging.
+
+\subsubsection{Framework-basierte Entwicklungsumgebung}
+Die Implementierung eines erweiterbaren Frameworks ermöglicht die einfache Integration neuer Funktionalitäten und Module. Dabei werden durch verschiedene Interfaces die Kommunikation zwischen den Apps und der Hardware-Schicht ermöglicht. Die in \ref{apx:software_architektur} gezeigten Apps sind Beispiele für mögliche Implementierungen und somit nicht als Final anzusehen.  \autocite[vgl.]{markiewiczObjectOrientedFramework2001}
+
+\subsection{Frontend und Backend Implementierung}
+
+\subsubsection{Web-Frontend mit Svelte}
+Für das Web-Frontend wird Svelte als Framework gewählt, da es mehrere entscheidende Vorteile bietet. Im Gegensatz zu traditionellen Frameworks wie React oder Vue nutzt Svelte einen Compiler-Ansatz, bei dem der Großteil der Arbeit bereits zur Build-Zeit statt zur Laufzeit erfolgt. Dies resultiert in außergewöhnlich kleinen Bundle-Größen und schnellen Ladezeiten – kritische Faktoren für ressourcenbeschränkte Geräte wie AR-Brillen. Svelte verzichtet auf ein virtuelles \ac{DOM}, was ebenfalls zu einer verbesserten Performance führt. Die integrierte Reaktivität von Svelte vereinfacht die Zustandsverwaltung erheblich, da Variablenänderungen automatisch die UI aktualisieren, ohne zusätzlichen Code oder Webhooks.  \autocite[vgl.]{SvelteWebDevelopment}  \autocite[vgl.]{highlightsReactVsVue2025}
+
+\newpage
+
+\subsubsection{Python-Backend}
+Das Backend wird vollständig in Python implementiert, wobei verschiedene Bibliotheken zum Einsatz kommen. Python bietet ein reichhaltiges Ökosystem an Frameworks für zum Beispiel maschinelles Lernen, Computer Vision und Hardware-Integration. Die Wahl von Python ermöglicht eine schnelle Entwicklung und einfache Integration von erweiterten Funktionen.  \autocite[vgl.]{WelcomePythonorg2025}
+
+\subsubsection{Mobile Applikation}
+Die Entwicklung einer Mobilen Applikation zusätzlich zu der eigentlichen AR-Brille wird hier vorgestellt, jedoch nur bei vorhandener Kapazität umgesetzt. Die App soll als Companion-App zur AR-Brille dienen um On-the-Go Einstellungen zu ändern und erweiterte Funktionalitäten zu bieten. Dazu wurden verschiedene Frameworks betrachtet, wobei sich zuletzt für React Native entschieden wurde. Durch den großen Support, die Cross-Platform Fähigkeit und die Nutzung von Javascript als Programmiersprache wurde die Entscheidung unterstützt. Alternativ wurde ebenfalls Flutter betrachtet, doch final wegen der nicht verbreiteten Programmiersprache Dart verworfen.  \autocite[vgl.]{gautierFlutterVsReact2025}  \autocite[vgl.]{ReactNativeLearn}
+
+\subsubsection{PC-basiertes Streaming mit Unreal Engine}
+
+Für hochperformante Visualisierungen wird Unreal Engine mit der Pixel Streaming-Technologie eingesetzt. Pixel Streaming ermöglicht es, rechenintensive Inhalte auf einem leistungsstarken Server zu rendern und als Videostream per WLAN an die AR-Brille zu übertragen. Dies kann zum Beispiel in Bereichen wie Produktion oder Logistik verwendet werden, um Anleitungen oder 3D Inhalte anzuzeigen.  \autocite[vgl.]{PixelStreamingUnreal}
+
+\section{Optik}
+
+Die optische Architektur einer AR-Brille ist fundamentaler Bestandteil des Gesamtsystems und maßgeblich für die Qualität der Nutzererfahrung verantwortlich. Die Wahl des optischen Systems beeinflusst kritische Parameter wie Field of View (FOV), Eyebox-Größe, Formfaktor, Helligkeit und Bildqualität.
+Grundsätzlich wurde sich für ein \ac{OST} System entschieden, da diese eine direkte Sicht auf die reale Umgebung ermöglicht. Alternativ wäre ein \ac{VST} System möglich, welches jedoch eine Kamera benötigt, um die reale Umgebung zu erfassen und darzustellen. Dies führt zu einer erhöhten Latenz und einem Verlust der natürlichen Tiefenwahrnehmung. Außerdem setzt dies eine weitaus komplexere Software- und Hardware-Architektur.  \autocite[vgl.]{itohIndistinguishableAugmentedReality2022}  \autocite[vgl.]{rollandComparisonOpticalVideo1994}
+
+\subsection{Display-Technologien für AR-Brillen}
+
+Moderne AR-Brillen nutzen verschiedene Mikrodisplay-Technologien, die jeweils spezifische Vor- und Nachteile aufweisen. Displays gibt es in verschiedensten ausführungen, wobei nur eine kleine Auswahl für AR-Brillen in frage kommen. Neben den bekannten LCD und OLED Displays, welche in Smartphones und Fernsehern verbaut werden, gibt es DLP-Projektoren, Micro-LED und \ac{LCoS}-Displays. Jede dieser Technologien hat seine eigenen Vor- und Nachteile. Durch die bestimmten Anforderungen und die limitierten Ressourcen des Projekts wurde sich für eine OLED-Lösung entschieden. Diese bietet eine gute Balance zwischen Kompakter Größe, Bildqualität und Kosteneffizient. Was die Entscheidung weiter unterstützt sind die breit verfügbaren Module auf dem Markt. Dabei gibt es einerseitz AR-Display-Systeme, welche speziell dafür ausgelegt sind, andererseits aber auch Viewfinder Displays, welche in Kameras verbaut werden. Diese sind meist günstiger und beinhalten schon eine passende Linse zur Fokussierung. Für die genaue Display Wahl wird noch mit verschiedenen Herstellern geschrieben, um eine möglichst günstige und passende Lösung zu finden. Ebenfalls im Raum steht die Möglichkeit zwei Displays zu verbauen, um mehr Informationen anzuzeigen und Vortschrittlichere Techniken zu ermöglichen.
+
+\subsection{Optische Combiner-Systeme}
+
+Die Wahl des optischen Combiners, welche für die Kombination der Realen Welt mit dem selbst generierten Bild zuständig ist, bestimmt maßgeblich den Formfaktor, die optische Leistung und die Herstellungskosten der AR-Brille. Dabei wurden vor allem zwei Systeme betrachtet: Birdbath-Optik und Waveguide-Optik. Entschieden wurde sich zuletzt für ein Birdbath-System. Dies ist ein weit verbreitetes optisches System für AR-Brillen, das seinen Namen von der charakteristischen Kugelform des Hauptspiegels erhält. Das System besteht aus zwei Hauptkomponenten: einem planaren Strahlteiler (Beam Splitter) und einem sphärischen (Teil-)Spiegel (Combiner). Es wird Licht vom Mikrodisplay zunächst vom Beam Splitter weg vom Auge reflektiert. Der sphärische Spiegel vergrößert das Bild und fokussiert es in Richtung des Auges. Das Licht passiert erneut den Beam Splitter (nun transmissiv) und erreicht das Auge. Gleichzeitig kann das Umgebungslicht durch den teiltransparenten sphärischen Spiegel zum Auge gelangen. Vorteile hierfür sind einerseits die Kostengünstigkeit, relativ kompakte Bauform und guter Bildqualität. Alternativen wie Waveguide-Optiken oder Laserreflektoren bieten zwar ihre eigenen Vorteile, sind jedoch zu teuer oder zu komplex um in diesem Rahmen realisierbar zu sein. Durch die Entscheidung wird auch maßgeblich die Hardwaretechnische gestaltung beeinflusst, wie in der Partnerarbeit weitert erläutert wird. \autocite[vgl.]{meiTwoMainOptical2024}
+
+\newpage
+
+\section{Unsicherheiten und Forschungsfragen}
+Trotz sorgfältiger Planung und Recherche bestehen weiterhin Unsicherheiten und offene Forschungsfragen, die im Verlauf des Projekts adressiert werden müssen:
+\begin{itemize}
+\item \textbf{Display-Auswahl:} Die endgültige Wahl des Mikrodisplays hängt von Verfügbarkeit, Kosten und Kompatibilität mit dem optischen System ab. Verschiedene Modelle müssen evaluiert werden und sich für eine Variante entschieden werden.
+\item \textbf{Optische Justierung:} Die präzise Ausrichtung und Kalibrierung der optischen Komponenten ist kritisch für die Bildqualität. Prototyping und Tests sind erforderlich, um optimale Einstellungen zu finden.
+\item \textbf{Leistungsmanagement:} Die Balance zwischen Rechenleistung, Energieverbrauch und thermischem Management in einem kompakten Formfaktor stellt eine Herausforderung dar. Effiziente Hardware- und Softwarelösungen müssen entwickelt werden.
+\item \textbf{Software-Integration:} Die nahtlose Integration der verschiedenen Software-Komponenten und die Gewährleistung niedriger Latenzzeiten erfordern umfangreiche Tests und Optimierungen.
+\item \textbf{Zusammenarbeit und Zeitmanagement:} Die enge Abstimmung zwischen den Hardware- und Software-Teams ist entscheidend für den Projekterfolg. Effektive Kommunikations- und Projektmanagement-Strategien müssen implementiert werden. Außerdem muss die verfügbare Zeit realistisch eingeschätzt und eingeplant werden, um alle Projektziele zu erreichen.
+\end{itemize}
+
+\section{Anforderungsanalyse}
+Hier wird auf die Partnerarbeit verwiesen, in welcher unter Abschnitt \textbf{\textit{2.5}} die Anforderungsanalyse beschrieben wird.

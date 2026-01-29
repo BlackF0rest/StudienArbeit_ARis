@@ -1,0 +1,22 @@
+@import 'tailwindcss';
+@plugin '@tailwindcss/typography';
+
+body {
+  background-color: black;
+  color: white;
+  width: 768px;
+  height: 500px;
+  outline: 2px white solid;
+  top: 20px;
+  left: 20px;
+  position: absolute;
+}
+
+#interface {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    outline-style: dashed;
+    outline-color: rgb(47, 255, 68);
+    outline-width: 2px;
+}

@@ -1,0 +1,12 @@
+{
+	"folders": [
+		{
+			"path": ".."
+		},
+		{
+			"name": "T-Beam_Micropython_Testing",
+			"path": "."
+		}
+	],
+	"settings": {}
+}

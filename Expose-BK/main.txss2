@@ -1,0 +1,104 @@
+{
+    "InternalPDFViewer": {
+        "Embedded": true,
+        "File": "main.pdf"
+    },
+    "Session": {
+        "Bookmarks": [
+        ],
+        "CurrentFile": "content/10_Problemstellung.tex",
+        "FileVersion": 1,
+        "Files": [
+            {
+                "Col": 15,
+                "EditorGroup": 0,
+                "FileName": "main.tex",
+                "FirstLine": 9,
+                "FoldedLines": "",
+                "Line": 10
+            },
+            {
+                "Col": 0,
+                "EditorGroup": 0,
+                "FileName": "config/header.tex",
+                "FirstLine": 30,
+                "FoldedLines": "",
+                "Line": 0
+            },
+            {
+                "Col": 20,
+                "EditorGroup": 0,
+                "FileName": "config/config.tex",
+                "FirstLine": 8,
+                "FoldedLines": "",
+                "Line": 17
+            },
+            {
+                "Col": 0,
+                "EditorGroup": 0,
+                "FileName": "resources/cover.tex",
+                "FirstLine": 9,
+                "FoldedLines": "",
+                "Line": 0
+            },
+            {
+                "Col": 0,
+                "EditorGroup": 0,
+                "FileName": "resources/restrictionNotices.tex",
+                "FirstLine": 0,
+                "FoldedLines": "",
+                "Line": 0
+            },
+            {
+                "Col": 0,
+                "EditorGroup": 0,
+                "FileName": "resources/declaration.tex",
+                "FirstLine": 0,
+                "FoldedLines": "",
+                "Line": 0
+            },
+            {
+                "Col": 0,
+                "EditorGroup": 0,
+                "FileName": "resources/genus.tex",
+                "FirstLine": 0,
+                "FoldedLines": "",
+                "Line": 0
+            },
+            {
+                "Col": 0,
+                "EditorGroup": 0,
+                "FileName": "resources/abstract.tex",
+                "FirstLine": 0,
+                "FoldedLines": "",
+                "Line": 0
+            },
+            {
+                "Col": 0,
+                "EditorGroup": 0,
+                "FileName": "resources/acronyms.tex",
+                "FirstLine": 0,
+                "FoldedLines": "",
+                "Line": 0
+            },
+            {
+                "Col": 0,
+                "EditorGroup": 0,
+                "FileName": "content/chapters.tex",
+                "FirstLine": 3,
+                "FoldedLines": "",
+                "Line": 0
+            },
+            {
+                "Col": 234,
+                "EditorGroup": 0,
+                "FileName": "content/10_Problemstellung.tex",
+                "FirstLine": 0,
+                "FoldedLines": "",
+                "Line": 6
+            }
+        ],
+        "MasterFile": "",
+        "VerticalSplit": true
+    }
+}
