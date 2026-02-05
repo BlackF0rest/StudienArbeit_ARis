@@ -368,6 +368,7 @@ class TextTxCharacteristic(Characteristic):
             return
         self.notifying = True
         print("Client subscribed to TX notifications")
+        self.send(b'Hello from GATT server!')
 
     def StopNotify(self):
         self.notifying = False
