@@ -30,8 +30,10 @@
    - Bluetooth adapter (GATT server/client UART-style service)
    - USB debug adapter (command channel + diagnostics endpoint)
    - WiFi adapter (PC interface + external services)
+   - PC interface orchestrator with WiFi session manager, Pixel Streaming controls, overlay sync contract, and stream guardrails
    - Translator layer for transport envelopes ↔ internal commands
    - Connection manager publishing status transitions on the event bus
+   - USB diagnostics panels can include PC link status + stream metrics
 7. **Startup profiles**
    - `dev`: verbose (`DEBUG`) logging
    - `demo`: stable defaults enabled

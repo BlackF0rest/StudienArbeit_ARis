@@ -17,6 +17,7 @@ class USBDebugAdapter:
         self._command_queue: deque[TransportPayload] = deque()
         self._diagnostics: deque[dict[str, Any]] = deque(maxlen=200)
         self._listeners: list[Callable[[TransportPayload], None]] = []
+        self._panel_providers: dict[str, Callable[[], dict[str, Any]]] = {}
         self._attached = False
 
     def attach(self) -> None:
@@ -38,6 +39,10 @@ class USBDebugAdapter:
     def on_payload(self, callback: Callable[[TransportPayload], None]) -> None:
         self._listeners.append(callback)
 
+
+    def register_panel_provider(self, panel_id: str, provider: Callable[[], dict[str, Any]]) -> None:
+        self._panel_providers[panel_id] = provider
+
     def receive_command(self, payload: TransportPayload) -> None:
         self._command_queue.append(payload)
         for listener in list(self._listeners):
@@ -58,11 +63,18 @@ class USBDebugAdapter:
 
     def diagnostics_endpoint(self, limit: int = 50) -> dict[str, Any]:
         data = list(self._diagnostics)[-limit:]
+        panels: dict[str, Any] = {}
+        for panel_id, provider in self._panel_providers.items():
+            try:
+                panels[panel_id] = provider()
+            except Exception as exc:  # pragma: no cover - defensive diagnostics guard
+                panels[panel_id] = {"error": str(exc)}
         return {
             "adapter": self._adapter_name,
             "connected": self._attached,
             "pending_commands": len(self._command_queue),
             "diagnostics": data,
+            "panels": panels,
         }
 
     def health(self) -> dict[str, Any]:
@@ -71,4 +83,5 @@ class USBDebugAdapter:
             "connected": self._attached,
             "queued_commands": len(self._command_queue),
             "diagnostic_entries": len(self._diagnostics),
+            "panels": list(self._panel_providers),
         }
