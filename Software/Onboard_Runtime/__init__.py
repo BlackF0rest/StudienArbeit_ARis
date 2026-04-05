@@ -1,4 +1,15 @@
 from .config_loader import ConfigLoader, RuntimeConfig
+from .comm import (
+    BluetoothAdapter,
+    ConnectionManager,
+    ConnectionState,
+    ConnectionTransition,
+    InternalCommand,
+    TransportPayload,
+    TransportTranslator,
+    USBDebugAdapter,
+    WiFiAdapter,
+)
 from .event_bus import EventMessage, RuntimeEvent, SharedEventBus
 from .hardware import (
     BME280Adapter,
@@ -45,5 +56,14 @@ __all__ = [
     "PROFILE_PRESETS",
     "ProfileSettings",
     "StartupProfile",
+    "BluetoothAdapter",
+    "USBDebugAdapter",
+    "WiFiAdapter",
+    "TransportPayload",
+    "InternalCommand",
+    "TransportTranslator",
+    "ConnectionState",
+    "ConnectionTransition",
+    "ConnectionManager",
     "resolve_profile",
 ]
