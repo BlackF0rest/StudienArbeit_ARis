@@ -3,6 +3,14 @@ from __future__ import annotations
 from dataclasses import dataclass
 from pathlib import Path
 
+from .comm import (
+    BluetoothAdapter,
+    ConnectionManager,
+    ConnectionState,
+    TransportTranslator,
+    USBDebugAdapter,
+    WiFiAdapter,
+)
 from .config_loader import ConfigLoader, RuntimeConfig
 from .event_bus import SharedEventBus
 from .hardware.subscriptions import (
@@ -51,11 +59,64 @@ class OnboardRuntime:
             ModuleLifecycleManager(name="hardware-adapter", version="0.1.0"),
             ModuleCategory.HARDWARE_ADAPTER,
         )
+        self.register_communication_modules()
+
+    def register_communication_modules(self) -> dict[str, object]:
+        connection_manager = ConnectionManager(self.event_bus)
+        translator = TransportTranslator()
+        bluetooth = BluetoothAdapter(connection_manager=connection_manager)
+        usb_debug = USBDebugAdapter(connection_manager=connection_manager)
+        wifi = WiFiAdapter(connection_manager=connection_manager)
+
+        modules = {
+            "connection_manager": connection_manager,
+            "translator": translator,
+            "bluetooth": bluetooth,
+            "usb_debug": usb_debug,
+            "wifi": wifi,
+        }
+
         self.registry.register(
-            ModuleLifecycleManager(name="communication-adapter", version="0.1.0"),
+            ModuleLifecycleManager(
+                name="connection-manager",
+                version="0.1.0",
+                on_start=lambda: connection_manager.set_state(
+                    "runtime", ConnectionState.CONNECTED, reason="connection manager active"
+                ),
+                on_stop=lambda: connection_manager.set_state(
+                    "runtime", ConnectionState.DISCONNECTED, reason="connection manager stopped"
+                ),
+            ),
+            ModuleCategory.COMMUNICATION_ADAPTER,
+        )
+        self.registry.register(
+            ModuleLifecycleManager(
+                name="bluetooth-adapter",
+                version="0.1.0",
+                on_stop=bluetooth.disconnect_peer,
+            ),
+            ModuleCategory.COMMUNICATION_ADAPTER,
+        )
+        self.registry.register(
+            ModuleLifecycleManager(
+                name="usb-debug-adapter",
+                version="0.1.0",
+                on_start=usb_debug.attach,
+                on_stop=usb_debug.detach,
+            ),
+            ModuleCategory.COMMUNICATION_ADAPTER,
+        )
+        self.registry.register(
+            ModuleLifecycleManager(
+                name="wifi-adapter",
+                version="0.1.0",
+                on_start=wifi.connect,
+                on_stop=wifi.disconnect,
+            ),
             ModuleCategory.COMMUNICATION_ADAPTER,
         )
 
+        return modules
 
     def register_feature_subscriptions(self) -> dict[str, object]:
         subscriptions = {

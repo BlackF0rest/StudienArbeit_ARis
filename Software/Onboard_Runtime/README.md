@@ -26,7 +26,13 @@
 5. **Configuration loader**
    - file-based JSON config
    - environment overrides via `ARIS_RUNTIME_` prefix
-6. **Startup profiles**
+6. **Communication modules**
+   - Bluetooth adapter (GATT server/client UART-style service)
+   - USB debug adapter (command channel + diagnostics endpoint)
+   - WiFi adapter (PC interface + external services)
+   - Translator layer for transport envelopes ↔ internal commands
+   - Connection manager publishing status transitions on the event bus
+7. **Startup profiles**
    - `dev`: verbose (`DEBUG`) logging
    - `demo`: stable defaults enabled
    - `headless`: UI disabled for diagnostics
