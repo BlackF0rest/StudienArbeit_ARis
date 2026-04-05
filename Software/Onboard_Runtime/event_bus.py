@@ -11,6 +11,7 @@ class RuntimeEvent(str, Enum):
     SENSOR_UPDATE = "sensor_update"
     TELEPROMPTER_UPDATE = "teleprompter_update"
     CONNECTION_STATUS = "connection_status"
+    HARDWARE_EVENT = "hardware_event"
 
 
 @dataclass
