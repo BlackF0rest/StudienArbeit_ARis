@@ -1,0 +1,7 @@
+{
+  "profile": "demo",
+  "log_level": "INFO",
+  "ui_enabled": true,
+  "stable_defaults": true,
+  "connection_retries": 3
+}
