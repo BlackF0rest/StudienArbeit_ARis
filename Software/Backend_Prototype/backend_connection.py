@@ -1,3 +1,4 @@
+# LEGACY REFERENCE: retained during factory migration. Use run.py for new startup path.
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 import sqlite3
