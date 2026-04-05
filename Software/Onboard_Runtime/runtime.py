@@ -13,6 +13,7 @@ from .comm import (
     WiFiAdapter,
 )
 from .config_loader import ConfigLoader, RuntimeConfig
+from .debug_interface import DebugInterfaceModule
 from .event_bus import SharedEventBus
 from .hardware.subscriptions import (
     BasicHUDSubscription,
@@ -115,6 +116,17 @@ class OnboardRuntime:
         pc_interface = PCInterfaceOrchestrator(connection_manager=connection_manager)
         usb_debug.register_panel_provider("pc_link", pc_interface.diagnostic_panel)
 
+        debug_interface = DebugInterfaceModule(
+            registry=self.registry,
+            event_bus=self.event_bus,
+            connection_manager=connection_manager,
+            bluetooth=bluetooth,
+            usb_debug=usb_debug,
+            wifi=wifi,
+            telemetry_log=self.telemetry_log,
+        )
+        usb_debug.register_panel_provider("debug_interface", debug_interface.local_ui_snapshot)
+
         modules = {
             "connection_manager": connection_manager,
             "translator": translator,
@@ -122,6 +134,7 @@ class OnboardRuntime:
             "usb_debug": usb_debug,
             "wifi": wifi,
             "pc_interface": pc_interface,
+            "debug_interface": debug_interface,
         }
 
         self.registry.register(
@@ -186,6 +199,21 @@ class OnboardRuntime:
                 ),
                 custom_health_check=lambda: pc_interface.health(),
                 telemetry_hook=self._telemetry_hook("pc-interface"),
+            ),
+            ModuleCategory.COMMUNICATION_ADAPTER,
+        )
+
+        self.registry.register(
+            ModuleLifecycleManager(
+                name="debug-interface",
+                version="0.1.0",
+                metadata=ModuleMetadata(
+                    description="Runtime debug dashboard + protected debug API",
+                    permissions=("diagnostics.read", "diagnostics.write"),
+                    dependencies=("connection-manager",),
+                ),
+                custom_health_check=lambda: debug_interface.health(),
+                telemetry_hook=self._telemetry_hook("debug-interface"),
             ),
             ModuleCategory.COMMUNICATION_ADAPTER,
         )

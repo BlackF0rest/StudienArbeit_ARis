@@ -11,6 +11,7 @@ from .comm import (
     WiFiAdapter,
 )
 from .event_bus import EventMessage, RuntimeEvent, SharedEventBus
+from .debug_interface import DebugInterfaceModule
 from .hardware import (
     BME280Adapter,
     BME280Reading,
@@ -64,6 +65,7 @@ __all__ = [
     "CentralModuleRegistry",
     "ModuleCategory",
     "OnboardRuntime",
+    "DebugInterfaceModule",
     "PROFILE_PRESETS",
     "ProfileSettings",
     "StartupProfile",
