@@ -21,6 +21,7 @@ from .hardware.subscriptions import (
 )
 from .module_lifecycle import ModuleLifecycleManager, ModuleMetadata
 from .module_registry import CentralModuleRegistry, ModuleCategory
+from .pc_interface import PCInterfaceOrchestrator
 from .startup_profiles import resolve_profile
 
 
@@ -111,6 +112,8 @@ class OnboardRuntime:
         bluetooth = BluetoothAdapter(connection_manager=connection_manager)
         usb_debug = USBDebugAdapter(connection_manager=connection_manager)
         wifi = WiFiAdapter(connection_manager=connection_manager)
+        pc_interface = PCInterfaceOrchestrator(connection_manager=connection_manager)
+        usb_debug.register_panel_provider("pc_link", pc_interface.diagnostic_panel)
 
         modules = {
             "connection_manager": connection_manager,
@@ -118,6 +121,7 @@ class OnboardRuntime:
             "bluetooth": bluetooth,
             "usb_debug": usb_debug,
             "wifi": wifi,
+            "pc_interface": pc_interface,
         }
 
         self.registry.register(
@@ -171,6 +175,21 @@ class OnboardRuntime:
             ),
             ModuleCategory.COMMUNICATION_ADAPTER,
         )
+        self.registry.register(
+            ModuleLifecycleManager(
+                name="pc-interface",
+                version="0.1.0",
+                metadata=ModuleMetadata(
+                    description="PC link session manager + pixel streaming orchestrator",
+                    permissions=("network.read", "network.write", "display.write"),
+                    dependencies=("connection-manager",),
+                ),
+                custom_health_check=lambda: pc_interface.health(),
+                telemetry_hook=self._telemetry_hook("pc-interface"),
+            ),
+            ModuleCategory.COMMUNICATION_ADAPTER,
+        )
+
         self.registry.register(
             ModuleLifecycleManager(
                 name="wifi-adapter",

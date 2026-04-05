@@ -28,6 +28,16 @@ from .hardware import (
 from .module_lifecycle import ModuleLifecycleManager, ModuleMetadata, ModuleState
 from .module_registry import CentralModuleRegistry, ModuleCategory
 from .runtime import OnboardRuntime
+from .pc_interface import (
+    GuardrailThresholds,
+    OverlaySyncContract,
+    PCInterfaceOrchestrator,
+    PCWiFiSessionManager,
+    PixelStreamingOrchestrator,
+    StreamPerformanceGuard,
+    StreamQuality,
+    WiFiSession,
+)
 from .startup_profiles import PROFILE_PRESETS, ProfileSettings, StartupProfile, resolve_profile
 
 __all__ = [
@@ -67,4 +77,12 @@ __all__ = [
     "ConnectionTransition",
     "ConnectionManager",
     "resolve_profile",
+    "PCInterfaceOrchestrator",
+    "PCWiFiSessionManager",
+    "WiFiSession",
+    "PixelStreamingOrchestrator",
+    "StreamQuality",
+    "OverlaySyncContract",
+    "GuardrailThresholds",
+    "StreamPerformanceGuard",
 ]

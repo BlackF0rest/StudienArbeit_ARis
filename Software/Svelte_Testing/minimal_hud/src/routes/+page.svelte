@@ -3,6 +3,10 @@
 	import Header from './header.svelte';
 	import { bootstrapFeatureHost } from '$lib/feature-registration';
 	import { featureHost, type FeatureRuntimeSnapshot } from '$lib/feature-host';
+	import {
+		fetchPcLinkDiagnostics,
+		type PcLinkDiagnostics
+	} from '$lib/services/pc-link-diagnostics';
 
 	let snapshot: FeatureRuntimeSnapshot = {
 		registered: [],
@@ -10,8 +14,29 @@
 		telemetry: []
 	};
 
+	let pcDiagnostics: PcLinkDiagnostics = {
+		pc_link: { active: false, sessions: [] },
+		stream_metrics: {
+			connected: false,
+			reconnect_attempts: 0,
+			quality: 'medium',
+			avg_bandwidth_mbps: null,
+			avg_frame_drop_ratio: null,
+			onboard_only_mode: false,
+			last_updated: new Date(0).toISOString()
+		},
+		overlay_contract: {
+			contract_version: '1.0',
+			coordinate_space: 'normalized',
+			safe_area: { x: 0, y: 0, width: 1, height: 1 },
+			z_order: ['streamed-scene', 'streamed-overlay', 'onboard-hud'],
+			last_synced_at: new Date(0).toISOString()
+		}
+	};
+
 	async function refreshSnapshot(): Promise<void> {
 		snapshot = await featureHost.snapshot();
+		pcDiagnostics = await fetchPcLinkDiagnostics();
 	}
 
 	onMount(() => {
@@ -52,6 +77,30 @@
 			{/each}
 		{/if}
 	</section>
+
+	<section class="diagnostics card">
+		<h3>PC Link Diagnostics</h3>
+		<p><strong>PC Link:</strong> {pcDiagnostics.pc_link.active ? 'Connected' : 'Offline'}</p>
+		<p>
+			<strong>Stream:</strong>
+			{pcDiagnostics.stream_metrics.connected ? 'Connected' : 'Disconnected'}
+			({pcDiagnostics.stream_metrics.quality})
+		</p>
+		<p>
+			<strong>Reconnects:</strong> {pcDiagnostics.stream_metrics.reconnect_attempts} ·
+			<strong>Bandwidth:</strong> {pcDiagnostics.stream_metrics.avg_bandwidth_mbps ?? 'n/a'} Mbps ·
+			<strong>Frame Drop:</strong> {pcDiagnostics.stream_metrics.avg_frame_drop_ratio ?? 'n/a'}
+		</p>
+		<p>
+			<strong>Display Mode:</strong>
+			{pcDiagnostics.stream_metrics.onboard_only_mode ? 'Onboard-only fallback' : 'Hybrid streaming'}
+		</p>
+		<p>
+			<strong>Overlay Contract:</strong>
+			v{pcDiagnostics.overlay_contract.contract_version} · {pcDiagnostics.overlay_contract.coordinate_space} ·
+			{pcDiagnostics.overlay_contract.z_order.join(' → ')}
+		</p>
+	</section>
 </main>
 
 <style>
@@ -73,5 +122,8 @@
 		margin-top: 1rem;
 		border-top: 1px solid #292929;
 		padding-top: 0.7rem;
+	}
+	.diagnostics {
+		margin-top: 0.8rem;
 	}
 </style>
