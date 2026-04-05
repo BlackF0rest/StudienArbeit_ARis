@@ -1,7 +1,8 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
+from typing import Any
 
 from .comm import (
     BluetoothAdapter,
@@ -18,7 +19,7 @@ from .hardware.subscriptions import (
     NavigationSubscription,
     TeleprompterSubscription,
 )
-from .module_lifecycle import ModuleLifecycleManager
+from .module_lifecycle import ModuleLifecycleManager, ModuleMetadata
 from .module_registry import CentralModuleRegistry, ModuleCategory
 from .startup_profiles import resolve_profile
 
@@ -28,6 +29,7 @@ class OnboardRuntime:
     config_loader: ConfigLoader
     registry: CentralModuleRegistry
     event_bus: SharedEventBus
+    telemetry_log: list[dict[str, Any]] = field(default_factory=list)
 
     @classmethod
     def from_config(cls, config_path: str | Path) -> "OnboardRuntime":
@@ -36,6 +38,19 @@ class OnboardRuntime:
             registry=CentralModuleRegistry(),
             event_bus=SharedEventBus(),
         )
+
+    def _telemetry_hook(self, module_name: str):
+        def emit(event_type: str, payload: dict[str, Any]) -> None:
+            self.telemetry_log.append(
+                {
+                    "module": module_name,
+                    "event_type": event_type,
+                    "payload": payload,
+                }
+            )
+            self.telemetry_log[:] = self.telemetry_log[-100:]
+
+        return emit
 
     def load_config(self) -> RuntimeConfig:
         config = self.config_loader.load()
@@ -48,15 +63,44 @@ class OnboardRuntime:
 
     def register_core_modules(self) -> None:
         self.registry.register(
-            ModuleLifecycleManager(name="backend-service", version="0.1.0"),
+            ModuleLifecycleManager(
+                name="backend-service",
+                version="0.1.0",
+                metadata=ModuleMetadata(
+                    description="Backend service entrypoint",
+                    permissions=("network.read", "network.write"),
+                ),
+                custom_health_check=lambda: {"service_ready": True},
+                telemetry_hook=self._telemetry_hook("backend-service"),
+            ),
             ModuleCategory.BACKEND_SERVICE,
         )
         self.registry.register(
-            ModuleLifecycleManager(name="feature-app-host", version="0.1.0"),
+            ModuleLifecycleManager(
+                name="feature-app-host",
+                version="0.1.0",
+                metadata=ModuleMetadata(
+                    description="Feature application host runtime",
+                    permissions=("clock.read", "storage.read", "storage.write"),
+                    dependencies=("backend-service",),
+                ),
+                custom_health_check=lambda: {"modules": len(self.registry.modules)},
+                telemetry_hook=self._telemetry_hook("feature-app-host"),
+            ),
             ModuleCategory.FEATURE_APP_HOST,
         )
         self.registry.register(
-            ModuleLifecycleManager(name="hardware-adapter", version="0.1.0"),
+            ModuleLifecycleManager(
+                name="hardware-adapter",
+                version="0.1.0",
+                metadata=ModuleMetadata(
+                    description="Hardware sensor/IO adapter",
+                    permissions=("sensors.read",),
+                    dependencies=("feature-app-host",),
+                ),
+                custom_health_check=lambda: {"event_bus": "ready"},
+                telemetry_hook=self._telemetry_hook("hardware-adapter"),
+            ),
             ModuleCategory.HARDWARE_ADAPTER,
         )
         self.register_communication_modules()
@@ -80,12 +124,19 @@ class OnboardRuntime:
             ModuleLifecycleManager(
                 name="connection-manager",
                 version="0.1.0",
+                metadata=ModuleMetadata(
+                    description="Connection state orchestrator",
+                    permissions=("network.read", "network.write"),
+                    dependencies=("backend-service",),
+                ),
                 on_start=lambda: connection_manager.set_state(
                     "runtime", ConnectionState.CONNECTED, reason="connection manager active"
                 ),
                 on_stop=lambda: connection_manager.set_state(
                     "runtime", ConnectionState.DISCONNECTED, reason="connection manager stopped"
                 ),
+                custom_health_check=lambda: connection_manager.health(),
+                telemetry_hook=self._telemetry_hook("connection-manager"),
             ),
             ModuleCategory.COMMUNICATION_ADAPTER,
         )
@@ -93,7 +144,14 @@ class OnboardRuntime:
             ModuleLifecycleManager(
                 name="bluetooth-adapter",
                 version="0.1.0",
+                metadata=ModuleMetadata(
+                    description="Bluetooth adapter",
+                    permissions=("network.read", "network.write"),
+                    dependencies=("connection-manager",),
+                ),
                 on_stop=bluetooth.disconnect_peer,
+                custom_health_check=lambda: bluetooth.health(),
+                telemetry_hook=self._telemetry_hook("bluetooth-adapter"),
             ),
             ModuleCategory.COMMUNICATION_ADAPTER,
         )
@@ -101,8 +159,15 @@ class OnboardRuntime:
             ModuleLifecycleManager(
                 name="usb-debug-adapter",
                 version="0.1.0",
+                metadata=ModuleMetadata(
+                    description="USB diagnostics and command channel",
+                    permissions=("network.read", "network.write"),
+                    dependencies=("connection-manager",),
+                ),
                 on_start=usb_debug.attach,
                 on_stop=usb_debug.detach,
+                custom_health_check=lambda: usb_debug.health(),
+                telemetry_hook=self._telemetry_hook("usb-debug-adapter"),
             ),
             ModuleCategory.COMMUNICATION_ADAPTER,
         )
@@ -110,8 +175,15 @@ class OnboardRuntime:
             ModuleLifecycleManager(
                 name="wifi-adapter",
                 version="0.1.0",
+                metadata=ModuleMetadata(
+                    description="WiFi client interface",
+                    permissions=("network.read", "network.write"),
+                    dependencies=("connection-manager",),
+                ),
                 on_start=wifi.connect,
                 on_stop=wifi.disconnect,
+                custom_health_check=lambda: wifi.health(),
+                telemetry_hook=self._telemetry_hook("wifi-adapter"),
             ),
             ModuleCategory.COMMUNICATION_ADAPTER,
         )

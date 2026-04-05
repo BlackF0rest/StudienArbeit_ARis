@@ -25,7 +25,7 @@ from .hardware import (
     SensorAdapter,
     TeleprompterSubscription,
 )
-from .module_lifecycle import ModuleLifecycleManager, ModuleState
+from .module_lifecycle import ModuleLifecycleManager, ModuleMetadata, ModuleState
 from .module_registry import CentralModuleRegistry, ModuleCategory
 from .runtime import OnboardRuntime
 from .startup_profiles import PROFILE_PRESETS, ProfileSettings, StartupProfile, resolve_profile
@@ -49,6 +49,7 @@ __all__ = [
     "NavigationSubscription",
     "TeleprompterSubscription",
     "ModuleLifecycleManager",
+    "ModuleMetadata",
     "ModuleState",
     "CentralModuleRegistry",
     "ModuleCategory",
