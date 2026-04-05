@@ -5,6 +5,11 @@ from pathlib import Path
 
 from .config_loader import ConfigLoader, RuntimeConfig
 from .event_bus import SharedEventBus
+from .hardware.subscriptions import (
+    BasicHUDSubscription,
+    NavigationSubscription,
+    TeleprompterSubscription,
+)
 from .module_lifecycle import ModuleLifecycleManager
 from .module_registry import CentralModuleRegistry, ModuleCategory
 from .startup_profiles import resolve_profile
@@ -50,6 +55,17 @@ class OnboardRuntime:
             ModuleLifecycleManager(name="communication-adapter", version="0.1.0"),
             ModuleCategory.COMMUNICATION_ADAPTER,
         )
+
+
+    def register_feature_subscriptions(self) -> dict[str, object]:
+        subscriptions = {
+            "basic_hud": BasicHUDSubscription(self.event_bus),
+            "navigation": NavigationSubscription(self.event_bus),
+            "teleprompter": TeleprompterSubscription(self.event_bus),
+        }
+        for subscription in subscriptions.values():
+            subscription.attach()
+        return subscriptions
 
     def start_all(self) -> None:
         for module in self.registry.modules.values():
