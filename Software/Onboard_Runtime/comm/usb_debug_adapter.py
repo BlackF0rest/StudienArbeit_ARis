@@ -77,6 +77,17 @@ class USBDebugAdapter:
             "panels": panels,
         }
 
+
+    def clear_command_queue(self) -> int:
+        queued = len(self._command_queue)
+        self._command_queue.clear()
+        return queued
+
+    def clear_diagnostics(self) -> int:
+        count = len(self._diagnostics)
+        self._diagnostics.clear()
+        return count
+
     def health(self) -> dict[str, Any]:
         return {
             "adapter": self._adapter_name,

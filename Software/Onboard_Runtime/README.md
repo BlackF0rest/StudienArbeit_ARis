@@ -34,7 +34,14 @@
    - Translator layer for transport envelopes ↔ internal commands
    - Connection manager publishing status transitions on the event bus
    - USB diagnostics panels can include PC link status + stream metrics
-7. **Startup profiles**
+7. **Debug interface module**
+   - live module health dashboard
+   - sampled event bus monitor
+   - transport status (Bluetooth/USB/WiFi)
+   - sensor + HID signal monitor
+   - admin commands (`restart_module`, `clear_queue_cache`, `export_logs`, `run_integration_smoke_check`)
+   - local UI snapshot payload + protected debug API helper
+8. **Startup profiles**
    - `dev`: verbose (`DEBUG`) logging
    - `demo`: stable defaults enabled
    - `headless`: UI disabled for diagnostics

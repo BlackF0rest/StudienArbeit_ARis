@@ -70,6 +70,12 @@ class WiFiAdapter:
         self._sent_counters[f"service:{service_name}"] += 1
         return True
 
+
+    def clear_counters(self) -> int:
+        count = len(self._sent_counters)
+        self._sent_counters.clear()
+        return count
+
     def health(self) -> dict[str, object]:
         return {
             "adapter": self._adapter_name,
