@@ -1,38 +1,77 @@
 <script lang="ts">
-    import { onMount } from 'svelte';
+	import { onMount } from 'svelte';
+	import Header from './header.svelte';
+	import { bootstrapFeatureHost } from '$lib/feature-registration';
+	import { featureHost, type FeatureRuntimeSnapshot } from '$lib/feature-host';
 
-    let data: never[] = [];
+	let snapshot: FeatureRuntimeSnapshot = {
+		registered: [],
+		health: {},
+		telemetry: []
+	};
 
-    let time = new Date();
-    let hours: number;
-    let minutes: number;
-    let seconds: number;
+	async function refreshSnapshot(): Promise<void> {
+		snapshot = await featureHost.snapshot();
+	}
 
-    // Reaktive Variablen – werden jedes Mal aktualisiert, wenn "time" ODER "messages" sich ändert
-    $: hours = time.getHours();
-    $: minutes = time.getMinutes();
-    $: seconds = time.getSeconds();
-
-
-    function two(n: number) { return String(n).padStart(2, '0'); }
-
-    async function fetchData() {
-    const res = await fetch('http://localhost:5000/api/mainInfo');
-    data = await res.json();
-    }
-
-    onMount(() => {
-        const interval = setInterval(() => {
-            time = new Date();
-            fetchData();
-        }, 5000);
-        return () => clearInterval(interval);
-    });
+	onMount(() => {
+		bootstrapFeatureHost();
+		void refreshSnapshot();
+		const timer = setInterval(() => void refreshSnapshot(), 3000);
+		return () => clearInterval(timer);
+	});
 </script>
 
+<Header />
+
 <main>
-    <div id="interface">
-        <h1>{two(hours)}:{two(minutes)} | 🔋{data.Battery} | 🌡️{data.Temperature} | 💧{data.Humidity}</h1>
-        <hr>
-    </div>
+	<h2>Feature Host Runtime</h2>
+	<div class="grid">
+		{#each snapshot.registered as module}
+			<section class="card">
+				<h3>{module.name}</h3>
+				<p>{module.description}</p>
+				<p><strong>Version:</strong> {module.version}</p>
+				<p><strong>Permissions:</strong> {module.permissions.join(', ')}</p>
+				<p><strong>Dependencies:</strong> {module.dependencies.join(', ')}</p>
+				<p>
+					<strong>Health:</strong>
+					{snapshot.health[module.id]?.ok ? '✅' : '❌'} {snapshot.health[module.id]?.details}
+				</p>
+			</section>
+		{/each}
+	</div>
+
+	<section class="telemetry">
+		<h3>Telemetry (latest)</h3>
+		{#if snapshot.telemetry.length === 0}
+			<p>No telemetry yet.</p>
+		{:else}
+			{#each snapshot.telemetry.slice(0, 8) as event}
+				<p>{event.createdAt} · {event.featureId} · {event.type}</p>
+			{/each}
+		{/if}
+	</section>
 </main>
+
+<style>
+	main {
+		padding: 0.4rem 0.8rem;
+		font-family: Arial, sans-serif;
+	}
+	.grid {
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: 0.8rem;
+	}
+	.card {
+		border: 1px solid #2f2f2f;
+		padding: 0.7rem;
+		background: #090909;
+	}
+	.telemetry {
+		margin-top: 1rem;
+		border-top: 1px solid #292929;
+		padding-top: 0.7rem;
+	}
+</style>

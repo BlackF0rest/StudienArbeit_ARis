@@ -23,6 +23,16 @@ class CentralModuleRegistry:
     )
 
     def register(self, module: ModuleLifecycleManager, category: ModuleCategory) -> None:
+        missing_dependencies = [
+            dependency
+            for dependency in module.metadata.dependencies
+            if dependency and dependency not in self.modules
+        ]
+        if missing_dependencies:
+            raise ValueError(
+                f"Cannot register '{module.name}': missing dependencies {missing_dependencies}"
+            )
+
         self.modules[module.name] = module
         if module.name not in self.category_map[category]:
             self.category_map[category].append(module.name)
@@ -43,5 +53,5 @@ class CentralModuleRegistry:
             if name in self.modules
         ]
 
-    def all_health(self) -> dict[str, dict[str, str | None]]:
+    def all_health(self) -> dict[str, dict[str, str | None | dict]]:
         return {name: module.health() for name, module in self.modules.items()}
