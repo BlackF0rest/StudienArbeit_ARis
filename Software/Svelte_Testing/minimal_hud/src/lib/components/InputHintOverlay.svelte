@@ -1,10 +1,10 @@
 <script lang="ts">
 	import type { InputHint } from '$lib/input-controller';
 
-	let { hint }: { hint: InputHint } = $props();
+	let { hint, compact = false }: { hint: InputHint; compact?: boolean } = $props();
 </script>
 
-<div class="input-hint">short: {hint.short} | long: {hint.long}</div>
+<div class="input-hint" class:compact>{hint.short} · {hint.long}</div>
 
 <style>
 	.input-hint {
@@ -20,5 +20,12 @@
 		font-family: var(--hud-font-stack);
 		z-index: 60;
 		white-space: nowrap;
+	}
+
+	.input-hint.compact {
+		font-size: 0.7rem;
+		padding: 0.15rem 0.4rem;
+		bottom: 6px;
+		opacity: 0.82;
 	}
 </style>
