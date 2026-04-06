@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import json
+import os
+import shutil
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
@@ -17,6 +19,7 @@ from Software.QA.tests.integration.test_smoke_scenarios import run_smoke_scenari
 BASE_DIR = Path(__file__).resolve().parents[1]
 CRITERIA_FILE = BASE_DIR / "acceptance_criteria.yaml"
 REPORT_DIR = BASE_DIR / "reports"
+HISTORY_DIR = REPORT_DIR / "history"
 
 
 def parse_simple_yaml(path: Path) -> dict[str, Any]:
@@ -59,6 +62,51 @@ def _coerce_scalar(raw: str) -> Any:
     if cleaned.startswith('"') and cleaned.endswith('"'):
         return cleaned[1:-1]
     return cleaned
+
+
+def _calculate_p0_pass_rate(criteria_rows: list[dict[str, Any]]) -> float | None:
+    p0_automated = [row for row in criteria_rows if row["severity"] == "P0" and row["status"] in {"PASS", "FAIL"}]
+    if not p0_automated:
+        return None
+    p0_passed = sum(1 for row in p0_automated if row["status"] == "PASS")
+    return p0_passed / len(p0_automated)
+
+
+def _status_diffs(current_rows: list[dict[str, Any]], previous_rows: list[dict[str, Any]]) -> list[dict[str, str]]:
+    previous_status = {row["id"]: row["status"] for row in previous_rows}
+    diffs: list[dict[str, str]] = []
+    for row in current_rows:
+        old = previous_status.get(row["id"])
+        if old is None or old == row["status"]:
+            continue
+        diffs.append({"id": row["id"], "previous": old, "current": row["status"]})
+    return diffs
+
+
+def attach_trend_metadata(report: dict[str, Any], previous_report: dict[str, Any] | None) -> dict[str, Any]:
+    current_rate = _calculate_p0_pass_rate(report["criteria"])
+    trend: dict[str, Any] = {
+        "previous_report": None,
+        "p0_pass_rate": current_rate,
+        "previous_p0_pass_rate": None,
+        "p0_pass_rate_regressed": False,
+        "status_changes": [],
+    }
+
+    if previous_report is None:
+        report["trend"] = trend
+        return report
+
+    previous_rate = _calculate_p0_pass_rate(previous_report.get("criteria", []))
+    trend["previous_report"] = previous_report.get("generated_at")
+    trend["previous_p0_pass_rate"] = previous_rate
+    trend["status_changes"] = _status_diffs(report["criteria"], previous_report.get("criteria", []))
+
+    if current_rate is not None and previous_rate is not None and current_rate < previous_rate:
+        trend["p0_pass_rate_regressed"] = True
+
+    report["trend"] = trend
+    return report
 
 
 def build_criterion_summary() -> dict[str, Any]:
@@ -140,8 +188,16 @@ def build_criterion_summary() -> dict[str, Any]:
 
 def write_reports(report: dict[str, Any]) -> tuple[Path, Path]:
     REPORT_DIR.mkdir(parents=True, exist_ok=True)
+    HISTORY_DIR.mkdir(parents=True, exist_ok=True)
+
     json_path = REPORT_DIR / "latest.json"
     md_path = REPORT_DIR / "latest.md"
+
+    previous_report: dict[str, Any] | None = None
+    if json_path.exists():
+        previous_report = json.loads(json_path.read_text(encoding="utf-8"))
+
+    report = attach_trend_metadata(report, previous_report)
 
     json_path.write_text(json.dumps(report, indent=2), encoding="utf-8")
 
@@ -166,7 +222,37 @@ def write_reports(report: dict[str, Any]) -> tuple[Path, Path]:
     else:
         lines.append("- None")
 
+    lines.extend(["", "## Trend", ""])
+    trend = report["trend"]
+    if trend["previous_report"] is None:
+        lines.append("- Baseline run: no previous report available.")
+    else:
+        lines.append(f"- Previous report timestamp: {trend['previous_report']}")
+        lines.append(f"- Current P0 pass-rate: {trend['p0_pass_rate']:.2%}")
+        lines.append(f"- Previous P0 pass-rate: {trend['previous_p0_pass_rate']:.2%}")
+        lines.append(f"- P0 pass-rate regressed: {'yes' if trend['p0_pass_rate_regressed'] else 'no'}")
+        if trend["status_changes"]:
+            lines.append("- Status changes:")
+            for diff in trend["status_changes"]:
+                lines.append(f"  - {diff['id']}: {diff['previous']} -> {diff['current']}")
+        else:
+            lines.append("- Status changes: none")
+
     md_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+    timestamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+    archived_json = HISTORY_DIR / f"{timestamp}.json"
+    archived_md = HISTORY_DIR / f"{timestamp}.md"
+    shutil.copy2(json_path, archived_json)
+    shutil.copy2(md_path, archived_md)
+
+    keep_count = int(os.environ.get("QA_REPORT_HISTORY_LIMIT", "10"))
+    history_json_files = sorted(HISTORY_DIR.glob("*.json"), reverse=True)
+    for stale_json in history_json_files[keep_count:]:
+        stale_md = stale_json.with_suffix(".md")
+        stale_json.unlink(missing_ok=True)
+        stale_md.unlink(missing_ok=True)
+
     return json_path, md_path
 
 

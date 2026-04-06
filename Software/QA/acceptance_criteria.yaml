@@ -20,17 +20,27 @@ criteria:
     severity: P1
     automatable: true
   - id: SMK-001
-    description: Soak/smoke checks execute basic health and reset flows in a short smoke run.
+    description: Short smoke checks execute API health and reset flows.
     type: integration
     severity: P0
     automatable: true
   - id: MAN-001
-    description: Hardware button press on target device updates runtime state as expected.
+    description: Sensor pin behavior on target hardware matches runtime expectations.
     type: manual
     severity: P1
     automatable: false
   - id: MAN-002
-    description: Long-duration soak test on target device shows stable behavior over extended runtime.
+    description: Physical HID button/interaction behavior on target hardware is correct.
+    type: manual
+    severity: P1
+    automatable: false
+  - id: MAN-003
+    description: BLE transport checks on the target adapter remain stable.
+    type: manual
+    severity: P1
+    automatable: false
+  - id: MAN-004
+    description: Extended soak execution on target hardware remains stable over long runtime.
     type: manual
     severity: P2
     automatable: false

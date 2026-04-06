@@ -14,12 +14,13 @@ from Software.QA.scripts.criteria_mapper import build_criterion_summary, write_r
 
 def main() -> int:
     report = build_criterion_summary()
-    write_reports(report)
+    json_path, _ = write_reports(report)
+    written_report = json.loads(json_path.read_text(encoding="utf-8"))
 
     p0_failures: list[str] = []
     non_p0_failures: list[str] = []
 
-    for row in report["criteria"]:
+    for row in written_report["criteria"]:
         if row["status"] != "FAIL":
             continue
         if row["severity"] == "P0":
@@ -27,10 +28,25 @@ def main() -> int:
         else:
             non_p0_failures.append(row["id"])
 
-    print(json.dumps({"p0_failures": p0_failures, "non_p0_failures": non_p0_failures}, indent=2))
+    trend = written_report.get("trend", {})
+    p0_regressed = bool(trend.get("p0_pass_rate_regressed", False))
+
+    print(
+        json.dumps(
+            {
+                "p0_failures": p0_failures,
+                "non_p0_failures": non_p0_failures,
+                "p0_pass_rate_regressed": p0_regressed,
+            },
+            indent=2,
+        )
+    )
 
     if p0_failures:
         print("Acceptance gate FAILED: one or more P0 automatable criteria failed.")
+        return 1
+    if p0_regressed:
+        print("Acceptance gate FAILED: P0 pass-rate regressed versus previous baseline.")
         return 1
     if non_p0_failures:
         print("Acceptance gate WARNING: only P1/P2 automatable criteria failed.")
