@@ -1,0 +1,79 @@
+from __future__ import annotations
+
+from Software.QA.scripts.backend_test_harness import (
+    BackendServer,
+    TestResult,
+    assert_true,
+    request_json,
+)
+
+
+def run_smoke_scenarios() -> list[TestResult]:
+    results: list[TestResult] = []
+
+    with BackendServer() as server:
+        try:
+            scenario_payload = {
+                "text": "Scenario A payload",
+                "speed": 55,
+                "fontSize": 3,
+                "fontColor": "#ff0",
+                "backgroundColor": "#111",
+                "fontFamily": "Courier New",
+                "lineHeight": 1.4,
+                "opacity": 0.8,
+            }
+            send = request_json(server.base_url, "POST", "/api/teleprompter/send", payload=scenario_payload)
+            assert_true(send["status"] == 200, "Scenario A send should return 200")
+
+            current = request_json(server.base_url, "GET", "/api/teleprompter/current")
+            assert_true(current["status"] == 200, "Scenario A current should return 200")
+            current_data = current["json"]["data"]
+            assert_true(current_data == scenario_payload, "Scenario A expected current config to match posted payload")
+            results.append(TestResult(name="scenario_a_send_then_current", passed=True))
+        except Exception as exc:  # noqa: BLE001
+            results.append(TestResult(name="scenario_a_send_then_current", passed=False, reason=str(exc)))
+
+        try:
+            reset = request_json(server.base_url, "POST", "/api/teleprompter/reset")
+            assert_true(reset["status"] == 200, "Scenario B reset should return 200")
+            reset_config = reset["json"]["data"]["config"]
+            assert_true(reset_config["speed"] == 30, "Scenario B reset should restore default speed")
+            assert_true(
+                reset_config["text"].startswith("Willkommen zur AR-Brille"),
+                "Scenario B reset should restore default text",
+            )
+            results.append(TestResult(name="scenario_b_reset_defaults", passed=True))
+        except Exception as exc:  # noqa: BLE001
+            results.append(TestResult(name="scenario_b_reset_defaults", passed=False, reason=str(exc)))
+
+        try:
+            request_json(server.base_url, "DELETE", "/api/messages")
+            create = request_json(server.base_url, "POST", "/api/messages", payload={"content": "Scenario C"})
+            assert_true(create["status"] == 200, "Scenario C create should return 200")
+
+            listed = request_json(server.base_url, "GET", "/api/messages")
+            assert_true(listed["status"] == 200, "Scenario C list should return 200")
+            assert_true(
+                any(item.get("content") == "Scenario C" for item in listed["json"]["data"]),
+                "Scenario C message was not found in list",
+            )
+
+            deleted = request_json(server.base_url, "DELETE", "/api/messages")
+            assert_true(deleted["status"] == 200, "Scenario C delete should return 200")
+            listed_after = request_json(server.base_url, "GET", "/api/messages")
+            assert_true(len(listed_after["json"]["data"]) == 0, "Scenario C should leave no messages")
+            results.append(TestResult(name="scenario_c_messages_roundtrip", passed=True))
+        except Exception as exc:  # noqa: BLE001
+            results.append(TestResult(name="scenario_c_messages_roundtrip", passed=False, reason=str(exc)))
+
+    return results
+
+
+if __name__ == "__main__":
+    failures = [result for result in run_smoke_scenarios() if not result.passed]
+    if failures:
+        for failure in failures:
+            print(f"FAIL {failure.name}: {failure.reason}")
+        raise SystemExit(1)
+    print("PASS all smoke scenarios")
