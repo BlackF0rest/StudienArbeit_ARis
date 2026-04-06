@@ -6,14 +6,39 @@
 		type TeleprompterConfig
 	} from '$lib/services/teleprompter-runtime';
 	import { featureHost } from '$lib/feature-host';
+	import {
+		getHintForContext,
+		registerAppActions,
+		setInputContext,
+		type InputHint
+	} from '$lib/input-controller';
+	import InputHintOverlay from '$lib/components/InputHintOverlay.svelte';
 
 	let config: TeleprompterConfig = defaultTeleprompterConfig;
 	let runtimeState = 'booting';
 	let scrollPosition = 0;
 	let isScrolling = true;
 	let teleprompterContainer: HTMLElement;
+	let hint: InputHint = getHintForContext('teleprompter');
+
+	function speedStep(): void {
+		const nextSpeed = Math.min(120, config.speed + 5);
+		config = { ...config, speed: nextSpeed };
+		featureHost.emit('teleprompter-runtime', 'teleprompter.speed_step', { speed: nextSpeed });
+	}
+
+	function togglePauseResume(): void {
+		isScrolling = !isScrolling;
+		featureHost.emit('teleprompter-runtime', 'teleprompter.pause_toggle', { isScrolling });
+	}
 
 	onMount(() => {
+		setInputContext('teleprompter');
+		const unregister = registerAppActions({
+			onShort: speedStep,
+			onLong: togglePauseResume
+		});
+
 		const runtime = new TeleprompterRuntime(
 			(nextConfig) => {
 				config = nextConfig;
@@ -44,6 +69,7 @@
 		window.addEventListener('keydown', handleKeyPress);
 
 		return () => {
+			unregister();
 			runtime.stop();
 			cancelAnimationFrame(animationId);
 			window.removeEventListener('keydown', handleKeyPress);
@@ -52,7 +78,7 @@
 </script>
 
 <div class="teleprompter-full" style="background-color: {config.backgroundColor};">
-	<div class="state">Runtime: {runtimeState}</div>
+	<div class="state">Runtime: {runtimeState} · {isScrolling ? 'running' : 'paused'} · speed {config.speed}</div>
 	<div
 		class="teleprompter-content"
 		bind:this={teleprompterContainer}
@@ -70,6 +96,7 @@
 </div>
 
 <button class="home-button" on:click={() => (window.location.href = '/')}>🏠 Home</button>
+<InputHintOverlay {hint} />
 
 <style>
 	:global(body) {
@@ -106,7 +133,7 @@
 	}
 	.home-button {
 		position: fixed;
-		bottom: 20px;
+		bottom: 46px;
 		left: 20px;
 		padding: 12px 22px;
 		background: #0f0;

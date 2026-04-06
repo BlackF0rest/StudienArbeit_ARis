@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import { get } from 'svelte/store';
 	import Header from './header.svelte';
 	import { bootstrapFeatureHost } from '$lib/feature-registration';
 	import { featureHost, type FeatureRuntimeSnapshot } from '$lib/feature-host';
@@ -7,6 +8,17 @@
 		fetchPcLinkDiagnostics,
 		type PcLinkDiagnostics
 	} from '$lib/services/pc-link-diagnostics';
+	import {
+		homeCarouselIndex,
+		getHintForContext,
+		setInputContext,
+		type InputHint
+	} from '$lib/input-controller';
+	import InputHintOverlay from '$lib/components/InputHintOverlay.svelte';
+
+	const carouselApps = ['Navigation', 'Teleprompter', 'Messages/HUD'];
+	let selectedApp = carouselApps[0];
+	let hint: InputHint = getHintForContext('home');
 
 	let snapshot: FeatureRuntimeSnapshot = {
 		registered: [],
@@ -40,10 +52,18 @@
 	}
 
 	onMount(() => {
+		setInputContext('home');
+		selectedApp = carouselApps[get(homeCarouselIndex)] ?? carouselApps[0];
+		const unsubscribe = homeCarouselIndex.subscribe((index) => {
+			selectedApp = carouselApps[index] ?? carouselApps[0];
+		});
 		bootstrapFeatureHost();
 		void refreshSnapshot();
 		const timer = setInterval(() => void refreshSnapshot(), 3000);
-		return () => clearInterval(timer);
+		return () => {
+			unsubscribe();
+			clearInterval(timer);
+		};
 	});
 </script>
 
@@ -51,6 +71,7 @@
 
 <main>
 	<h2>Feature Host Runtime</h2>
+	<p class="carousel-state">Home carousel selection: <strong>{selectedApp}</strong></p>
 	<div class="grid">
 		{#each snapshot.registered as module}
 			<section class="card">
@@ -103,10 +124,16 @@
 	</section>
 </main>
 
+<InputHintOverlay {hint} />
+
 <style>
 	main {
 		padding: 0.4rem 0.8rem;
 		font-family: Arial, sans-serif;
+	}
+	.carousel-state {
+		color: #9eff9e;
+		margin: 0.3rem 0 0.8rem;
 	}
 	.grid {
 		display: grid;
