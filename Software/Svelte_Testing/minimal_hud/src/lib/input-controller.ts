@@ -4,7 +4,7 @@ import { writable } from 'svelte/store';
 
 export type InputGesture = 'short' | 'long';
 export type InputFsmState = 'home-carousel' | 'feature-active' | 'confirm-exit';
-export type AppContext = 'home' | 'teleprompter' | 'navigation' | 'messages' | 'chat';
+export type AppContext = 'home' | 'teleprompter' | 'navigation' | 'messages' | 'chat' | 'debug';
 
 export interface InputHint {
 	short: string;
@@ -173,6 +173,11 @@ export function getHintForContext(context: AppContext): InputHint {
 			return {
 				short: 'n/a',
 				long: 'AI chat input via companion app'
+			};
+		case 'debug':
+			return {
+				short: 'refresh diagnostics',
+				long: 'return home'
 			};
 	}
 }

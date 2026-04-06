@@ -211,3 +211,75 @@ body.ar-mode.compact {
 	display: grid;
 	place-items: center;
 }
+
+.hud-grid-3 {
+	display: grid;
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+	gap: var(--hud-space-md);
+}
+
+.hud-compact-line {
+	margin: 0.15rem 0;
+	display: -webkit-box;
+	-webkit-line-clamp: 2;
+	-webkit-box-orient: vertical;
+	overflow: hidden;
+	font-size: var(--hud-font-sm);
+}
+
+.hud-home-debug-link a {
+	color: var(--hud-accent);
+}
+
+.nav-panel-heading {
+	margin: 0 0 0.35rem;
+	font-size: 0.9rem;
+	text-transform: uppercase;
+	letter-spacing: 0.08em;
+	color: var(--hud-muted);
+}
+
+.nav-panel-main {
+	margin: 0.2rem 0;
+	font-size: clamp(1.2rem, 3.2vw, 1.9rem);
+	line-height: 1.2;
+	font-weight: 700;
+}
+
+.nav-marker-large {
+	width: 210px;
+	height: 210px;
+	margin: 0.4rem 0 0.2rem;
+}
+
+.teleprompter-state {
+	top: 8px;
+	right: 8px;
+	font-size: 0.75rem;
+	padding: 3px 6px;
+	opacity: 0.8;
+}
+
+.teleprompter-home-button {
+	bottom: 8px;
+	left: 8px;
+	padding: 4px 8px;
+	font-size: 0.8rem;
+	opacity: 0.72;
+}
+
+@media (max-width: 640px), (max-height: 420px) {
+	.hud-grid-3,
+	.hud-grid-2 {
+		grid-template-columns: 1fr;
+	}
+
+	.hud-scaffold {
+		padding: 0.45rem 0.6rem;
+		gap: 0.6rem;
+	}
+
+	.hud-card {
+		padding: 0.55rem;
+	}
+}

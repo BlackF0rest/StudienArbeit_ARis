@@ -77,20 +77,20 @@
 
 	<HudCard>
 		{#if panels[activePanelIndex] === 'route'}
-			<p><strong>Route:</strong> {nav.routeText}</p>
+			<p class="nav-panel-heading">Route</p>
+			<p class="nav-panel-main">{nav.routeText}</p>
 		{:else if panels[activePanelIndex] === 'next-action'}
-			<p><strong>Next Action:</strong> {nav.nextAction}</p>
+			<p class="nav-panel-heading">Next action</p>
+			<p class="nav-panel-main">{nav.nextAction}</p>
 		{:else}
-			<p>Heading: {Math.round(nav.headingDeg)}°</p>
+			<p class="nav-panel-heading">Heading marker</p>
+			<div class="compass-wrap nav-marker-large">
+				<div style="position:absolute;top:8px;color:#7eff7e;font-weight:bold;font-size:1.4rem;">N</div>
+				<div style="position:absolute;top:50%;left:50%;transform-origin:50% 90%;font-size:3.3rem;color:#9dff9d;transform:translate(-50%,-90%) rotate({nav.headingDeg}deg);">↑</div>
+			</div>
+			<p class="nav-panel-main">{Math.round(nav.headingDeg)}°</p>
 		{/if}
 		<p class="hud-muted"><strong>Updated:</strong> {nav.updatedAt}</p>
-	</HudCard>
-
-	<HudCard>
-		<div class="compass-wrap">
-			<div style="position:absolute;top:10px;color:#7eff7e;font-weight:bold;">N</div>
-			<div style="position:absolute;top:50%;left:50%;transform-origin:50% 90%;font-size:2rem;color:#9dff9d;transform:translate(-50%,-90%) rotate({nav.headingDeg}deg);">↑</div>
-		</div>
 	</HudCard>
 
 	<svelte:fragment slot="hint">

@@ -60,6 +60,7 @@
 	<a href="/Navigation">Navigation</a>
 	<a href="/Teleprompter">Teleprompter</a>
 	<a href="/Messages">AI Chat</a>
+	<a href="/Debug">Debug</a>
 </nav>
 
 <style>
