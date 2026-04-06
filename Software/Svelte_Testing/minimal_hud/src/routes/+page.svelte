@@ -1,5 +1,6 @@
 <script lang="ts">
     import { onMount } from 'svelte';
+	import Header from './header.svelte';
 
     let data: never[] = [];
 
@@ -30,9 +31,8 @@
     });
 </script>
 
+<Header />
+
 <main>
-    <div id="interface">
-        <h1>{two(hours)}:{two(minutes)} | 🔋{data.Battery} | 🌡️{data.Temperature} | 💧{data.Humidity}</h1>
-        <hr>
-    </div>
+    
 </main>

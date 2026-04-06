@@ -1,0 +1,1 @@
+{"rule":"DE_AGREEMENT","sentence":"^\\QDie Architektur basiert auf einer JavaScript-Laufzeitumgebung, die über eine sogenannte Bridge asynchron mit dem nativen Thread kommuniziert und so plattformspezifische APIs und Systemfunktionen ansprechen kann.\\E$"}

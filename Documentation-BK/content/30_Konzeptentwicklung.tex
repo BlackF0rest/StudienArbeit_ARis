@@ -1,0 +1,105 @@
+%!TEX root = ../main.tex
+
+\chapter{Konzeptentwicklung und Systemarchitektur}
+\label{chap:konzeptundsystem}
+Aufbauend auf den in den vorangegangenen Kapiteln erarbeiteten theoretischen Grundlagen sowie dem dargestellten Stand der Technik beschreibt dieses Kapitel die Entwicklung des Systemkonzepts der \ac{AR}-Brille. Dabei werden die getroffenen Entwurfsentscheidugnen hinsichtlich Softwareachitektur sowie optischem Aufbau systematisch begründet.
+
+\section{Anforderungsanalyse}
+\label{sec:Anforderungsanalyse}
+Die Anforderungen an das System wurden aus zwei Quellen abgeleitet: einerseits durch die Aufgabenstellung sowie das initiale Gespräch mit dem betreuenden Proffessor, der grundlegende funktionale und nicht-funktionale Anforderungen definierte, andererseits durch eigene Recherche und den selbst gesetzten Qualitätsanspruch an das Projekt. Zur strukturierten Priorisierung der erhobenen Anforderungen und zur klaren Abgrenzung des Projektumfangs wurde die MoSCoW-Methode (\ref{subsec:Moscow}) angewendet; die vollständige Priorisierungsübersicht ist im Anhang (\ref{apx:2}) zu finden.
+
+Die \textbf{Must-Have-Anforderungen} wurden überwiegend durch den Betreuer vorgegeben und definieren den nicht verhandelbaren Kern des Systems. Sie umfassen die optische Sichtbarkeit der Anzeige im Auge des Nutzers, Freihand-Nutzbarkeit, mobile Verwendbarkeit, eine Eingabemöglichkeit, Kostengünstigkeit, verschiedene Darstellungsmodi, Akkubetrieb, physische Stabilität sowie einen berührungssensitiven Button als Eingabeelement .
+
+Die \textbf{Should-Have-Anforderungen} wurden auf Basis eigener Recherche und Projekterfahrung ergänzt und erweitern das System sinnvoll, ohne projektblockierend zu sein. Dazu zählen ein brillenähnliches Design, ein Gyroskop zur Lageerfassung, Temperatur- und Feuchtigkeitssensoren, eine Companion-App zur Systemsteuerung sowie eine möglichst hohe Displayauflösung und lange Akkulaufzeit .
+
+Die \textbf{Could-Have-Anforderungen} stellen optionale Erweiterungen dar, die das System deutlich aufwerten würden, im aktuellen Projektrahmen jedoch nachrangig behandelt werden. Hierzu zählen ein zweites Display, Mikrofon, Kamera, die Implementierung konkreter Feature-Apps sowie ein beidseitiger Zwei-Augen-Aufbau .
+
+Bewusst aus dem Projektumfang ausgeschlossen wurden eine Waveguide-Lösung sowie GPS. Die Won't-Have-Kategorie dient dabei nicht der negativen Bewertung dieser Technologien — Waveguide-Systeme sind, wie in Kapitel 3 dargestellt, eine der vielversprechendsten AR-Architekturen — sondern der realistischen Abgrenzung des Projektumfangs hinsichtlich verfügbarer Ressourcen, Fertigungsaufwand und Kosten .
+
+\section{Gesamtsystemarchitektur}
+\label{sec:Gesamtarchitektur}
+\todo{!}
+
+\section{Software-Architektur}
+\label{sec:Software-Architektur}
+Aus der Gesamtsystemarchitektur wurde eine modulare Softwarearchitektur abgeleitet, die die einzelnen Softwarekomponenten und deren Interaktionen strukturiert beschreibt. Die Architektur gliedert sich in vier funktionale Hauptbereiche: User Interface, Sensorik und Eingabe, Datenverarbeitung sowie Anwendungslogik. Die detaillierten Interaktionen zwischen diesen Komponenten sind in einem Klassendiagramm im Anhang dargestellt.
+
+Den zentralen Kern der Onboard-Software bildet das Python Backend, das als Datenverarbeitungs- und Koordinationsschicht fungiert. Es verwaltet die Anbindung an die SQL-Datenbank, stellt die Schnittstelle für das Web-UI Frontend (Svelte) bereit und koordiniert die Kommunikation zwischen allen übrigen Systemkomponenten über HTTP-Anfragen. Das Frontend wird vom Display-Driver auf dem integrierten Display der Brille dargestellt und ist damit die primäre visuelle Ausgabeschicht des Systems .
+
+Die Anwendungslogik ist in einem Feature-Apps-Modul organisiert, das konzeptionell verschiedene Anzeigemodi und Funktionen wie ein Basic HUD, Navigation, Teleprompter und AI-Chat zusammenfasst. Diese greifen jeweils auf das Python Backend zu und ermöglichen so unterschiedliche Darstellungen auf dem Display, ohne die zugrundeliegende Infrastruktur zu verändern . Die Kommunikation mit der Mobile Device App erfolgt über das App-Interface via Bluetooth und ermöglicht dem Nutzer die Steuerung des Systems über dessen Smartphone, einschließlich App-seitiger Einstellungen und weiterer Nutzereingaben .
+
+Für die Eingabe ohne Mobilgerät steht eine HID-Komponente bereit, die physische Nutzereingaben direkt entgegennimmt und an die Anwendungslogik weiterleitet. Das Debugging-Interface erlaubt während der Entwicklung eine kabelgebundene USB-Verbindung zur direkten Systemzustandsabfrage und Fehlerdiagnose . Als optionale Erweiterung ist eine Verbindung zu einer externen Unreal Engine-Instanz vorgesehen: Über ein PC-Interface und den Unreal Pixelstreamer kann rechenintensives 3D-Rendering auf einen externen PC ausgelagert und der fertige Videostream per WiFi zur Darstellung auf die Brille übertragen werden .
+
+Diese Architektur folgt dem Prinzip der losen Kopplung zwischen den Komponenten: Jedes Modul kommuniziert ausschließlich über definierte Schnittstellen mit den anderen, was eine unabhängige Entwicklung, Erweiterung und Fehlersuche der einzelnen Komponenten ermöglicht.
+
+\section{Optisches-Design-Konzept}
+\label{sec:optikdesign}
+Das optische Design des Systems wurde bewusst als kostengünstiger und fertigungspraktischer Ansatz konzipiert, der auf handelsübliche Einzelkomponenten zurückgreift und auf aufwendige Speziallinsensysteme verzichtet. Die Entscheidung fiel zugunsten eines Free-Space Combiner-Designs (Mirror-Type NED), da diese Architektur gegenüber Waveguide-Lösungen erheblich geringere Material- und Fertigungskosten aufweist und gleichzeitig eine für den Proof-of-Concept ausreichende Bildqualität ermöglicht (vgl. Kapitel 3.6). Eine Waveguide-Lösung wurde entsprechend der Anforderungsanalyse (vgl. Kapitel 5.1) bewusst aus dem Projektumfang ausgeschlossen.
+
+Der optische Strahlengang des Systems besteht aus drei aufeinanderfolgenden Komponenten. Als Bildquelle dient ein Mikrodisplay, das in ein handelsübliches Viewfinder-Okular aus einem elektronischen Kamerasucher eingebettet ist. Das Okular übernimmt dabei die Funktion der Kollimationsoptik: Es vergrößert das Displaybild und überführt die divergenten Lichtstrahlen in einen annähernd parallelen Strahl, sodass das virtuelle Bild dem Nutzer scheinbar in der Ferne erscheint und eine entspannte Augenakkommodation ermöglicht wird. Die Verwendung eines vorkonfigurierten Viewfinder-Moduls, in dem Display und Optik bereits justiert vorliegen, reduziert dabei den Aufwand für die optische Ausrichtung erheblich.
+
+Der kollimierte Strahl wird anschließend durch einen planaren Umlenkspiegel seitlich umgelenkt. Diese Komponente erlaubt es, das Display-Okular-Modul nicht axial vor dem Auge, sondern seitlich am Brillenrahmen zu positionieren, was für den Formfaktor und den Tragekomfort eine wesentliche konstruktive Voraussetzung darstellt. Da ein planarer Spiegel keine Brechkraft besitzt, werden durch ihn keine zusätzlichen optischen Aberrationen eingeführt.
+
+Abschließend trifft das Licht auf den halbdurchlässigen Combiner-Spiegel, der unter ca. 45° zur einfallenden Strahlachse angeordnet ist. Er reflektiert das kollimierte Displaybild in Richtung des Auges und transmittiert gleichzeitig das Umgebungslicht, sodass eine optische Überlagerung von virtuellem Bild und realer Welt entsteht (Optical See-Through). Da das Licht den Combiner im Gegensatz zum klassischen Birdbath-Design nur einmal passiert, ergibt sich ein theoretischer Lichtdurchsatz von bis zu 50\% im Displaykanal — ein wesentlicher Vorteil gegenüber dem Birdbath-Prinzip (vgl. Kapitel 3.6.4).
+
+Die Größe des Combiner-Spiegels sowie der Abstand zum Auge bestimmen maßgeblich das erreichbare Field of View des Systems und müssen im Zuge des mechanischen Aufbaus iterativ angepasst werden. Abbildung A.1 zeigt die resultierende Gesamtarchitektur der Optik in Form einer Strahlenskizze.
+
+\begin{comment}
+\section{Stand der Technik und Forschung}
+\label{sec:hauptteil_stand_der_technik_forschung}
+
+\subsection{Kommerzielle AR-Systeme}
+Obwohl \ac{AR} noch eine kleine nieche in der Industrie ist, wird die Technik doch immer weiter gepusht. Dafür gibt es bereits eine gewisse breite an kommerziellen Systemen, welche eine Vielzahl an Anwendungen anbieten. Die bekanntesten darunter sind zum Beispiel die Microsoft Hololens, die Magic Leap One oder die Nreal Light. Diese Systeme sind vor allem für Industrielle Anwendungen wie die Entwicklung von Prototypen, die Wartung von Maschinen oder die Schulung von Mitarbeitern Konzipiert. Andere Anbieter wie Snke OS Gmbh oder Taiwan Main Orthopedic Biotechnology bieten spezialisierte Lösungen für die Medizinische Industrie an. Für den Privaten Sektor gibt es ebenfalls eine Vielzahl an Systemen, welche vor allem für Gaming und Unterhaltung konzipiert sind. Dieser Sektro ist jedoch nicht sehr weit entwickelt und hat gerade in letzter Zeit erst an Fahrt aufgenommen. Wobei hier zum Beispiel der Rückszug von Meta aus dem AR-Markt einen herben Rückschlag darstellt. Dennoch gibt es hier gerade aus dem Chinesischen Markt einige vielversprechende Systeme, welche assistenzen in verschiedenen Berecheichen. Wie gerade dieses Jahr bei der CES Messe gezeigt, gibt es hier einen andrang an neuen Systemen.  Die Integration von AR in den Alltag der Menschen wird also immer weiter vorangetrieben. Nachteil dieser Kommerziellen Systeme ist jedoch ganz klar der Kostenfaktor. Diese Systeme sind meist sher teuer oder sind durch ihre Bauweise bzw. Technologie sehr beschrämnkt in ihrer Anwendung. Deshalb wird es für den Markt noch sehr viel Entwicklungspotential geben.
+
+Beim Betrachten der tatsächlichen Vorreiter in dem Privaten Sektor sind gerade die Unternehmen wie Apple, Google und Meta zu nennen, welche bereits in verschiedenen weisen versucht haben ihr Produkt in Masse zu bringen. Aber auch kleinere Unternehmen wie Reality Labs oder Nreal versuchen mit ihren Produkten den Markt zu erobern.
+
+\subsection{Aktuelle Forschungsansätze}
+Die Forschung im Bereich der \ac{AR} konzentriert sich derzeit auf verschiedene Schlüsselbereiche. Dazu gehören die Verbesserung der optischen Systeme, die Entwicklung effizienterer Energieversorgungslösungen, die Optimierung der Softwarearchitektur und die Integration von Sensorik für eine verbesserte Interaktion. In Bezug auf die optischen Systeme wird insbesondere an der Weiterentwicklung von Birdbath-Optiken gearbeitet, um eine bessere Bildqualität bei gleichzeitig geringem Gewicht zu erreichen. Noch viel mehr werden Waveguide optiken entwickelt. Diese ermöglichen die benötigten Optischen komponenten direkt im eigentlichen Brillenglas. Diese Technologie verspricht eine tiefrgündige Veränderung im \ac{AR}-Bereich von großen und unhandlichen Brillen zu leichten und unerkennbaren Technoligschen Brillen. 
+
+Im Bereich der Energieversorgung werden neue Ansätze zur Verlängerung der Batterielaufzeit erforscht, wie zum Beispiel die Nutzung von energieeffizienten Displays und die Implementierung von Energiesparmodi. Ebenfalls sind neue Batterietechnologien oder Regenrative Energietechnologien Interesant um die Batterielaufzeit der Brille so lang wie möglich zu gestalten.
+
+In Bezug auf der Software wird ständig versucht bessere UI Designs zu gestalten, welcher mit minimalem Input eine maximale Interaktion ermöglicht. Hierbei werden auch neue Ansätze wie die Nutzung von KI oder die Integration von Sprachsteuerung erforscht, um die Benutzerfreundlichkeit zu verbessern. Gerade in \ac{AR}, wo die Menschlichen Eingabemöglichkeiten begrenzt sind, ist es wichtig eine Software zu entwickeln, welche diese wenigen Inputs maximal Ausnutzt. Gerade Technologien wie Spracherkennung ist dafür besonders interessant.
+
+Zuletzt sind neue Ansätze zur Integration von Sensorik in Brillen ein wichtiger Forschungsteil. Dabei sind nicht nur externe Sensoren wie Kameras, Mikrofone oder Bewegungssensoren interessant, sondern auch die Integration von Menschenbezogenen Sensoren wie Ferzfrequenzsensoren oder Hautleitfähigkeitssensoren. Dies spielt ebenfalls eng zusammen mit den Interaktionsmöglichkeitenm da Sensoren welche direkt mit dem Menschen verbunden sind, neue Möglichkeiten der Interaktion bieten können. So könnte zum Beispiel die Erkennung von Emotionen oder Stressleveln durch Sensoren eine neue Form der Interaktion ermöglichen, welche auf die Bedürfnisse des Benutzers abgestimmt ist.
+
+\subsection{Identifizierte Forschungslücke}
+Gerade in der DIY Szene gibt es zwar einige Projekte, jedoch keine welche sich mit der Entwicklung einer kostengünstigen AR-Brille beschäftigen, welche eine akzeptable Bildqualität liefert. Meist sind sie sehr teuer oder stark eingeschräönkt in den Möglichkeiten. Dies möchten wir mit unserem Projekt ändern und eine kostengünstige AR-Brille entwickeln, welche eine akzeptable Bildqualität liefert und gleichzeitig einfach zu bauen ist. Dabei möchten wir vor allem auf die Verwendung von 3D-Druck setzen, um die Herstellungskosten so gering wie möglich zu halten. Zudem möchten wir eine Software entwickeln, welche es ermöglicht, die Brille mit verschiedenen Anwendungen zu nutzen, um die Vielseitigkeit der Brille zu erhöhen.
+
+\section{Konzeptentwicklung und Systemarchitektur}
+\label{sec:hauptteil_konzeptentwicklung_systemarchitektur}
+
+\subsection{Anforderungsanalyse}
+
+
+\subsection{Gesamtsystemachitektur}
+Aus den Anforderungen wurde eine Gesamtsystemarchitektur entwickelt, welche die verschiedenen Komponenten des Systems und deren Interaktionen beschreibt. Dabei wurden die optischen Komponenten, die Softwarekomponenten und die Energieversorgung als Hauptkomponenten identifiziert. Die Interaktionen zwischen diesen Komponenten wurden durch ein Blockdiagramm dargestellt, welches im Anhang zu finden ist.
+
+\subsection{Software-Architektur}
+Aus der Gesamtsystemarchitektur wurde eine Software-Architektur entwickelt, welche die verschiedenen Softwarekomponenten und deren Interaktionen beschreibt. Dabei wurden die Hauptkomponenten der Software als User Interface, Sensorik, Datenverarbeitung und Anwendungslogik identifiziert. Die Interaktionen zwischen diesen Komponenten wurden durch ein Klassendiagramm dargestellt, welches im Anhang zu finden ist.
+
+
+\subsection{Optisches-Design-Konzept}
+Ebenfalls aus der Gesamtsystemarchitektur wurde ein optisches Design Konzept entwickelt, welches die verschiedenen optischen Komponenten und deren Interaktionen beschreibt. Dabei wurden die Hauptkomponenten der Optik als Lichtquelle, Bildquelle, Linsen und Spiegel identifiziert. Die Interaktionen zwischen diesen Komponenten wurden durch ein Blockdiagramm dargestellt, welches im Anhang zu finden ist.
+
+\section{Implementierung und Entwicklung}
+\label{sec:hauptteil_implementierung_entwicklung}
+
+\subsection{Optische Implementierung}
+
+\subsection{Software Implementierung}
+
+\subsection{Integration von Optik und Software}
+
+\section{Test und Evaluation}
+\label{sec:hauptteil_test_evaluation}
+
+\subsection{Test-Methodik}
+
+\subsection{Optische Tests}
+
+\subsection{Software Tests}
+
+\subsection{Systemtests}
+
+\subsection{Ergebnisanalyse}
+\end{comment}

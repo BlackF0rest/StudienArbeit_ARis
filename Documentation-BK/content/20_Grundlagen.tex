@@ -1,6 +1,142 @@
 
 %!TEX root = ../main.tex
 
+\chapter{Theoretische Grundlagen (8-10S)}
+\label{ch:theogrundlagen}
+
+In diesem Kapitel werden die benötigten theoretischen Grundlagen für das Verständnis der Arbeit notwendig sind, erläutert. Für tiefere Einblicke in die jeweiligen Themengebiete wird auf die gegebenen Quellen verwiesen, um dieses Kapitel nicht in die Länge zu ziehen.
+
+\section{Architektur- und Grundlagen der Softwareentwicklung}
+\label{sec:SoftwarearchiGrund}
+Die verwendeten Techniken und Tool sder Softwareentwicklung und die grundlagen für eine Architektur werden hier kurz aufgefasst.
+
+\subsection{Softwarearchitektur}
+\label{subsec:Softwarearchitektur}
+Softwarearchitektur bezeichnet die grundlegende Strukturiereung eines Softwaresystems sowie die Entscheidungen, die diese Struktur definieren. Nach \textbf{Bass} umfasst Softwarearchitektur die Menge von Strukturen , die nötig sind, um über ein System zu urteilen, einschließlich der Softwareelemtente, der Beziehungen zwischen ihnen und der Eigenschaften dieser Elemente. Eine wesentliche Architekturentscheidung in mordernen Webanwendungen ist die Trennung von Frontend und Backend im Sinne einer Client-Server-Architektur. Dabei kommunizieren beide Schichten über definierte Schnittstellen, typischerweise auf Basis des \ac{REST}-Prinzips, welches eine zustandslose Kommunikation über HTTP-Methoden wie GET, POST, PUT und DELETE vorsieht.
+
+In ressourcenbeschränkten Systemen wie eingebetteten Computern ist die klare Modulaufteilung in funktional abgegrenzte Softwarekomponenten besonders relevant, da sie Wartbarkeit, Erweiterbarkeit und Testbarkeit des Systems fördern. Abbildung \ref{apx:1} zeigt die konkrete Archtiektur des entwickelten Systems, bestehend aus der Onboard-Software, einer Begleit-App sowie einer externen Rendering-Komponente auf Basis des Unreal Engine Pixel Streamings.
+
+\subsection{Versionskontrolle mit Git und Github}
+\label{subsec:Softwarearchitektur}
+Git ist ein verteiltes Versionskontrollsystem (DVCS), das 2005 von Linus Torvalds entwickelt wurde, um kollaborative und nachvollziehbare Softwareentwicklung zu ermöglichen. Im Gegensatz zu zentralisierten Systemen speichert Git eine vollständige Kopie des Repositories auf jedem Entwicklerrechner, was paralleles Arbeiten in sogenannten Branches sowie eine lückenlose Nachvollziehbarkeit aller Änderungen ermöglicht. Kernkonzepte umfassen das Repository als Archiv der Projekthistorie, den Commit als versionierter Zustandssnapshot sowie den Branch als paralleler Entwicklungszweig.
+
+Github ist eine cloudbasierte Plattform, die auf Git aufbaut und zusätzlich kollaborative Funktionen wie Pull Requests, Issue Tracking und automatisierte Workflows über GitHub Actions bereitstellt. Im Kontext der Projektarbeit dient GitHub zudem der Dokumentation von Entwicklungsentscheidungen und der transparenten Nachvollziehbarkeit des Projektfortschritts.
+
+\subsection{Python}
+\label{subsec:Python}
+Python ist eine interpretierte, hochgradig lesbare Allzweck-Programmiersprache, die 1991 von Guido van Rossum veröffentlicht wurde. Ihre Designphilosophie betont Produktivität durch reduzierte Syntax bei gleichzeitig umfangreicher Standardbibliothek, wobei mehrere Programmierparadigmen - darunter prozedurale und objektorientierte Programmierung - unterstützt werden. Im technischen und wissenschaftlichen Bereich hat sich Python als bevorzugte Sprache für Backend-Entwicklung, Datenverarbeitung und Systemsteuerung etabliert.
+Dabei werden Abhängigkeiten  über den Paketmanager \textit{pip} verwaltet.
+
+\subsection{Verwendete Python-Bibliotheken}
+\label{subsec:PythonLibraries}
+Folgend die wichtigsten, im Projekt eingesetzten Python-Bibliotheken. Alle weiteren sind im Code zum Projekt zu finden.
+
+\subsubsection{BibName}
+\textit{Kurze Beschreibung: Was ist die Bibliothek, welche Kernfunktionalität wird genutzt, warum ist sie für dieses Projekt relevant? — ca. 3–5 Sätze mit Verweis auf offizielle Dokumentation oder ein zitierfähiges Paper. Beispiel für FastAPI: „FastAPI ist ein modernes, auf Python-Typhinweisen basierendes Web-Framework zur Erstellung von HTTP-APIs. Es nutzt den ASGI-Standard und bietet durch automatische OpenAPI-Schema-Generierung eine integrierte Schnittstellendokumentation..."}
+
+\subsection{Svelte}
+\label{subsec:Svelte}
+Svelte is ein reaktives Frontend-Framework, das 2016 von Rich Harris entwickelt wurde und einen grundlegend anderen Ansatz als klassische Laufzeit-Frameworks verfolgt: Statt einer Browser-Bibliothek kompiliert Svelte den Anwendungscode zur Bauzeit direkt in optimiertes, natives HTML, CSS und JavaScript. Durch den Verzicht auf ein virtuelles \ac{DOM} entfällt der entsprechende Laufzeit-Overhead, was zu einer besonders geringen Bundle-Größe und schnellen Renderzeit führt - Eigenschaften, die in ressourcenbeschränkten Embedded-Umgebungen besonders vorteilhaft sind. Reaktivität wird in Svelte durch eine auf Compilier-Ebene verarbeitete Zuweisungssemantik erreicht, wodurch Zustandsänderungen ohne explizite State-Management-Bibliotheken ausgedrückt werden können.
+
+\newpage
+\subsection{React}
+\label{subsec:React}
+React Native ist ein von Meta (ehemals Facebook) entwickeltes Open-Source-Framework zur Entwicklung nativer mobiler Anwendungen auf Basis von JavaScript und der React-Bibliothek, das 2015 veröffentlicht wurde. Im Gegensatz zu hybriden Ansätzen, die eine WebView zur Darstellung nutzen, rendert React Native die Benutzeroberfläche in echte native UI-Komponenten des jeweiligen Zielbetriebssystems - also IOS- bzw. Android-native Elemente - was eine der nativen Entwicklung vergleichbaren Performance und Nutzererfahrung ermöglicht. Die Architektur basiert auf einer JavaScript-Laufzeitumgebung, die über eine sogenannte Bridge asynchron mit dem nativen Thread kommuniziert und so plattformspezifische APIs und Systemfunktionen ansprechen kann.
+
+Ein wesentlicher Vorteil von React Native ist die Code-Wiederverwendbarkeit: Eine gemeinsame JavaScript-Codebasis kann sowohl für IOS als auch für Android kompiliert werden, was den Entwicklungsaufwand gegenüber zwei separaten nativen Implementierungen erheblich reduziert. Plattformspezifische Funktionen wie Bluetooth-Kommunikation, Sensorzugriffe oder Hintergrundprozesse werden über sogenannte Native-Modules eingebunden, die eine direkte Schnittstelle zwischen der JavaScript-Schicht und dem nativen Betriebssystem herstellt.
+
+\subsection{SQL-Datenbank}
+\label{subsec:SQL}
+Relationale Datenbanken basieren auf dem von Edgar F. Codd 1970 entwickelten relationalen Modell, bei dem Daten in strukturierten Tabellen mit definierten Beziehungen gespeichert werden. Die Abfragesprache \ac{SQL} stellt den standartisierten Zugriff auf diese Daten durch deklarative Befehle sicher. In eingebetteten Systemen werden häufig dateibasierte SQL-Lösungen wie SQLite eingesetzt, da diese ohne separaten Datenbankserver betrieben werden können und eine geringe Ressourcenlast aufweisen.
+
+\subsection{Bluetooth und WIFI}
+Bluetooth is ein standartisiertes Kurzstreckenkommunikationsprotokoll (IEEE802.15.1), das die drahtlose Datenübertragung zwischen Geräten in einem Radius von typischerweise bis zu 10 Metern ermöglicht. Es ist besonders für die Übertragung von Steuerbefehlen und kleinen Datenmengen zwischen mobilen Endgeräten und eingebetteten Systemen geeignet, da es einen geringen Energieverbrauch mit ausreichender Bandbreite kombiniert.
+
+\ac{WIFI} (IEEE802.11) ist ein standardisiertes drahtloses Netzwerkprotokoll, das höhere Datenübertragungsraten und größere Reichweiten als Bluetooth bietet und primär für die Einbindung von Geräten in Lokale Netzwerke (\ac{LAN}) verwendet wird. Gegenüber Bluetooth eignet sich \ac{WIFI} besonders für Übertragungen größerer Datenmengen sowie latenzempfindliche Streaming-Anwendungen, da es auf dem \ac{TCP}/\ac{IP}-Protokollstack aufbaut und somit eine direkte \ac{HTTP}-basierte Kommunikation ermöglicht.
+
+\subsection{Human Interface Device}
+\label{subsec:HID}
+\ac{HID} bezeichnet einen \ac{USB}- und Bluetooth-Geräteklassenstandard, der die Kommunikation von Eingabegeräten - wie Tastaturen, Mäusen oder benutzerdefinierten Controllern - mit einem Host-System ohne gerätespezifische Treiber ermöglicht. Das \ac{HID}-Protokoll definiert dabei ein standardisiertes Deskriptorformat, über das ein Gerät dem Host sein seine Eingabefähigkeiten mitteilt, sodass Betriebssysteme die Eingaben ohne zusätzliche Treiberinstallation können.
+
+\newpage
+\subsection{Unreal Engine und Pixel Streaming}
+\label{subsec:UnrealUndPixelStreaming}
+Die Unreal Engine ist eine von Epic Games entwickelte Echtzeit-3D-Engine, die ursprünglich für die Spieöeentwicklung konzipiert wurde, jedoch zunehmend für die industrielle Visualisierung- und XR-Anwendungen eingesetzt wird. Pixel Streaming ist eine von Epic Games bereitgestellte Technologie, die das Rendering einer Unreal-Engine Szene auf einem leistungsstarken PC ermöglicht und den erzeugten Videostream über ein Netzwerk - typischerweise über \ac{WebRTC} und eine WebSocket-Verbindung - an ein Endgerät mit begrenzten Grafikressourcen überträgt. Das Endgerät fungiert dabei als reiner Displayclient, während die Rechenarbeit ausgelagert bleibt.
+
+\section{Optische Grundlagen}
+\label{sec:optischeGrundlagen}
+Im folgenden wird das benötigte Grundwissen für die Gestaltung es Optischen Systems vorgestellt und alles kurz beschrieben.
+
+\subsection{Geometrische Optik}
+\label{subsec:geometrischeOptik}
+\begin{wrapfigure}{r}{0.4\textwidth}
+    \centering
+        \includegraphics[width=0.5\textwidth]{Brechungsgesetz.png}
+        %\caption{Lichtbrechung beim Übergang eines Lichtstrahls.}
+        \label{img:Brechungsgesetz}
+\end{wrapfigure}
+Die geometrische Optik beschreibt das Verhalten von Licht anhand des Strahlenmodells,  bei dem Licht als geradlinig verlaufende Strahlen modelliert wird. Trifft ein Lichtstrahl auf eine Grenzfläche zwischen zwei Medien unterschiedlicher optischer Dichte, treten gleichzeitig Reflexion und Brechung auf. Das \textbf{Reflexionsgesetzt} beschreibt dabei, dass der Einfallswinkel gleich dem Ausfallswinkel ist, gemessen zur Flächennormalen der Grenzfläche. Das \textbf{Brechnungsgesetz} nach Snellius beschreibt die Richtungsänderung des transmittierten Strahls:
+$$
+    n_1\times\sin(\Theta_1)=n_2\times\sin(\Theta_2)
+$$
+Wobei $n_1$ und $n_2$ die Brechungsindizes der beiden Medien und $\Theta_1$ bzw. $\Theta_2$ die Winkel des einfallenden und gebrochenen Strahls zur Normalen beschreiben.
+
+\subsection{Near-Eye Display}
+\label{subsec:NED}
+Ein \ac{NED} ist ein Anzeigesystem, das in unmittelbarer Nähe des Auges positioniert wird - typischerweise wenige Zentimeter entfernt - und das projezierte Bild direkt in das Sichtfeld des Nutzers einblendet. Im Gegensatz zu konventionellen  Bildschirmen erzeugt ein NED ein virtuelles Bild, das dem Nutzer in einer definierten Wahrnemungsdistanz erscheint, obwohl die phyische Displayfläche sehr nah am Auge liegt. Das optische System eines \ac{NED} besteht typischerweise aus drei Grundkomponenten: einem bidgebenden Mikrodisplay oder -projektor als Lichtquelle, einer Abbildungsoptik zur Kollimation und Umlenkung des Lichts sowie einem Combiner, der das virtuelle Bild mit der realen Umgebung überlagert. 
+
+Für \ac{AR}-Anwendungen muss das \ac{NED} zusätzlich optisch Transparent sein, sodass der Nutzer gleichzeitig das virtuelle Bild und die reale Welt wahrnehmen kann (Optical See-Through). Die zwei zentralen Leistungsparameter eines \ac{NED} sind das \textbf{\ac{FoV}} und die \textbf{Eyebox}, welche in den folgenden Abschnitten definiert werden.
+
+\subsection{Field of View}
+\label{subsec:FoV}
+Das \ac{FoV} bezeichnet den Raumwinkel, innerhalb dessen das dargestellte Bild vom menschlichen Auge vollständig wahrgenommen werden kann. Es wird üblicherweise in Winkelgrad angegeben - horizontal, vertikal und diagonal - und stellt eines der wichtigsten Qualitätsmerkmale eines \ac{VR}- oder \ac{AR}-Displays dar. Das binokulare \ac{FoV} des menschlichen Auge beträgt ca. 120\textdegree horizontal; aktuelle Consumer-\ac{AR}-Brillen erreichen typischerweise zwischen 40\textdegree und 60\textdegree.
+
+Ein größeres FoV ermöglicht eine immersivere und räumlich ausgedehntere Darstellung virtueller Inhalte, geht jedoch in der Regel mit einer größeren und schwereren Optik einher, was bei tragbaren Systemen einen grundlegenden Designkonflikt erzeugt.
+
+\subsection{Eyebox}
+\label{subsec:Eyebox}
+Die Eyebox bezeichnet das dreidimensionale Volumen vor dem Optical Combiner, innerhalb dessen das Auge des Nutzers das vollständige Bild im gesamten \ac{FoV} wahrnehmen kann. Innerhalb der Eyebox kann das Auge sowohl lateral als auch axial bewegt werden, ohne dass das Bild beschnitten oder verzerrt wird. Eine größere Eyebox erhöht den Tragekomfort, da sie größere interpupillare Abstände und Kopfbewegungen toleriert, erfordert jedoch optisch aufwändigere Designs.
+
+\subsection{Mikrodisplay}
+\label{subsec:Mikrodisplay}
+Mikrodisplays sind hochauflösende Bildgeber mit sehr kleinr aktiver Fläche - typischerweise unter einem Zoll Diagonale - die als Lichtquelle in \ac{NED}-Systemen eingesetzt werden. Die in \ac{AR}-Brillen am häufigsten eingesetzten Technologien umfassen \textbf{Micro-OLED} (organische Leuchtdioden auf Silizium-Substrat), \textbf{LCoS} (Liquid Crystal on Silicon, reflektives LCD) sowie \textbf{Micro-LED}. Micro-OLEDs zeichnen sich dabei durch besonder hohen Kontrast (>100.000:1), kompakte Bauform und selbstemittierende Pixel aus, die keine externe Lichtquelle benötigen.
+
+Die sehr kleinen Pixelgrößen - typischerweise zwischen 4 und 20 Mikrometern - ermöglichen Pixeldichten von über 4000 ppi auf einem panel, das dennoch durch eine vergrößernde Optik ein ausreichend großes virtuelles Bild im FoV des Nutzers erzeugt.
+
+\subsection{Free-Space Combiner (Mirror-Type NED)}
+\label{subsec:FreeSpaceCombiner}
+\ac{NED}s lassen sich hinsichtlich ihrer optischen Architektur grundlegend in zwei Kategorien einteilen: wellenleiterbasierte Systeme (Waveguide-Type) und spiegelbasierte Systeme (Mirror-Type). Mirror-Type \ac{NED}s nutzen einen halbdurchlässigen Spiegel als optischen Combiner und zeichnen sich gegenüber Waveguide-Systemen durch einen vergleichsweise einfachen optischen Aufbau aus handelsüblichen Komponenten aus. Da alle optischen Elemente frei im Raum angeordnet sind - ohne Lichtfühung durch ein Substrat - wird diese Klasse in der Literatur auch als \textbf{Free-Space Combiner} bezeichnet.
+
+Der Strahlengang eines solchen Systems besteht typischerweise aus einem bildgebenden Mikrodisplay, einer kollimierenden Abbildungsoptik sowie dem eigentlichen Combiner-Spiegel, der das Bild mit dem Durchblick auf die reale Umgebung überlagert. Das Umgebungslicht wird vom Combiner transmittiert, währenddas kollimierte Displaybild in Richtung des Auges reflektiert wird, sodass beide Bildquellen simultan wahrgenommen werden (\ac{OST}). Im vergleich zu Waveguie-Lösungen bietet dieser Ansatz eine höhere Bildqualität und geringe Fertigungskosten, weist jedoch einen eingeschränkten Formfaktor sowie eine durch die Strahlteilerpassage bedingte Lichteffizienz von maximal 50\% auf.
+
+\subsubsection{Viewfinder-Okular}
+\label{subsubsec:Viewfinder-Okular}
+Ein Viewfinder-Okular ist eine kompakte Linsenanordnung, die ursprünglich fpr elektronische Kamerasucher entwickelt wurde und ein kleines Display für das menschliche Auge vergrößert und scharf abbildet. Optisch wirkt das Okular als \textbf{Lupe}: Das Mikrodisplay wird in oder nahe dem vorderen Brennpunkt des Okulars platziert, sodass die austretenden Lichtstrahlen annähernd parallel (kollimiert) aus dem Okular austreten - das virtuelle Bild erscheint dem Betrachter damit scheinbar in der Ferne, was eine entspannte Augenakkomodation ermöglicht. Die \textbf{Vergrößung} $M$ eines Okulars ergibt sich näherungsweise aus dem Verhältnis der Bezugssehweite $d_0=250\text{mm}$(Norm-Nahpunktsabstand des menschlichen Auges) zur Brennweite $f$ des Okulars: $$M=\frac{d_0}{f}$$
+Eine kürzere Brennweite liefert dabei eine höhere Vergrößerung, begrenzt jedoch gleichzeitig das erreichbar \ac{FoV} und die Eyebox.
+
+\subsubsection{Planarer Umlenkspiegel}
+\label{subsubsec:planarerUmlenkspiegel}
+Ein planarer (flacher) Umlenkspiegel lenkt den Lichtstrahl um, ohne die optischen Eigenschaften des Strahls - insbesondere dessen kollimation und Abbildungsqualität - zu verändern. Die Umlenkung erfolgt gemäß dem zuvor erklärten Reflexionsgesetz. Da ein planarer Spiegel keine brechkraft besitzt, werden durch ihn keine zusätzlichen optischen Aberrationen eingeführt, was ihn gegenüber gekrümmten Spiegeln in einfachen Systemen vorteilhaft macht.
+
+\subsubsection{Halbdurchlässiger Spiegel (Combiner)}
+\label{subsubsex:halbdurchläsigerSpiegel}
+Der halbdurchlässige Spiegel - auch \textbf{Pellicle Mirror} oder \textbf{Beam Splitter Mirror} genannt - ist eine teilverspiegelte, planare Glasfläche, die typischerweise unter 45\textdegree zur optischen Achse des einfallenden Lichts angeordnet wird. Er erfüllt zwei simultane Funktionen: Er \textbf{reflektiert} das Licht aus dem seitlich einfallenden Pfad in Richtung des Auges, transmittiert gleichzeitig das Licht des Bereichs hinter dem Spiegel, sodass eine optische Überlagerung (See-Through) entsteht. Bei einem typischen 50/50-Strahlteiler werden 50\% des seitlich einfallenden Lichts zum Auge reflektiert und 50\% transmittiert (und damit verloren), was den maximal erreichbaren Lichtdurchsatz des seitlichen kanals auf 50\% begrenzt - gegenüber $\sim$25\% beim klassischen Birdbath, wo das Licht den Strahlteiler zweimal passiert.
+
+Die Größe des Combiners bestimmt maßgeblich das erreichbare \ac{FoV}: je weiter der Combiner vom Auge entfernt ist und je größer das gewünschte \ac{FoV}, desto größer muss die Spiegelfläche dimensioniert sein. Für ein \ac{FoV} von 40\textdegree bei einem Augenabstand von ca. 30mm ergibt sich eine Mindestbreite des Combiners von näherungsweise:
+$$w_{min}=2\times\tan{\frac{\text{FoV}}{2}}\times d_{\text{Auge-Combiner}}=2\times\tan{\frac{40}{2}}\times30\simeq21,838$$
+
+\section{Projektmanagement und Methodik}
+\label{ProjektundMethodik}
+
+
+\subsection{MoSCoW-Methodik}
+\label{subsec:Moscow}
+Die MoSCoW-Methode ist eine strukturierte Priorisierungstechnik aus dem Anforderungsmanagement, die 1994 von Dai Clegg im Kontext der \ac{DSDM} entwickelt wurde. Ihr Name ist ein Akronym aus den vier Anforderungskategorien, in die sämtliche Anforderungen eines Projekts eingeordnet werden: \textbf{Must Have}, \textbf{Should Have}, \textbf{Could Have} und \textbf{Won't Have}. Die Methode hat sich sowohl im agilen Projektmanagement als auch in der ingenieurswissenschaftlichen Systementwicklung als gängiges Werkzeug zur Abgrenzung des Projektumfangs etabliert.
+
+\textbf{Must-Have}-Anforderungen definieren den nicht verhandelbaren Mindestumfang eines Systems - ihr Fehlen beudetet, dass das Projektziel als nicht erreicht gilt. \textbf{Should-Have}-Anforderungen sind wichtig und sollen umgesetzt werden, sind aber nicht projektblockierend. \textbf{Could-Have}-Anforderungen stellen wünschenswerte Erweiterungen dar, die bei ausreichenden Ressourcen realisiert werden. Die \textbf{Won't-Have}-Kategorie schließt Anforderungen bewusst aus dem aktuellen Projektumfang aus, ohne deren grundsätzlichen Wert zu negieren - sie verhindert damit gezielt Scope Creep und schafft Transparenz für alle Projektbeteiligten.
+
+
+\begin{comment}
 \chapter{Theoretische Grundlagen}
 \label{ch:grundlagen}
 In diesem Kapitel werden die benötigten theoretischen Grundlagen, welche für das Verständnis dieser Arbeit notwendig sind, kurz erläutert. Für tiefere Einblicke in die jeweiligen Themengebiete wird auf die gegebenen Quellen verwiesen.
@@ -78,3 +214,4 @@ Trotz sorgfältiger Planung und Recherche bestehen weiterhin Unsicherheiten und 
 
 \section{Anforderungsanalyse}
 Hier wird auf die Partnerarbeit verwiesen, in welcher unter Abschnitt \textbf{\textit{2.5}} die Anforderungsanalyse beschrieben wird.
+\end{comment}

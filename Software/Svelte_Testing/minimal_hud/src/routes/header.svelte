@@ -55,6 +55,7 @@
         margin: 0;
         font-size: 1.2rem;
         letter-spacing: 2px;
+        text-align: right;
     }
 </style>
 

@@ -345,9 +345,29 @@ class TextRxCharacteristic(Characteristic):
         text = data.decode('utf-8', errors='ignore')
         print("RX from client:", text)
 
-        reply = f"Received {len(text)} characters"
-        # WICHTIG: diese Zeile ist jetzt IN der Methode eingerückt:
-        self.service.tx.send(reply.encode())
+        # Einfaches Protokoll
+        if text.startswith("CMD:TELEPROMPTER_START"):
+            print("-> Teleprompter START command")
+            self.service.teleprompter_buffer = ""
+
+            
+
+            # HIER: Teleprompter-UI öffnen (z.B. Browser, Python-UI, etc.)
+            # z.B. subprocess.Popen(["python3", "teleprompter_ui.py"])
+
+        elif text.startswith("CMD:TELEPROMPTER_END"):
+            print("-> Teleprompter END command, final text length:",
+                  len(self.service.teleprompter_buffer))
+            final_text = self.service.teleprompter_buffer
+
+            # HIER: final_text an dein Teleprompter-Programm übergeben
+            # z.B.: teleprompter.set_text(final_text); teleprompter.start()
+
+        elif text.startswith("TXT:"):
+            chunk = text[4:]
+            self.service.teleprompter_buffer += chunk
+        else:
+            print("Unknown payload")
 
 
 class TextTxCharacteristic(Characteristic):
@@ -383,7 +403,6 @@ class TextTxCharacteristic(Characteristic):
             {'Value': self.value},
             []
         )
-
 
 class CharacteristicUserDescriptionDescriptor(Descriptor):
     """
