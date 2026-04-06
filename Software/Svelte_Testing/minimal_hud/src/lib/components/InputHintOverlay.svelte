@@ -17,7 +17,7 @@
 		color: #b8ffb8;
 		padding: 0.25rem 0.6rem;
 		font-size: 0.85rem;
-		font-family: 'Courier New', monospace;
+		font-family: var(--hud-font-stack);
 		z-index: 60;
 		white-space: nowrap;
 	}

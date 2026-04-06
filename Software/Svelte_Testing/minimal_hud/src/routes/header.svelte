@@ -71,7 +71,7 @@
 		padding: 0.8rem 1rem;
 		border: 1px dashed #2fff44;
 		color: #9dff9d;
-		font-family: 'Courier New', monospace;
+		font-family: var(--hud-font-stack);
 	}
 
 	.divider {
@@ -87,7 +87,7 @@
 		display: flex;
 		gap: 1rem;
 		padding: 0.8rem 0.4rem 0.4rem;
-		font-family: 'Courier New', monospace;
+		font-family: var(--hud-font-stack);
 	}
 
 	a {

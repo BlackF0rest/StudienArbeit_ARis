@@ -2,21 +2,14 @@
 	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
 	import Header from '../header.svelte';
-	import {
-		createChatProvider,
-		loadHistory,
-		saveHistory,
-		newMessage,
-		type ChatMessage
-	} from '$lib/services/ai-chat';
+	import { createChatProvider, loadHistory, saveHistory, newMessage, type ChatMessage } from '$lib/services/ai-chat';
 	import { featureHost } from '$lib/feature-host';
-	import {
-		getHintForContext,
-		registerAppActions,
-		setInputContext,
-		type InputHint
-	} from '$lib/input-controller';
+	import { getHintForContext, registerAppActions, setInputContext, type InputHint } from '$lib/input-controller';
 	import InputHintOverlay from '$lib/components/InputHintOverlay.svelte';
+	import HudCard from '$lib/components/hud/HudCard.svelte';
+	import HudScaffold from '$lib/components/hud/HudScaffold.svelte';
+	import HudTabs from '$lib/components/hud/HudTabs.svelte';
+	import StatusPill from '$lib/components/hud/StatusPill.svelte';
 
 	const ENABLE_REAL_PROVIDER = false;
 	const provider = createChatProvider(ENABLE_REAL_PROVIDER);
@@ -80,76 +73,47 @@
 
 <Header />
 
-<main>
-	<h2>AI Chat Scaffold</h2>
-	<div class="sections">
-		{#each sections as section, index}
-			<span class:active={index === activeSectionIndex}>{section}</span>
-		{/each}
-	</div>
+<HudScaffold title="AI Chat Scaffold" subtitle={`Provider: ${provider.name}`}>
+	<svelte:fragment slot="header">
+		<StatusPill text={provider.enabled ? 'Provider Enabled' : 'Demo Mode'} tone={provider.enabled ? 'ok' : 'warn'} />
+	</svelte:fragment>
 
-	{#if activeSectionIndex === 0}
-		<p>Provider: {provider.name} ({provider.enabled ? 'enabled' : 'disabled for demo'})</p>
-	{:else if activeSectionIndex === 1}
-		<p>Compose is intentionally not bound to HID; companion input app handles text entry.</p>
-	{:else}
-		<p>History view active ({history.length} entries).</p>
-	{/if}
+	<HudTabs tabs={sections} activeIndex={activeSectionIndex} />
 
-	<form
-		on:submit={(event) => {
-			event.preventDefault();
-			void submit();
-		}}
-	>
-		<input bind:value={input} placeholder="Prompt eingeben..." />
-		<button type="submit" disabled={busy}>{busy ? 'Sende...' : 'Senden'}</button>
+	<HudCard>
+		{#if activeSectionIndex === 0}
+			<p>Provider: {provider.name} ({provider.enabled ? 'enabled' : 'disabled for demo'})</p>
+		{:else if activeSectionIndex === 1}
+			<p>Compose is intentionally not bound to HID; companion input app handles text entry.</p>
+		{:else}
+			<p>History view active ({history.length} entries).</p>
+		{/if}
+	</HudCard>
+
+	<form class="hud-form-row" on:submit={(event) => {
+		event.preventDefault();
+		void submit();
+	}}>
+		<input class="hud-input" bind:value={input} placeholder="Prompt eingeben..." />
+		<button class="hud-button" type="submit" disabled={busy}>{busy ? 'Sende...' : 'Senden'}</button>
 	</form>
 
-	<section class="history">
+	<section style="display:grid;gap:0.4rem;">
 		{#if history.length === 0}
 			<p>Noch keine Nachrichten.</p>
 		{:else}
 			{#each history as message}
-				<article class="msg {message.role}">
-					<div class="meta">{message.role} · {message.createdAt}</div>
-					<div>{message.content}</div>
-				</article>
+				<HudCard>
+					<div class="hud-muted" style="font-size:0.8rem;">{message.role} · {message.createdAt}</div>
+					<div style={`border-left:3px solid ${message.role === 'user' ? '#7eff7e' : '#7ea9ff'};padding-left:0.5rem;margin-top:0.2rem;`}>
+						{message.content}
+					</div>
+				</HudCard>
 			{/each}
 		{/if}
 	</section>
-</main>
 
-<InputHintOverlay {hint} />
-
-<style>
-	main { padding: 0.6rem 1rem; }
-	.sections {
-		display: flex;
-		gap: 0.5rem;
-		margin-bottom: 0.5rem;
-	}
-	.sections span {
-		padding: 0.2rem 0.45rem;
-		border: 1px solid #335033;
-		opacity: 0.7;
-	}
-	.sections span.active {
-		opacity: 1;
-		color: #9eff9e;
-	}
-	form { display: flex; gap: 0.4rem; margin-bottom: 0.8rem; }
-	input {
-		flex: 1;
-		padding: 0.5rem;
-		background: #111;
-		border: 1px solid #2f2f2f;
-		color: #fff;
-	}
-	button { padding: 0.5rem 0.8rem; }
-	.history { display: grid; gap: 0.4rem; }
-	.msg { border: 1px solid #2e2e2e; padding: 0.5rem; }
-	.msg.user { border-left: 3px solid #7eff7e; }
-	.msg.assistant { border-left: 3px solid #7ea9ff; }
-	.meta { font-size: 0.8rem; opacity: 0.7; }
-</style>
+	<svelte:fragment slot="hint">
+		<InputHintOverlay {hint} />
+	</svelte:fragment>
+</HudScaffold>

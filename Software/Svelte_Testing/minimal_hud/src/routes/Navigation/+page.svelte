@@ -4,13 +4,12 @@
 	import Header from '../header.svelte';
 	import { buildNavigationProvider, type NavigationSnapshot } from '$lib/services/navigation';
 	import { featureHost } from '$lib/feature-host';
-	import {
-		getHintForContext,
-		registerAppActions,
-		setInputContext,
-		type InputHint
-	} from '$lib/input-controller';
+	import { getHintForContext, registerAppActions, setInputContext, type InputHint } from '$lib/input-controller';
 	import InputHintOverlay from '$lib/components/InputHintOverlay.svelte';
+	import HudCard from '$lib/components/hud/HudCard.svelte';
+	import HudScaffold from '$lib/components/hud/HudScaffold.svelte';
+	import HudTabs from '$lib/components/hud/HudTabs.svelte';
+	import StatusPill from '$lib/components/hud/StatusPill.svelte';
 
 	const USE_REAL_PROVIDER = false;
 	const provider = buildNavigationProvider(USE_REAL_PROVIDER);
@@ -39,10 +38,7 @@
 	async function refreshNavigation(): Promise<void> {
 		try {
 			nav = await provider.getLatest();
-			featureHost.emit('navigation-mvp', 'navigation.update', {
-				headingDeg: nav.headingDeg,
-				source: provider.name
-			});
+			featureHost.emit('navigation-mvp', 'navigation.update', { headingDeg: nav.headingDeg, source: provider.name });
 		} catch {
 			nav = {
 				...nav,
@@ -72,15 +68,14 @@
 
 <Header />
 
-<main>
-	<h2>Navigation MVP</h2>
-	<p><strong>Source:</strong> {provider.name}</p>
-	<div class="panel-tabs">
-		{#each panels as panel, index}
-			<span class:active={index === activePanelIndex}>{panel}</span>
-		{/each}
-	</div>
-	<div class="block">
+<HudScaffold title="Navigation MVP" subtitle={`Source: ${provider.name}`}>
+	<svelte:fragment slot="header">
+		<StatusPill text={nav.source === 'real' ? 'Live Source' : 'Mock Source'} tone={nav.source === 'real' ? 'ok' : 'info'} />
+	</svelte:fragment>
+
+	<HudTabs tabs={panels} activeIndex={activePanelIndex} />
+
+	<HudCard>
 		{#if panels[activePanelIndex] === 'route'}
 			<p><strong>Route:</strong> {nav.routeText}</p>
 		{:else if panels[activePanelIndex] === 'next-action'}
@@ -88,51 +83,17 @@
 		{:else}
 			<p>Heading: {Math.round(nav.headingDeg)}°</p>
 		{/if}
-		<p><strong>Updated:</strong> {nav.updatedAt}</p>
-	</div>
+		<p class="hud-muted"><strong>Updated:</strong> {nav.updatedAt}</p>
+	</HudCard>
 
-	<div class="heading-wrap">
-		<div class="compass">N</div>
-		<div class="needle" style="transform: translate(-50%, -90%) rotate({nav.headingDeg}deg);">↑</div>
-	</div>
-</main>
+	<HudCard>
+		<div class="compass-wrap">
+			<div style="position:absolute;top:10px;color:#7eff7e;font-weight:bold;">N</div>
+			<div style="position:absolute;top:50%;left:50%;transform-origin:50% 90%;font-size:2rem;color:#9dff9d;transform:translate(-50%,-90%) rotate({nav.headingDeg}deg);">↑</div>
+		</div>
+	</HudCard>
 
-<InputHintOverlay {hint} />
-
-<style>
-	main { padding: 0.6rem 1rem; }
-	.panel-tabs {
-		display: flex;
-		gap: 0.5rem;
-		margin-bottom: 0.5rem;
-	}
-	.panel-tabs span {
-		padding: 0.2rem 0.45rem;
-		border: 1px solid #335033;
-		opacity: 0.7;
-	}
-	.panel-tabs span.active {
-		opacity: 1;
-		color: #9eff9e;
-	}
-	.block { border: 1px solid #333; padding: 0.6rem; background: #080808; }
-	.heading-wrap {
-		margin-top: 1rem;
-		position: relative;
-		width: 160px;
-		height: 160px;
-		border: 2px solid #3a3a3a;
-		border-radius: 50%;
-		display: grid;
-		place-items: center;
-	}
-	.compass { position: absolute; top: 10px; color: #7eff7e; font-weight: bold; }
-	.needle {
-		position: absolute;
-		top: 50%;
-		left: 50%;
-		transform-origin: 50% 90%;
-		font-size: 2rem;
-		color: #9dff9d;
-	}
-</style>
+	<svelte:fragment slot="hint">
+		<InputHintOverlay {hint} />
+	</svelte:fragment>
+</HudScaffold>

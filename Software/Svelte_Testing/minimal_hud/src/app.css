@@ -1,9 +1,213 @@
 @import 'tailwindcss';
 @plugin '@tailwindcss/typography';
 
+:root {
+	--hud-font-stack: 'Inter', 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+	--hud-font-mono: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+	--hud-bg: #000;
+	--hud-surface: #090909;
+	--hud-surface-alt: #111;
+	--hud-text: #f1fff1;
+	--hud-muted: #a6c1a6;
+	--hud-accent: #9eff9e;
+	--hud-border: #2f2f2f;
+	--hud-border-accent: #2f5a2f;
+	--hud-radius: 8px;
+	--hud-space-xs: 0.25rem;
+	--hud-space-sm: 0.5rem;
+	--hud-space-md: 0.8rem;
+	--hud-space-lg: 1rem;
+	--hud-font-xs: 0.78rem;
+	--hud-font-sm: 0.9rem;
+	--hud-font-base: 1rem;
+	--hud-font-lg: 1.1rem;
+}
+
 body {
 	margin: 0;
-	background-color: #000;
-	color: #fff;
-	font-family: Arial, sans-serif;
+	background-color: var(--hud-bg);
+	color: var(--hud-text);
+	font-family: var(--hud-font-stack);
+}
+
+body.ar-mode.compact {
+	letter-spacing: 0.01em;
+	font-size: 15px;
+	line-height: 1.35;
+}
+
+.hud-scaffold {
+	padding: var(--hud-space-sm) var(--hud-space-md);
+	display: grid;
+	gap: var(--hud-space-md);
+}
+
+.hud-scaffold-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: flex-start;
+	gap: var(--hud-space-sm);
+}
+
+.hud-scaffold h2 {
+	margin: 0;
+	font-size: var(--hud-font-lg);
+}
+
+.hud-subtitle {
+	margin: var(--hud-space-xs) 0 0;
+	color: var(--hud-muted);
+	font-size: var(--hud-font-sm);
+}
+
+.hud-scaffold-content {
+	display: grid;
+	gap: var(--hud-space-md);
+}
+
+.hud-scaffold-hint {
+	min-height: 1.6rem;
+}
+
+.hud-grid-2 {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: var(--hud-space-md);
+}
+
+.hud-card {
+	border: 1px solid var(--hud-border);
+	border-radius: var(--hud-radius);
+	padding: var(--hud-space-md);
+	background: var(--hud-surface);
+}
+
+.hud-card h3 {
+	margin: 0 0 var(--hud-space-sm);
+	font-size: var(--hud-font-base);
+}
+
+.hud-card.is-muted {
+	background: var(--hud-surface-alt);
+}
+
+.hud-tabs {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--hud-space-sm);
+}
+
+.hud-tabs span {
+	padding: 0.2rem 0.45rem;
+	border: 1px solid var(--hud-border-accent);
+	opacity: 0.7;
+	border-radius: 999px;
+	font-size: var(--hud-font-sm);
+}
+
+.hud-tabs span.active {
+	opacity: 1;
+	color: var(--hud-accent);
+}
+
+.status-pill {
+	display: inline-flex;
+	padding: 0.1rem 0.5rem;
+	border-radius: 999px;
+	border: 1px solid var(--hud-border-accent);
+	font-size: var(--hud-font-xs);
+}
+
+.status-pill.tone-ok {
+	color: var(--hud-accent);
+}
+
+.status-pill.tone-warn {
+	color: #ffd97f;
+}
+
+.status-pill.tone-danger {
+	color: #ff8b8b;
+}
+
+.status-pill.tone-info {
+	color: #8bb5ff;
+}
+
+.hud-muted {
+	color: var(--hud-muted);
+}
+
+.hud-form-row {
+	display: flex;
+	gap: var(--hud-space-sm);
+}
+
+.hud-input {
+	flex: 1;
+	padding: var(--hud-space-sm);
+	background: var(--hud-surface-alt);
+	border: 1px solid var(--hud-border);
+	border-radius: var(--hud-radius);
+	color: var(--hud-text);
+	font-family: var(--hud-font-stack);
+}
+
+.hud-button {
+	padding: var(--hud-space-sm) var(--hud-space-md);
+	border: 1px solid var(--hud-border-accent);
+	background: #113111;
+	color: var(--hud-text);
+	border-radius: var(--hud-radius);
+}
+
+.teleprompter-full {
+	position: fixed;
+	inset: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.teleprompter-state {
+	position: fixed;
+	top: 14px;
+	right: 14px;
+	background: rgb(0 0 0 / 55%);
+	padding: 6px 10px;
+	font-family: var(--hud-font-mono);
+	color: var(--hud-accent);
+	border: 1px solid var(--hud-border-accent);
+	border-radius: var(--hud-radius);
+}
+
+.teleprompter-content {
+	position: absolute;
+	width: 95%;
+	max-width: 1200px;
+	white-space: pre-wrap;
+	word-break: break-word;
+	text-align: center;
+}
+
+.teleprompter-home-button {
+	position: fixed;
+	bottom: 46px;
+	left: 20px;
+	padding: 12px 22px;
+	background: #0f0;
+	color: #000;
+	border: none;
+	border-radius: var(--hud-radius);
+	cursor: pointer;
+}
+
+.compass-wrap {
+	position: relative;
+	width: 160px;
+	height: 160px;
+	border: 2px solid #3a3a3a;
+	border-radius: 50%;
+	display: grid;
+	place-items: center;
 }
