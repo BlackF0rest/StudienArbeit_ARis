@@ -1,0 +1,67 @@
+name: Acceptance Gate
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  acceptance:
+    runs-on: ubuntu-latest
+    env:
+      BACKEND_PORT: "5011"
+      QA_REPORT_HISTORY_LIMIT: "20"
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install backend test runner dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install flask flask-cors
+
+      - name: Start backend service
+        run: |
+          mkdir -p Software/QA/reports
+          nohup env HOST=127.0.0.1 PORT=${BACKEND_PORT} DB_PATH=Software/QA/reports/ci_backend.db PYTHONUNBUFFERED=1 \
+            python Software/Backend_Prototype/run.py > Software/QA/reports/ci_backend.log 2>&1 &
+          echo $! > backend.pid
+
+      - name: Wait for backend readiness
+        run: |
+          for i in $(seq 1 60); do
+            if curl -fsS "http://127.0.0.1:${BACKEND_PORT}/api/status" > /dev/null; then
+              exit 0
+            fi
+            sleep 1
+          done
+          echo "Backend did not become ready" >&2
+          exit 1
+
+      - name: Run acceptance gate
+        run: |
+          QA_BACKEND_BASE_URL="http://127.0.0.1:${BACKEND_PORT}" python Software/QA/scripts/run_acceptance_gate.py
+
+      - name: Stop backend service
+        if: always()
+        run: |
+          if [ -f backend.pid ]; then
+            kill "$(cat backend.pid)" || true
+            wait "$(cat backend.pid)" 2>/dev/null || true
+          fi
+
+      - name: Upload acceptance reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: acceptance-reports
+          path: |
+            Software/QA/reports/latest.json
+            Software/QA/reports/latest.md

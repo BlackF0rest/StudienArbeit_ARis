@@ -27,12 +27,17 @@ class TestResult:
 
 class BackendServer:
     def __init__(self) -> None:
-        self.port = self._find_open_port()
-        self.base_url = f"http://127.0.0.1:{self.port}"
+        self.external_base_url = os.environ.get("QA_BACKEND_BASE_URL")
+        self.port = self._find_open_port() if self.external_base_url is None else None
+        self.base_url = self.external_base_url or f"http://127.0.0.1:{self.port}"
         self.db_path = REPO_ROOT / "Software" / "QA" / "reports" / f"qa_backend_{self.port}.db"
         self.proc: subprocess.Popen[str] | None = None
 
     def __enter__(self) -> "BackendServer":
+        if self.external_base_url:
+            self._wait_until_ready(timeout=20)
+            return self
+
         env = os.environ.copy()
         env.update(
             {
@@ -54,6 +59,8 @@ class BackendServer:
         return self
 
     def __exit__(self, exc_type, exc, tb) -> None:
+        if self.external_base_url:
+            return
         if self.proc is None:
             return
         self.proc.terminate()
