@@ -4,17 +4,12 @@
 	import Header from './header.svelte';
 	import { bootstrapFeatureHost } from '$lib/feature-registration';
 	import { featureHost, type FeatureRuntimeSnapshot } from '$lib/feature-host';
-	import {
-		fetchPcLinkDiagnostics,
-		type PcLinkDiagnostics
-	} from '$lib/services/pc-link-diagnostics';
-	import {
-		homeCarouselIndex,
-		getHintForContext,
-		setInputContext,
-		type InputHint
-	} from '$lib/input-controller';
+	import { fetchPcLinkDiagnostics, type PcLinkDiagnostics } from '$lib/services/pc-link-diagnostics';
+	import { homeCarouselIndex, getHintForContext, setInputContext, type InputHint } from '$lib/input-controller';
 	import InputHintOverlay from '$lib/components/InputHintOverlay.svelte';
+	import HudCard from '$lib/components/hud/HudCard.svelte';
+	import HudScaffold from '$lib/components/hud/HudScaffold.svelte';
+	import StatusPill from '$lib/components/hud/StatusPill.svelte';
 
 	const carouselApps = ['Navigation', 'Teleprompter', 'Messages/HUD'];
 	let selectedApp = carouselApps[0];
@@ -69,27 +64,24 @@
 
 <Header />
 
-<main>
-	<h2>Feature Host Runtime</h2>
-	<p class="carousel-state">Home carousel selection: <strong>{selectedApp}</strong></p>
-	<div class="grid">
+<HudScaffold title="Feature Host Runtime" subtitle={`Home carousel selection: ${selectedApp}`}>
+	<svelte:fragment slot="header">
+		<StatusPill text={pcDiagnostics.pc_link.active ? 'PC Link Connected' : 'PC Link Offline'} tone={pcDiagnostics.pc_link.active ? 'ok' : 'warn'} />
+	</svelte:fragment>
+
+	<div class="hud-grid-2">
 		{#each snapshot.registered as module}
-			<section class="card">
-				<h3>{module.name}</h3>
+			<HudCard title={module.name}>
 				<p>{module.description}</p>
 				<p><strong>Version:</strong> {module.version}</p>
 				<p><strong>Permissions:</strong> {module.permissions.join(', ')}</p>
 				<p><strong>Dependencies:</strong> {module.dependencies.join(', ')}</p>
-				<p>
-					<strong>Health:</strong>
-					{snapshot.health[module.id]?.ok ? '✅' : '❌'} {snapshot.health[module.id]?.details}
-				</p>
-			</section>
+				<p><strong>Health:</strong> {snapshot.health[module.id]?.ok ? '✅' : '❌'} {snapshot.health[module.id]?.details}</p>
+			</HudCard>
 		{/each}
 	</div>
 
-	<section class="telemetry">
-		<h3>Telemetry (latest)</h3>
+	<HudCard title="Telemetry (latest)" muted>
 		{#if snapshot.telemetry.length === 0}
 			<p>No telemetry yet.</p>
 		{:else}
@@ -97,60 +89,17 @@
 				<p>{event.createdAt} · {event.featureId} · {event.type}</p>
 			{/each}
 		{/if}
-	</section>
+	</HudCard>
 
-	<section class="diagnostics card">
-		<h3>PC Link Diagnostics</h3>
+	<HudCard title="PC Link Diagnostics">
 		<p><strong>PC Link:</strong> {pcDiagnostics.pc_link.active ? 'Connected' : 'Offline'}</p>
-		<p>
-			<strong>Stream:</strong>
-			{pcDiagnostics.stream_metrics.connected ? 'Connected' : 'Disconnected'}
-			({pcDiagnostics.stream_metrics.quality})
-		</p>
-		<p>
-			<strong>Reconnects:</strong> {pcDiagnostics.stream_metrics.reconnect_attempts} ·
-			<strong>Bandwidth:</strong> {pcDiagnostics.stream_metrics.avg_bandwidth_mbps ?? 'n/a'} Mbps ·
-			<strong>Frame Drop:</strong> {pcDiagnostics.stream_metrics.avg_frame_drop_ratio ?? 'n/a'}
-		</p>
-		<p>
-			<strong>Display Mode:</strong>
-			{pcDiagnostics.stream_metrics.onboard_only_mode ? 'Onboard-only fallback' : 'Hybrid streaming'}
-		</p>
-		<p>
-			<strong>Overlay Contract:</strong>
-			v{pcDiagnostics.overlay_contract.contract_version} · {pcDiagnostics.overlay_contract.coordinate_space} ·
-			{pcDiagnostics.overlay_contract.z_order.join(' → ')}
-		</p>
-	</section>
-</main>
+		<p><strong>Stream:</strong> {pcDiagnostics.stream_metrics.connected ? 'Connected' : 'Disconnected'} ({pcDiagnostics.stream_metrics.quality})</p>
+		<p><strong>Reconnects:</strong> {pcDiagnostics.stream_metrics.reconnect_attempts} · <strong>Bandwidth:</strong> {pcDiagnostics.stream_metrics.avg_bandwidth_mbps ?? 'n/a'} Mbps · <strong>Frame Drop:</strong> {pcDiagnostics.stream_metrics.avg_frame_drop_ratio ?? 'n/a'}</p>
+		<p><strong>Display Mode:</strong> {pcDiagnostics.stream_metrics.onboard_only_mode ? 'Onboard-only fallback' : 'Hybrid streaming'}</p>
+		<p><strong>Overlay Contract:</strong> v{pcDiagnostics.overlay_contract.contract_version} · {pcDiagnostics.overlay_contract.coordinate_space} · {pcDiagnostics.overlay_contract.z_order.join(' → ')}</p>
+	</HudCard>
 
-<InputHintOverlay {hint} />
-
-<style>
-	main {
-		padding: 0.4rem 0.8rem;
-		font-family: Arial, sans-serif;
-	}
-	.carousel-state {
-		color: #9eff9e;
-		margin: 0.3rem 0 0.8rem;
-	}
-	.grid {
-		display: grid;
-		grid-template-columns: repeat(2, minmax(0, 1fr));
-		gap: 0.8rem;
-	}
-	.card {
-		border: 1px solid #2f2f2f;
-		padding: 0.7rem;
-		background: #090909;
-	}
-	.telemetry {
-		margin-top: 1rem;
-		border-top: 1px solid #292929;
-		padding-top: 0.7rem;
-	}
-	.diagnostics {
-		margin-top: 0.8rem;
-	}
-</style>
+	<svelte:fragment slot="hint">
+		<InputHintOverlay {hint} />
+	</svelte:fragment>
+</HudScaffold>

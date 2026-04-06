@@ -1,17 +1,8 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import {
-		TeleprompterRuntime,
-		defaultTeleprompterConfig,
-		type TeleprompterConfig
-	} from '$lib/services/teleprompter-runtime';
+	import { TeleprompterRuntime, defaultTeleprompterConfig, type TeleprompterConfig } from '$lib/services/teleprompter-runtime';
 	import { featureHost } from '$lib/feature-host';
-	import {
-		getHintForContext,
-		registerAppActions,
-		setInputContext,
-		type InputHint
-	} from '$lib/input-controller';
+	import { getHintForContext, registerAppActions, setInputContext, type InputHint } from '$lib/input-controller';
 	import InputHintOverlay from '$lib/components/InputHintOverlay.svelte';
 
 	let config: TeleprompterConfig = defaultTeleprompterConfig;
@@ -34,6 +25,7 @@
 
 	onMount(() => {
 		setInputContext('teleprompter');
+		document.body.style.overflow = 'hidden';
 		const unregister = registerAppActions({
 			onShort: speedStep,
 			onLong: togglePauseResume
@@ -73,12 +65,13 @@
 			runtime.stop();
 			cancelAnimationFrame(animationId);
 			window.removeEventListener('keydown', handleKeyPress);
+			document.body.style.overflow = '';
 		};
 	});
 </script>
 
 <div class="teleprompter-full" style="background-color: {config.backgroundColor};">
-	<div class="state">Runtime: {runtimeState} · {isScrolling ? 'running' : 'paused'} · speed {config.speed}</div>
+	<div class="teleprompter-state">Runtime: {runtimeState} · {isScrolling ? 'running' : 'paused'} · speed {config.speed}</div>
 	<div
 		class="teleprompter-content"
 		bind:this={teleprompterContainer}
@@ -95,51 +88,5 @@
 	</div>
 </div>
 
-<button class="home-button" on:click={() => (window.location.href = '/')}>🏠 Home</button>
+<button class="teleprompter-home-button" on:click={() => (window.location.href = '/')}>🏠 Home</button>
 <InputHintOverlay {hint} />
-
-<style>
-	:global(body) {
-		margin: 0;
-		padding: 0;
-		overflow: hidden;
-	}
-	.teleprompter-full {
-		position: fixed;
-		top: 0;
-		left: 0;
-		width: 100%;
-		height: 100%;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-	}
-	.state {
-		position: fixed;
-		top: 14px;
-		right: 14px;
-		background: rgba(0, 0, 0, 0.55);
-		padding: 6px 10px;
-		font-family: 'Courier New', monospace;
-		color: #9eff9e;
-	}
-	.teleprompter-content {
-		position: absolute;
-		width: 95%;
-		max-width: 1200px;
-		white-space: pre-wrap;
-		word-break: break-word;
-		text-align: center;
-	}
-	.home-button {
-		position: fixed;
-		bottom: 46px;
-		left: 20px;
-		padding: 12px 22px;
-		background: #0f0;
-		color: #000;
-		border: none;
-		border-radius: 8px;
-		cursor: pointer;
-	}
-</style>
