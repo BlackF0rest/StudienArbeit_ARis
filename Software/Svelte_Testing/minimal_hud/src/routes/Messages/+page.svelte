@@ -13,13 +13,15 @@
 
 	const ENABLE_REAL_PROVIDER = false;
 	const provider = createChatProvider(ENABLE_REAL_PROVIDER);
-	const sections = ['provider', 'compose', 'history'];
+	const sections = ['status', 'compose', 'history'];
 
 	let input = '';
 	let busy = false;
 	let activeSectionIndex = 0;
 	let hint: InputHint = getHintForContext('messages');
 	let history: ChatMessage[] = loadHistory();
+
+	$: previewMessages = history.slice(0, 2);
 
 	async function submit(): Promise<void> {
 		if (!input.trim() || busy) return;
@@ -80,38 +82,45 @@
 
 	<HudTabs tabs={sections} activeIndex={activeSectionIndex} />
 
-	<HudCard>
-		{#if activeSectionIndex === 0}
-			<p>Provider: {provider.name} ({provider.enabled ? 'enabled' : 'disabled for demo'})</p>
-		{:else if activeSectionIndex === 1}
-			<p>Compose is intentionally not bound to HID; companion input app handles text entry.</p>
-		{:else}
-			<p>History view active ({history.length} entries).</p>
-		{/if}
-	</HudCard>
+	{#if activeSectionIndex === 0}
+		<HudCard title="Compact status">
+			<p class="hud-compact-line">{provider.name} · {provider.enabled ? 'live' : 'mock/demo'} · {busy ? 'working' : 'idle'}</p>
+			<p class="hud-compact-line">Stored messages: {history.length} · Showing latest {Math.min(previewMessages.length, 2)}</p>
+		</HudCard>
 
-	<form class="hud-form-row" on:submit={(event) => {
-		event.preventDefault();
-		void submit();
-	}}>
-		<input class="hud-input" bind:value={input} placeholder="Prompt eingeben..." />
-		<button class="hud-button" type="submit" disabled={busy}>{busy ? 'Sende...' : 'Senden'}</button>
-	</form>
-
-	<section style="display:grid;gap:0.4rem;">
-		{#if history.length === 0}
-			<p>Noch keine Nachrichten.</p>
-		{:else}
-			{#each history as message}
-				<HudCard>
-					<div class="hud-muted" style="font-size:0.8rem;">{message.role} · {message.createdAt}</div>
-					<div style={`border-left:3px solid ${message.role === 'user' ? '#7eff7e' : '#7ea9ff'};padding-left:0.5rem;margin-top:0.2rem;`}>
-						{message.content}
-					</div>
-				</HudCard>
-			{/each}
-		{/if}
-	</section>
+		<HudCard title="Latest messages">
+			{#if previewMessages.length === 0}
+				<p>Noch keine Nachrichten.</p>
+			{:else}
+				{#each previewMessages as message}
+					<p class="hud-compact-line"><strong>{message.role}:</strong> {message.content}</p>
+				{/each}
+			{/if}
+		</HudCard>
+	{:else if activeSectionIndex === 1}
+		<form class="hud-form-row" on:submit={(event) => {
+			event.preventDefault();
+			void submit();
+		}}>
+			<input class="hud-input" bind:value={input} placeholder="Prompt eingeben..." />
+			<button class="hud-button" type="submit" disabled={busy}>{busy ? 'Sende...' : 'Senden'}</button>
+		</form>
+	{:else}
+		<section style="display:grid;gap:0.4rem;">
+			{#if history.length === 0}
+				<p>Noch keine Nachrichten.</p>
+			{:else}
+				{#each history as message}
+					<HudCard>
+						<div class="hud-muted" style="font-size:0.8rem;">{message.role} · {message.createdAt}</div>
+						<div style={`border-left:3px solid ${message.role === 'user' ? '#7eff7e' : '#7ea9ff'};padding-left:0.5rem;margin-top:0.2rem;`}>
+							{message.content}
+						</div>
+					</HudCard>
+				{/each}
+			{/if}
+		</section>
+	{/if}
 
 	<svelte:fragment slot="hint">
 		<InputHintOverlay {hint} />

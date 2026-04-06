@@ -71,7 +71,7 @@
 </script>
 
 <div class="teleprompter-full" style="background-color: {config.backgroundColor};">
-	<div class="teleprompter-state">Runtime: {runtimeState} · {isScrolling ? 'running' : 'paused'} · speed {config.speed}</div>
+	<div class="teleprompter-state">{isScrolling ? '▶' : '⏸'} {config.speed}</div>
 	<div
 		class="teleprompter-content"
 		bind:this={teleprompterContainer}
@@ -88,5 +88,5 @@
 	</div>
 </div>
 
-<button class="teleprompter-home-button" on:click={() => (window.location.href = '/')}>🏠 Home</button>
+<button class="teleprompter-home-button" on:click={() => (window.location.href = '/')} aria-label="Back to home">⌂</button>
 <InputHintOverlay {hint} />
