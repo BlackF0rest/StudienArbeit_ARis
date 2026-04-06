@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { goto } from '$app/navigation';
+	import { onMount } from 'svelte';
 	import Header from '../header.svelte';
 	import {
 		createChatProvider,
@@ -8,12 +10,22 @@
 		type ChatMessage
 	} from '$lib/services/ai-chat';
 	import { featureHost } from '$lib/feature-host';
+	import {
+		getHintForContext,
+		registerAppActions,
+		setInputContext,
+		type InputHint
+	} from '$lib/input-controller';
+	import InputHintOverlay from '$lib/components/InputHintOverlay.svelte';
 
 	const ENABLE_REAL_PROVIDER = false;
 	const provider = createChatProvider(ENABLE_REAL_PROVIDER);
+	const sections = ['provider', 'compose', 'history'];
 
 	let input = '';
 	let busy = false;
+	let activeSectionIndex = 0;
+	let hint: InputHint = getHintForContext('messages');
 	let history: ChatMessage[] = loadHistory();
 
 	async function submit(): Promise<void> {
@@ -42,13 +54,47 @@
 		saveHistory(history);
 		busy = false;
 	}
+
+	function cycleSections(): void {
+		activeSectionIndex = (activeSectionIndex + 1) % sections.length;
+		featureHost.emit('ai-chat-scaffold', 'chat.section_cycle', { section: sections[activeSectionIndex] });
+	}
+
+	async function returnHome(): Promise<void> {
+		featureHost.emit('ai-chat-scaffold', 'chat.return_home', { reason: 'long-press' });
+		await goto('/');
+	}
+
+	onMount(() => {
+		setInputContext('messages');
+		const unregister = registerAppActions({
+			onShort: cycleSections,
+			onLong: () => {
+				void returnHome();
+			}
+		});
+
+		return () => unregister();
+	});
 </script>
 
 <Header />
 
 <main>
 	<h2>AI Chat Scaffold</h2>
-	<p>Provider: {provider.name} ({provider.enabled ? 'enabled' : 'disabled for demo'})</p>
+	<div class="sections">
+		{#each sections as section, index}
+			<span class:active={index === activeSectionIndex}>{section}</span>
+		{/each}
+	</div>
+
+	{#if activeSectionIndex === 0}
+		<p>Provider: {provider.name} ({provider.enabled ? 'enabled' : 'disabled for demo'})</p>
+	{:else if activeSectionIndex === 1}
+		<p>Compose is intentionally not bound to HID; companion input app handles text entry.</p>
+	{:else}
+		<p>History view active ({history.length} entries).</p>
+	{/if}
 
 	<form
 		on:submit={(event) => {
@@ -74,8 +120,24 @@
 	</section>
 </main>
 
+<InputHintOverlay {hint} />
+
 <style>
 	main { padding: 0.6rem 1rem; }
+	.sections {
+		display: flex;
+		gap: 0.5rem;
+		margin-bottom: 0.5rem;
+	}
+	.sections span {
+		padding: 0.2rem 0.45rem;
+		border: 1px solid #335033;
+		opacity: 0.7;
+	}
+	.sections span.active {
+		opacity: 1;
+		color: #9eff9e;
+	}
 	form { display: flex; gap: 0.4rem; margin-bottom: 0.8rem; }
 	input {
 		flex: 1;
