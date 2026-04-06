@@ -1,0 +1,36 @@
+criteria:
+  - id: API-001
+    description: API behavior remains stable for status, messages, and teleprompter endpoints.
+    type: api
+    severity: P0
+    automatable: true
+  - id: INT-001
+    description: Module lifecycle checks validate teleprompter send/current/history state transitions.
+    type: integration
+    severity: P0
+    automatable: true
+  - id: INT-002
+    description: Communication adapter checks verify request-response consistency for teleprompter operations.
+    type: integration
+    severity: P1
+    automatable: true
+  - id: REG-001
+    description: Feature regressions are detected through message and teleprompter roundtrip scenarios.
+    type: integration
+    severity: P1
+    automatable: true
+  - id: SMK-001
+    description: Soak/smoke checks execute basic health and reset flows in a short smoke run.
+    type: integration
+    severity: P0
+    automatable: true
+  - id: MAN-001
+    description: Hardware button press on target device updates runtime state as expected.
+    type: manual
+    severity: P1
+    automatable: false
+  - id: MAN-002
+    description: Long-duration soak test on target device shows stable behavior over extended runtime.
+    type: manual
+    severity: P2
+    automatable: false
