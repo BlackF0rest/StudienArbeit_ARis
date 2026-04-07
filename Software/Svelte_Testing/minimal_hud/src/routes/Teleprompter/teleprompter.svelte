@@ -1,9 +1,14 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import { goto } from '$app/navigation';
+	import { browser, dev } from '$app/environment';
 	import { TeleprompterRuntime, defaultTeleprompterConfig, type TeleprompterConfig } from '$lib/services/teleprompter-runtime';
 	import { featureHost } from '$lib/feature-host';
 	import { getHintForContext, registerAppActions, setInputContext, type InputHint } from '$lib/input-controller';
 	import InputHintOverlay from '$lib/components/InputHintOverlay.svelte';
+	import Header from '../header.svelte';
+
+	let { debugMode = false }: { debugMode?: boolean } = $props();
 
 	let config: TeleprompterConfig = defaultTeleprompterConfig;
 	let runtimeState = 'booting';
@@ -11,16 +16,45 @@
 	let isScrolling = true;
 	let teleprompterContainer: HTMLElement;
 	let hint: InputHint = getHintForContext('teleprompter');
+	let longPressExitArmed = false;
+	let longPressExitResetTimer: ReturnType<typeof setTimeout> | null = null;
+
+	const SHOW_CLICK_HOME_FALLBACK = debugMode || dev;
+	const MIN_FONT_REM = 1.15;
+	const MAX_FONT_REM = 2.1;
+	const MIN_LINE_HEIGHT = 1.22;
+	const MAX_LINE_HEIGHT = 1.68;
+
+	$: clampedFontSize = Math.min(MAX_FONT_REM, Math.max(MIN_FONT_REM, Number(config.fontSize) || defaultTeleprompterConfig.fontSize));
+	$: clampedLineHeight = Math.min(MAX_LINE_HEIGHT, Math.max(MIN_LINE_HEIGHT, Number(config.lineHeight) || defaultTeleprompterConfig.lineHeight));
+
+	async function returnHome(): Promise<void> {
+		await goto('/');
+	}
+
+	function armLongPressExit(): void {
+		longPressExitArmed = true;
+		if (longPressExitResetTimer) clearTimeout(longPressExitResetTimer);
+		longPressExitResetTimer = setTimeout(() => {
+			longPressExitArmed = false;
+		}, 2200);
+	}
 
 	function speedStep(): void {
 		const nextSpeed = Math.min(120, config.speed + 5);
 		config = { ...config, speed: nextSpeed };
 		featureHost.emit('teleprompter-runtime', 'teleprompter.speed_step', { speed: nextSpeed });
+		longPressExitArmed = false;
 	}
 
-	function togglePauseResume(): void {
+	function onTeleprompterLongPress(): void {
+		if (longPressExitArmed) {
+			void returnHome();
+			return;
+		}
 		isScrolling = !isScrolling;
 		featureHost.emit('teleprompter-runtime', 'teleprompter.pause_toggle', { isScrolling });
+		armLongPressExit();
 	}
 
 	onMount(() => {
@@ -28,7 +62,7 @@
 		document.body.style.overflow = 'hidden';
 		const unregister = registerAppActions({
 			onShort: speedStep,
-			onLong: togglePauseResume
+			onLong: onTeleprompterLongPress
 		});
 
 		const runtime = new TeleprompterRuntime(
@@ -56,31 +90,43 @@
 		animationId = requestAnimationFrame(scroll);
 
 		const handleKeyPress = (event: KeyboardEvent) => {
-			if (event.key === 'Escape') window.location.href = '/';
+			if (event.key === 'Escape') void returnHome();
 		};
-		window.addEventListener('keydown', handleKeyPress);
+		if (browser) {
+			window.addEventListener('keydown', handleKeyPress);
+		}
 
 		return () => {
 			unregister();
 			runtime.stop();
 			cancelAnimationFrame(animationId);
-			window.removeEventListener('keydown', handleKeyPress);
+			if (browser) {
+				window.removeEventListener('keydown', handleKeyPress);
+			}
+			if (longPressExitResetTimer) clearTimeout(longPressExitResetTimer);
 			document.body.style.overflow = '';
 		};
 	});
 </script>
 
+{#if debugMode}
+	<Header />
+	<div class="teleprompter-debug-state">
+		state={runtimeState} · speed={config.speed} · long-exit={longPressExitArmed ? 'armed' : 'idle'}
+	</div>
+{/if}
+
 <div class="teleprompter-full" style="background-color: {config.backgroundColor};">
-	<div class="teleprompter-state">{isScrolling ? '▶' : '⏸'} {config.speed}</div>
+	<div class="teleprompter-state">{isScrolling ? '▶ running' : '⏸ paused'} · {config.speed}</div>
 	<div
 		class="teleprompter-content"
 		bind:this={teleprompterContainer}
 		style="
             transform: translateY({scrollPosition}px);
-            font-size: {config.fontSize}rem;
+            font-size: clamp({MIN_FONT_REM}rem, {clampedFontSize}rem, {MAX_FONT_REM}rem);
             color: {config.fontColor};
             font-family: {config.fontFamily};
-            line-height: {config.lineHeight};
+            line-height: {clampedLineHeight};
             opacity: {config.opacity};
         "
 	>
@@ -88,5 +134,7 @@
 	</div>
 </div>
 
-<button class="teleprompter-home-button" on:click={() => (window.location.href = '/')} aria-label="Back to home">⌂</button>
-<InputHintOverlay {hint} />
+{#if SHOW_CLICK_HOME_FALLBACK}
+	<button class="teleprompter-home-button" on:click={() => void returnHome()} aria-label="Back to home">⌂</button>
+{/if}
+<InputHintOverlay {hint} compact={!debugMode} />
