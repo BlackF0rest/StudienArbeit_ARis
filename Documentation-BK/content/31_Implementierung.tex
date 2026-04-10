@@ -2,3 +2,39 @@
 
 \chapter{Implementierung und Entwicklung (10-12S)}
 \label{chap:ImplementierungundEntwicklung}
+
+\section{Optische Implementierung}
+\label{sec:optischeImplementierung}
+Die Implementierung des Opitschen Konzepts wurde recht schnell und einfach umgesetzt. Nach der Initialen Recherche wurden verschiedene Hauptbereiche festgestellt. Die erste Herausforderung war das finden einer passenden Display und Linsen kombi, welche auf dem kleinen Raum funktionieren würde. In diesem Bereich wurde recht schnell eine Lösung im Form von Viewfindern von neueren Digitalen Kameras gefunden. Diese beinhalten eine Linse und das dazu passende Display. Gerade zu Beginn des Projekts wurde versucht durch sponsoring oder Spenden eine Waveguide Linse zu erhalten, welche den Innovativen Character der Brille um eineiges erhöhrt hätten. Leider beginnen diese Preislich bei ca. 1000€, selbst wenn direkt mit Chinesischen Firmen gesprochen wurde. Nach einigen absagen wurde diese Idee verworfen und die Einfache sowie Kostengünstige Lösung eines Viewfinder Pakets wurde bevorzugt. Wie in \ref{apx:1} zu sehen betrafne die Kosten dafür gerade mal 50€ wobei vergleichbare eigene Konfigurationen mit Micro-Displays und Linsen sehr viel teurer waren. Der Andere Teil der Optischen Implementierung waren die benötigten Spiegel. Wie in \ref{subsec:FreeSpaceCombiner} beschrieben muss hier ein richtiger Spiegel gefunden werden, um halbdurchsichtig zu sein. Dafür wurde recht schnell eine kostengünstige option genommen, welche im Dunkeln ebenfalls als Spiegel benutzt werden kann. Dadurch konnten Kosten gespart werden und ein effizienterer UMsetzungsprozess erreicht werden.
+Mit dem ankommen der einzelnen Teile wurden diese in den mechanischen Aufbau integriert und waren voll funktionsfähig.
+
+\section{Software Implementierung}
+\label{sec:softwareImplementierung}
+Das Softwaredesign wurde nach der Konzeption nicht direkt umgesetzt. Zuerst wurden einige Tests mit den verschiedenen Komponenten, Libraries und Hardwarekomponenten durchgeführt. 
+
+Dabei wurden anfänglich noch verschiedene Libraries und Frameworks getestet, um lzu der letztendlich erarbeiteten Struktur zu kommen. Diese wird in den folgenden unterkapiteln beschrieben.
+
+Vorab zu bemerken ist, dass der Code hier nur Beispielhaft oder prinzipiell besprochen wird und nicht auf spezifischen Code eingegangen wird. Dies liegt der Komplexität und dem Wiederholenden Character von Code zugrunde. Hier geht es mehr um das verständnis der Funktion und der Umsetzung - nicht der genauen Zeilen. Dafür bitte in den Code selbst schauen, da dieser gut Dokummentiert ist, um für zukünftige Erweiterungen offen zu sein.
+
+\subsection{Frontend - Svelte Implementierung}
+\label{subsec:SvelteImplemeniterung}
+Das Frontend, welches in der Brille zu sehen ist, wurde nach einem recht einfachen Design umgesetzt. Um komplizierte Darstellungen und unklare Menüführung zu verhindern wurde die Hauptfarbe auf Grün gesetzt. Diese sticht aus dem Umfeld meist heraus und ist leicht ersichtlich. Ein Design in z.B. weiß ist schwer von einem Hintergrund zu unterscheiden. Das Design behält eine Standard Informationansicht immer am oberen Teil des Bildschirms mit der geradigen Batteriekapazität, der Temperatur und feuchtigkeit sowie anderen wichtigen Daten. Diese Darstellung bleibt durch alle Apps und darstellungen bestehen bis auf die Pixel Streaming einbindung.
+
+Svelte an sich ist recht einfach aufgebaut. Neben den verschiedenen Konfigurationsdateien für npm und weitere ist der eigentliche bearbeitete Code in "src" zu finden. Der sich hier befindene Code beeinflusst die ganze Website durch CSS und Typescript. Unter "routes" sind dann die einzelnen Seiten sowie die Hauptseite zu finden. Jeder Ordner stellt eine Seite dar, welche mithilfe von "/" und dem Namen der .svelte Datei angezeigt werden kann. Dies ist ein recht einfacher weg, um seiten hinzuzufügen oder zu löschen. Die Svelte Dateien basieren auf Typescript oder Javascript um zum Beispiel das Backend hier einzubinden und dem eigentlichen Svelte Teil, um einen  \todo{Beispiel Svelte Code zeigen um grundsatz zu erklären}.
+Nach diesem Prinzip wurden alle Seiten entwickelt. 
+In dem Verzeichnis routes befindet sich ebenfalls die Datei "+layout.svelte", welche das generelle Layout der Seiten bestimmt. Diese wirken sich auf die ganze Website aus. Dies ist ebenfalls für header.svete der fall.
+Die einzelnen Svelte Seiten erhalten die von diesen benötigten Dateien immer durch das Python backend und die dazugehörigen REST abfragen. Diese werden zu beginn der Svelte Dateien durch typescript oder Javascript gezogen.
+
+\subsection{Backend - Python Implementierung}
+\label{subsec:PythongImplementierung}
+Das Backend ist die Hauptverbingungskomponente. Hier werden alle Daten von den verschiednen Teilen Der Software und Systeme gesammelt und für das Frontend aufbereitet. Das wird dann alles über das REST Prinzipfür Svelte bereitgestellt.
+
+\subsection{Backend - Datenbank Implementierung}
+\label{subsec:DatenbankImplementierung}
+Die Datenbank ist für das Speichern von jeglichen Daten welche während der laufzeit anfallen und benötigt werden zuständig. \todo{Schema?}
+
+\subsection{Companion - React Native Implementierung}
+\label{subsec:ReactNativeImplementierung}
+
+\subsection{Pixel Streaming Implementierung}
+\label{subsec:PixelStreamingImplementierung}

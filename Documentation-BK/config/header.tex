@@ -22,6 +22,8 @@
 \newcommand{\ifDocType}[3]{%
 	\IfStrEq{\documentType}{#1}{#2}{#3}%
 }
+\usepackage{comment}
+\usepackage{wrapfig}
 
 %% Seiteneinstellungen
 % Ränder
@@ -33,10 +35,6 @@
 ]{geometry}
 
 \usepackage[onehalfspacing]{setspace}   % Zeilenabstand
-
-% Custom Packages
-\usepackage{verbatim} %for commenting
-\usepackage{wrapfig} % for wrapped figures
 
 % Schriftart
 \usepackage{helvet}     % Arial like
