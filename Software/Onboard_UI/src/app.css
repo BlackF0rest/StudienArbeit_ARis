@@ -80,6 +80,13 @@ body.ar-mode.compact {
 	border-radius: var(--hud-radius);
 	padding: var(--hud-space-md);
 	background: var(--hud-surface);
+	transition: border-color 150ms ease, box-shadow 150ms ease, background-color 150ms ease;
+}
+
+.hud-card.short-pulse {
+	border-color: #78d878;
+	box-shadow: 0 0 0 1px rgb(119 240 119 / 25%);
+	background: #101810;
 }
 
 .hud-card.hud-compact-block p,
@@ -112,11 +119,31 @@ body.ar-mode.compact {
 	opacity: 0.7;
 	border-radius: 999px;
 	font-size: var(--hud-font-sm);
+	transition: opacity 150ms ease, color 150ms ease, transform 150ms ease, box-shadow 150ms ease;
 }
 
 .hud-tabs span.active {
 	opacity: 1;
 	color: var(--hud-accent);
+}
+
+.hud-tabs span.short-pulse {
+	animation: tab-pulse 160ms ease-out;
+}
+
+@keyframes tab-pulse {
+	0% {
+		transform: scale(1);
+		box-shadow: 0 0 0 0 rgb(158 255 158 / 0%);
+	}
+	55% {
+		transform: scale(1.04);
+		box-shadow: 0 0 0 4px rgb(158 255 158 / 22%);
+	}
+	100% {
+		transform: scale(1);
+		box-shadow: 0 0 0 0 rgb(158 255 158 / 0%);
+	}
 }
 
 .status-pill {

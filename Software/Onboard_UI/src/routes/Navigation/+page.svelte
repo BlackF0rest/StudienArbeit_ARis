@@ -1,10 +1,9 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
 	import Header from '../header.svelte';
 	import { buildNavigationProvider, type NavigationSnapshot } from '$lib/services/navigation';
 	import { featureHost } from '$lib/feature-host';
-	import { getHintForContext, registerAppActions, setInputContext, type InputHint } from '$lib/input-controller';
+	import { shortPressPulse, getHintForContext, registerAppActions, setInputContext, type InputHint } from '$lib/input-controller';
 	import InputHintOverlay from '$lib/components/InputHintOverlay.svelte';
 	import HudCard from '$lib/components/hud/HudCard.svelte';
 	import HudScaffold from '$lib/components/hud/HudScaffold.svelte';
@@ -16,6 +15,7 @@
 	const panels = ['route', 'next-action', 'heading'];
 
 	let activePanelIndex = 0;
+	let pulseToken = 0;
 	let hint: InputHint = getHintForContext('navigation');
 	let nav: NavigationSnapshot = {
 		routeText: 'Lade Routendaten…',
@@ -28,11 +28,6 @@
 	function cycleInfoPanel(): void {
 		activePanelIndex = (activePanelIndex + 1) % panels.length;
 		featureHost.emit('navigation-mvp', 'navigation.panel_cycle', { panel: panels[activePanelIndex] });
-	}
-
-	async function returnHome(): Promise<void> {
-		featureHost.emit('navigation-mvp', 'navigation.return_home', { reason: 'long-press' });
-		await goto('/');
 	}
 
 	async function refreshNavigation(): Promise<void> {
@@ -50,10 +45,13 @@
 
 	onMount(() => {
 		setInputContext('navigation');
+		const unsubscribePulse = shortPressPulse.subscribe((value) => {
+			pulseToken = value;
+		});
 		const unregister = registerAppActions({
 			onShort: cycleInfoPanel,
 			onLong: () => {
-				void returnHome();
+				featureHost.emit('navigation-mvp', 'navigation.return_home', { reason: 'long-press' });
 			}
 		});
 
@@ -61,6 +59,7 @@
 		const timer = setInterval(() => void refreshNavigation(), 3000);
 		return () => {
 			unregister();
+			unsubscribePulse();
 			clearInterval(timer);
 		};
 	});
@@ -73,7 +72,7 @@
 		<StatusPill text={nav.source === 'real' ? 'Live Source' : 'Mock Source'} tone={nav.source === 'real' ? 'ok' : 'info'} />
 	</svelte:fragment>
 
-	<HudTabs tabs={panels} activeIndex={activePanelIndex} />
+	<HudTabs tabs={panels} activeIndex={activePanelIndex} {pulseToken} />
 
 	<HudCard>
 		{#if panels[activePanelIndex] === 'route'}

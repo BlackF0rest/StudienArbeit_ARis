@@ -1,10 +1,9 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
 	import Header from '../header.svelte';
 	import { createChatProvider, loadHistory, saveHistory, newMessage, type ChatMessage } from '$lib/services/ai-chat';
 	import { featureHost } from '$lib/feature-host';
-	import { getHintForContext, registerAppActions, setInputContext, type InputHint } from '$lib/input-controller';
+	import { shortPressPulse, getHintForContext, registerAppActions, setInputContext, type InputHint } from '$lib/input-controller';
 	import InputHintOverlay from '$lib/components/InputHintOverlay.svelte';
 	import HudCard from '$lib/components/hud/HudCard.svelte';
 	import HudScaffold from '$lib/components/hud/HudScaffold.svelte';
@@ -18,6 +17,7 @@
 	let input = '';
 	let busy = false;
 	let activeSectionIndex = 0;
+	let pulseToken = 0;
 	let hint: InputHint = getHintForContext('messages');
 	let history: ChatMessage[] = loadHistory();
 
@@ -55,21 +55,22 @@
 		featureHost.emit('ai-chat-scaffold', 'chat.section_cycle', { section: sections[activeSectionIndex] });
 	}
 
-	async function returnHome(): Promise<void> {
-		featureHost.emit('ai-chat-scaffold', 'chat.return_home', { reason: 'long-press' });
-		await goto('/');
-	}
-
 	onMount(() => {
 		setInputContext('messages');
+		const unsubscribePulse = shortPressPulse.subscribe((value) => {
+			pulseToken = value;
+		});
 		const unregister = registerAppActions({
 			onShort: cycleSections,
 			onLong: () => {
-				void returnHome();
+				featureHost.emit('ai-chat-scaffold', 'chat.return_home', { reason: 'long-press' });
 			}
 		});
 
-		return () => unregister();
+		return () => {
+			unregister();
+			unsubscribePulse();
+		};
 	});
 </script>
 
@@ -80,7 +81,7 @@
 		<StatusPill text={provider.enabled ? 'Provider Enabled' : 'Demo Mode'} tone={provider.enabled ? 'ok' : 'warn'} />
 	</svelte:fragment>
 
-	<HudTabs tabs={sections} activeIndex={activeSectionIndex} />
+	<HudTabs tabs={sections} activeIndex={activeSectionIndex} {pulseToken} />
 
 	{#if activeSectionIndex === 0}
 		<HudCard title="Compact status" className="hud-compact-block">

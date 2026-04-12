@@ -55,7 +55,10 @@
 
 	function onTeleprompterLongPress(): void {
 		featureHost.emit('teleprompter-runtime', 'teleprompter.return_home', { reason: 'long-press' });
-		void returnHome();
+		showFeedback('Returning home…');
+		setTimeout(() => {
+			void returnHome();
+		}, 170);
 	}
 
 	onMount(() => {

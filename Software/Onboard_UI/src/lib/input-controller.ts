@@ -29,11 +29,14 @@ const HOME_APPS = [
 
 export const inputFsmState = writable<InputFsmState>('home-carousel');
 export const homeCarouselIndex = writable(0);
+export const shortPressPulse = writable(0);
+export const longPressStatus = writable('');
 
 let currentContext: AppContext = 'home';
 let handlers: AppActionHandlers = {};
 let teardownInput: (() => void) | null = null;
 let confirmExitTimer: ReturnType<typeof setTimeout> | null = null;
+let longPressStatusTimer: ReturnType<typeof setTimeout> | null = null;
 
 function normalizeGesture(payload: unknown): InputGesture | null {
 	if (!payload || typeof payload !== 'object') return null;
@@ -44,11 +47,16 @@ function normalizeGesture(payload: unknown): InputGesture | null {
 
 function enterConfirmExitState(): void {
 	inputFsmState.set('confirm-exit');
+	longPressStatus.set('Returning home…');
 	if (confirmExitTimer) clearTimeout(confirmExitTimer);
 	confirmExitTimer = setTimeout(() => {
 		inputFsmState.set('home-carousel');
 		void goto('/');
-	}, 120);
+	}, 170);
+	if (longPressStatusTimer) clearTimeout(longPressStatusTimer);
+	longPressStatusTimer = setTimeout(() => {
+		longPressStatus.set('');
+	}, 950);
 }
 
 function onHomeShort(): void {
@@ -69,12 +77,16 @@ function onGesture(gesture: InputGesture): void {
 	if (currentContext === 'chat') return;
 
 	if (currentContext === 'home') {
-		if (gesture === 'short') onHomeShort();
+		if (gesture === 'short') {
+			shortPressPulse.update((value) => value + 1);
+			onHomeShort();
+		}
 		if (gesture === 'long') onHomeLong();
 		return;
 	}
 
 	if (gesture === 'short') {
+		shortPressPulse.update((value) => value + 1);
 		handlers.onShort?.();
 		return;
 	}
@@ -123,6 +135,9 @@ export function detachInputControl(): void {
 	teardownInput?.();
 	if (confirmExitTimer) clearTimeout(confirmExitTimer);
 	confirmExitTimer = null;
+	if (longPressStatusTimer) clearTimeout(longPressStatusTimer);
+	longPressStatusTimer = null;
+	longPressStatus.set('');
 }
 
 export function setInputContext(context: AppContext): void {
@@ -130,14 +145,17 @@ export function setInputContext(context: AppContext): void {
 	if (context === 'home') {
 		inputFsmState.set('home-carousel');
 		handlers = {};
+		longPressStatus.set('');
 		return;
 	}
 	if (context === 'chat') {
 		inputFsmState.set('feature-active');
 		handlers = {};
+		longPressStatus.set('');
 		return;
 	}
 	inputFsmState.set('feature-active');
+	longPressStatus.set('');
 }
 
 export function registerAppActions(actionHandlers: AppActionHandlers): () => void {
