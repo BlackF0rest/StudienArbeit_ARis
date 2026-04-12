@@ -12,6 +12,9 @@ The repository is now organized around active product tracks under `Software/`:
 
 See `docs/repo_map.md` for owners and purpose details.
 
+Launch-approved onboard routes are documented in `docs/release/onboard_route_manifest.md` (`/`, `/Navigation`, `/Teleprompter`, `/Messages`).
+Development/operator routes (`/Debug`, `/dev/*`) are outside launch scope.
+
 Compatibility notice (one release cycle): legacy paths `Software/Backend_Prototype` and `Software/Svelte_Testing/minimal_hud` remain as symlinks to the new locations.
 
 ## Legacy Archived

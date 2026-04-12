@@ -1,9 +1,10 @@
 # Onboard UI launch-approved routes
 
-Only the following routes are included for launch:
+Canonical manifest moved to `docs/release/onboard_route_manifest.md`.
+
+The launch-approved set is:
 
 - `/`
 - `/Navigation`
 - `/Teleprompter`
 - `/Messages`
-- `/Debug` *(optional, operator-only)*

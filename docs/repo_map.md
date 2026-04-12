@@ -22,3 +22,10 @@ For one release cycle, legacy paths remain available as symlinks:
 
 - `Software/Backend_Prototype` -> `Software/Backend`
 - `Software/Svelte_Testing/minimal_hud` -> `Software/Onboard_UI`
+
+## Onboard UI launch route boundaries
+
+Launch-approved onboard UI routes are tracked in `docs/release/onboard_route_manifest.md`.
+
+- Launch scope: `/`, `/Navigation`, `/Teleprompter`, `/Messages`
+- Non-launch scope: `/Debug` (operator/debug only), `/dev/*` (development-only namespace)
