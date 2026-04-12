@@ -50,3 +50,41 @@ def get_status():
 @bp.route("/api/v1/status", methods=["GET"])
 def get_status_v1():
     return get_status()
+
+
+@bp.route("/api/debug/diagnostics", methods=["GET"])
+def get_debug_diagnostics():
+    now = datetime.now(timezone.utc).isoformat()
+    return (
+        jsonify(
+            {
+                "panels": {
+                    "pc_link": {
+                        "pc_link": {
+                            "active": False,
+                            "sessions": [],
+                        },
+                        "stream_metrics": {
+                            "connected": False,
+                            "reconnect_attempts": 0,
+                            "quality": "medium",
+                            "avg_bandwidth_mbps": None,
+                            "avg_frame_drop_ratio": None,
+                            "onboard_only_mode": False,
+                            "last_updated": now,
+                        },
+                        "overlay_contract": {
+                            "contract_version": "1.0",
+                            "coordinate_space": "normalized",
+                            "safe_area": {"x": 0, "y": 0, "width": 1, "height": 1},
+                            "z_order": ["streamed-scene", "streamed-overlay", "onboard-hud"],
+                            "last_synced_at": now,
+                        },
+                    }
+                },
+                "timestamp": now,
+                "trace_id": g.trace_id,
+            }
+        ),
+        200,
+    )

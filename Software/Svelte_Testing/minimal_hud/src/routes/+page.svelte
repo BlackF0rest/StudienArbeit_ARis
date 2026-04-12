@@ -11,6 +11,8 @@
 	import HudScaffold from '$lib/components/hud/HudScaffold.svelte';
 	import StatusPill from '$lib/components/hud/StatusPill.svelte';
 
+	const COMPACT_MODE_POLL_INTERVAL_MS = 6000;
+
 	const carouselApps = ['Navigation', 'Teleprompter', 'Messages/HUD'];
 	const routeByApp: Record<string, string> = {
 		Navigation: '/Navigation',
@@ -70,7 +72,7 @@
 		});
 		bootstrapFeatureHost();
 		void refreshSnapshot();
-		const timer = setInterval(() => void refreshSnapshot(), 3000);
+		const timer = setInterval(() => void refreshSnapshot(), COMPACT_MODE_POLL_INTERVAL_MS);
 		return () => {
 			unsubscribe();
 			clearInterval(timer);

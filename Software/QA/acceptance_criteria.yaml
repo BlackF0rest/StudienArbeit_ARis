@@ -4,6 +4,11 @@ criteria:
     type: api
     severity: P0
     automatable: true
+  - id: API-002
+    description: Debug diagnostics endpoint `/api/debug/diagnostics` is reachable and exposes `panels.pc_link`.
+    type: api
+    severity: P0
+    automatable: true
   - id: INT-001
     description: Module lifecycle checks validate teleprompter send/current/history state transitions.
     type: integration

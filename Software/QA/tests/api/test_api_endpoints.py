@@ -42,6 +42,28 @@ def run_api_tests() -> list[TestResult]:
             results.append(TestResult(name="status_endpoint", passed=False, reason=str(exc)))
 
         try:
+            diagnostics_response = request_json(server.base_url, "GET", "/api/debug/diagnostics")
+            assert_true(
+                diagnostics_response["status"] == 200,
+                f"Expected HTTP 200, got {diagnostics_response['status']}",
+            )
+            panels = diagnostics_response["json"].get("panels", {})
+            assert_true("pc_link" in panels, "Diagnostics payload missing panels.pc_link")
+            results.append(TestResult(name="debug_diagnostics_endpoint", passed=True))
+        except Exception as exc:  # noqa: BLE001
+            results.append(TestResult(name="debug_diagnostics_endpoint", passed=False, reason=str(exc)))
+
+        try:
+            unknown_route_response = request_json(server.base_url, "GET", "/api/does-not-exist")
+            assert_true(
+                unknown_route_response["status"] == 404,
+                f"Expected HTTP 404, got {unknown_route_response['status']}",
+            )
+            results.append(TestResult(name="unknown_route_404", passed=True))
+        except Exception as exc:  # noqa: BLE001
+            results.append(TestResult(name="unknown_route_404", passed=False, reason=str(exc)))
+
+        try:
             delete_response = request_json(server.base_url, "DELETE", "/api/messages")
             _unwrap_ok_payload(delete_response)
 
