@@ -1,5 +1,10 @@
 <script lang="ts">
     import { onMount } from 'svelte';
+    import Header from '../../header.svelte';
+    import InputHintOverlay from '$lib/components/InputHintOverlay.svelte';
+    import HudCard from '$lib/components/hud/HudCard.svelte';
+    import HudScaffold from '$lib/components/hud/HudScaffold.svelte';
+    import StatusPill from '$lib/components/hud/StatusPill.svelte';
     
     interface TeleprompterConfig {
         text: string;
@@ -28,6 +33,7 @@
     let teleprompterContainer: HTMLElement;
     let statusMessage = '';
     let isSending = false;
+    const hint = { short: 'Tap: pause/reset', long: 'Long: return home' };
     
     async function fetchConfig() {
         try {
@@ -254,10 +260,16 @@
     }
 </style>
 
+<Header />
+
+<HudScaffold title="Teleprompter Test Console" subtitle="Developer calibration surface · local backend expected">
+    <svelte:fragment slot="header">
+        <StatusPill text={isSending ? 'Sending' : 'Ready'} tone={isSending ? 'info' : 'ok'} />
+    </svelte:fragment>
+
 <div class="container">
     <!-- Linke Seite: Preview -->
-    <div>
-        <h2 style="color: #0f0; margin-top: 0;">📺 Vorschau (AR-Brille Ansicht)</h2>
+    <HudCard title="📺 Vorschau (AR-Brille Ansicht)">
         <div class="preview" style="background-color: {config.backgroundColor};">
             <div
                 class="preview-content"
@@ -274,11 +286,10 @@
                 {config.text}
             </div>
         </div>
-    </div>
+    </HudCard>
     
     <!-- Rechte Seite: Steuerung -->
-    <div>
-        <h2 style="color: #0f0; margin-top: 0;">⚙️ Konfiguration</h2>
+    <HudCard title="⚙️ Konfiguration">
         <div class="controls-panel">
             <!-- Text -->
             <div class="control-group">
@@ -409,5 +420,10 @@
                 🔄 Laden
             </button>
         </div>
-    </div>
+    </HudCard>
 </div>
+
+    <svelte:fragment slot="hint">
+        <InputHintOverlay hint={hint} />
+    </svelte:fragment>
+</HudScaffold>

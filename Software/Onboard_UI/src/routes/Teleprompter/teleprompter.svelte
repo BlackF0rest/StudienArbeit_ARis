@@ -4,9 +4,9 @@
 	import { browser } from '$app/environment';
 	import { TeleprompterRuntime, defaultTeleprompterConfig, type TeleprompterConfig } from '$lib/services/teleprompter-runtime';
 	import { featureHost } from '$lib/feature-host';
-	import { getHintForContext, registerAppActions, setInputContext, type InputHint } from '$lib/input-controller';
-	import InputHintOverlay from '$lib/components/InputHintOverlay.svelte';
-	import Header from '../header.svelte';
+	import { registerAppActions, setInputContext } from '$lib/input-controller';
+	import HudCard from '$lib/components/hud/HudCard.svelte';
+	import StatusPill from '$lib/components/hud/StatusPill.svelte';
 
 	let { debugMode = false }: { debugMode?: boolean } = $props();
 
@@ -15,7 +15,6 @@
 	let scrollPosition = 0;
 	let isScrolling = true;
 	let teleprompterContainer: HTMLElement;
-	let hint: InputHint = getHintForContext('teleprompter');
 
 	const SHOW_CLICK_HOME_FALLBACK = debugMode;
 	const MIN_FONT_REM = 1.15;
@@ -93,9 +92,14 @@
 </script>
 
 {#if debugMode}
-	<Header />
-	<div class="teleprompter-debug-state">
-		state={runtimeState} · speed={config.speed} · scroll={isScrolling ? 'running' : 'paused'}
+	<div class="teleprompter-debug-overlay">
+		<HudCard title="Teleprompter Debug" className="is-muted">
+			<div class="teleprompter-debug-headline">
+				<StatusPill text={isScrolling ? 'Running' : 'Paused'} tone={isScrolling ? 'ok' : 'warn'} />
+				<StatusPill text={`State: ${runtimeState}`} tone="info" />
+			</div>
+			<p class="teleprompter-debug-state">speed={config.speed} · scroll={Math.round(scrollPosition)}</p>
+		</HudCard>
 	</div>
 {/if}
 
@@ -120,4 +124,3 @@
 {#if SHOW_CLICK_HOME_FALLBACK}
 	<button class="teleprompter-home-button" on:click={() => void returnHome()} aria-label="Back to home">⌂</button>
 {/if}
-<InputHintOverlay {hint} compact={!debugMode} />

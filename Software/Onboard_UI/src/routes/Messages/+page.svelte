@@ -106,14 +106,14 @@
 			<button class="hud-button" type="submit" disabled={busy}>{busy ? 'Sende...' : 'Senden'}</button>
 		</form>
 	{:else}
-		<section style="display:grid;gap:0.4rem;">
+		<section class="hud-stack-sm">
 			{#if history.length === 0}
 				<p>Noch keine Nachrichten.</p>
 			{:else}
 				{#each history as message}
 					<HudCard>
-						<div class="hud-muted" style="font-size:0.8rem;">{message.role} · {message.createdAt}</div>
-						<div style={`border-left:3px solid ${message.role === 'user' ? '#7eff7e' : '#7ea9ff'};padding-left:0.5rem;margin-top:0.2rem;`}>
+						<div class="hud-muted hud-meta-line">{message.role} · {message.createdAt}</div>
+						<div class={`hud-message-content ${message.role === 'user' ? 'is-user' : 'is-assistant'}`}>
 							{message.content}
 						</div>
 					</HudCard>
