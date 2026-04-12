@@ -72,6 +72,37 @@ def _calculate_p0_pass_rate(criteria_rows: list[dict[str, Any]]) -> float | None
     return p0_passed / len(p0_automated)
 
 
+def _load_manual_tracking(criteria_rows: list[dict[str, Any]]) -> list[dict[str, str]]:
+    tracked: list[dict[str, str]] = []
+    default_owner = os.environ.get("QA_MANUAL_DEFAULT_OWNER", "UNASSIGNED")
+    default_date = os.environ.get("QA_MANUAL_DEFAULT_DATE", "UNSET")
+    allowed_dispositions = {"PASS", "FAIL", "WAIVED", "BLOCKED"}
+
+    for row in criteria_rows:
+        if not row["id"].startswith("MAN-"):
+            continue
+
+        key = row["id"].replace("-", "_")
+        disposition = os.environ.get(f"QA_{key}_DISPOSITION", "UNSET").upper()
+        owner = os.environ.get(f"QA_{key}_OWNER", default_owner)
+        date = os.environ.get(f"QA_{key}_DATE", default_date)
+        notes = os.environ.get(f"QA_{key}_NOTES", "")
+
+        tracked.append(
+            {
+                "id": row["id"],
+                "severity": row["severity"],
+                "disposition": disposition,
+                "disposition_clear": "yes" if disposition in allowed_dispositions else "no",
+                "owner": owner,
+                "date": date,
+                "notes": notes,
+            }
+        )
+
+    return tracked
+
+
 def _status_diffs(current_rows: list[dict[str, Any]], previous_rows: list[dict[str, Any]]) -> list[dict[str, str]]:
     previous_status = {row["id"]: row["status"] for row in previous_rows}
     diffs: list[dict[str, str]] = []
@@ -109,10 +140,66 @@ def attach_trend_metadata(report: dict[str, Any], previous_report: dict[str, Any
     return report
 
 
+def _evaluate_readiness(report: dict[str, Any], json_path: Path, md_path: Path) -> dict[str, Any]:
+    criteria_rows = report["criteria"]
+    p0_automatable_failures = [
+        row["id"] for row in criteria_rows if row["severity"] == "P0" and row["status"] == "FAIL"
+    ]
+    p0_regressed = bool(report.get("trend", {}).get("p0_pass_rate_regressed", False))
+
+    manual_rows = report.get("manual_tracking", [])
+    manual_p1_unclear = [
+        row["id"] for row in manual_rows if row["severity"] == "P1" and row["disposition_clear"] != "yes"
+    ]
+
+    evidence = {
+        "json_report": {
+            "path": str(json_path),
+            "exists": True,
+            "ci_artifact_link": os.environ.get("QA_LATEST_JSON_ARTIFACT_URL", ""),
+        },
+        "markdown_report": {
+            "path": str(md_path),
+            "exists": True,
+            "ci_artifact_link": os.environ.get("QA_LATEST_MD_ARTIFACT_URL", ""),
+        },
+    }
+
+    evidence_complete = all(
+        item["exists"] or bool(item["ci_artifact_link"])
+        for item in [evidence["json_report"], evidence["markdown_report"]]
+    )
+    policy_requirements_met = not p0_automatable_failures and not p0_regressed and not manual_p1_unclear
+
+    return {
+        "evidence": evidence,
+        "evidence_complete": evidence_complete,
+        "p0_automatable_failures": p0_automatable_failures,
+        "p0_pass_rate_regressed": p0_regressed,
+        "manual_p1_without_clear_disposition": manual_p1_unclear,
+        "companion_sprint_start_allowed": evidence_complete and policy_requirements_met,
+        "policy": (
+            "Companion sprint starts only when all P0 automatable checks pass "
+            "and manual P1 checks have clear disposition."
+        ),
+    }
+
+
 def build_criterion_summary() -> dict[str, Any]:
     data = parse_simple_yaml(CRITERIA_FILE)
-    api_results = {result.name: result for result in run_api_tests()}
-    smoke_results = {result.name: result for result in run_smoke_scenarios()}
+    test_run_errors: list[str] = []
+    api_results: dict[str, Any] = {}
+    smoke_results: dict[str, Any] = {}
+
+    try:
+        api_results = {result.name: result for result in run_api_tests()}
+    except Exception as exc:  # pragma: no cover - defensive guard for offline/dev envs
+        test_run_errors.append(f"API test run failed: {exc}")
+
+    try:
+        smoke_results = {result.name: result for result in run_smoke_scenarios()}
+    except Exception as exc:  # pragma: no cover - defensive guard for offline/dev envs
+        test_run_errors.append(f"Integration smoke test run failed: {exc}")
 
     criterion_map = {
         "API-001": ["status_endpoint", "messages_get_post_delete", "teleprompter_send_current_history", "teleprompter_reset"],
@@ -155,12 +242,15 @@ def build_criterion_summary() -> dict[str, Any]:
         failed = [name for name in mapped_tests if not all_results.get(name) or not all_results[name].passed]
         if failed:
             reasons = [all_results[name].reason if name in all_results else "missing result" for name in failed]
+            reason_text = "; ".join(f"{test}: {reason}" for test, reason in zip(failed, reasons))
+            if test_run_errors:
+                reason_text = f"{reason_text}; test-run-errors: {' | '.join(test_run_errors)}"
             summary.append(
                 {
                     "id": criterion_id,
                     "severity": criterion["severity"],
                     "status": "FAIL",
-                    "reason": "; ".join(f"{test}: {reason}" for test, reason in zip(failed, reasons)),
+                    "reason": reason_text,
                     "tests": mapped_tests,
                 }
             )
@@ -178,10 +268,12 @@ def build_criterion_summary() -> dict[str, Any]:
     report = {
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "criteria": summary,
+        "manual_tracking": _load_manual_tracking(summary),
         "test_results": {
             "api": [result.__dict__ for result in api_results.values()],
             "integration": [result.__dict__ for result in smoke_results.values()],
         },
+        "test_run_errors": test_run_errors,
     }
     return report
 
@@ -198,6 +290,7 @@ def write_reports(report: dict[str, Any]) -> tuple[Path, Path]:
         previous_report = json.loads(json_path.read_text(encoding="utf-8"))
 
     report = attach_trend_metadata(report, previous_report)
+    report["readiness"] = _evaluate_readiness(report, json_path, md_path)
 
     json_path.write_text(json.dumps(report, indent=2), encoding="utf-8")
 
@@ -222,6 +315,15 @@ def write_reports(report: dict[str, Any]) -> tuple[Path, Path]:
     else:
         lines.append("- None")
 
+    lines.extend(["", "## Manual criteria checklist (owner/date required)", ""])
+    lines.append("| Criterion | Severity | Disposition | Clear? | Owner | Date | Notes |")
+    lines.append("|---|---|---|---|---|---|---|")
+    for row in report["manual_tracking"]:
+        lines.append(
+            f"| {row['id']} | {row['severity']} | {row['disposition']} | {row['disposition_clear']} | "
+            f"{row['owner']} | {row['date']} | {row['notes']} |"
+        )
+
     lines.extend(["", "## Trend", ""])
     trend = report["trend"]
     if trend["previous_report"] is None:
@@ -237,6 +339,31 @@ def write_reports(report: dict[str, Any]) -> tuple[Path, Path]:
                 lines.append(f"  - {diff['id']}: {diff['previous']} -> {diff['current']}")
         else:
             lines.append("- Status changes: none")
+
+    lines.extend(["", "## Ready for companion decision gate", ""])
+    readiness = report["readiness"]
+    json_evidence = readiness["evidence"]["json_report"]
+    md_evidence = readiness["evidence"]["markdown_report"]
+    lines.append(
+        f"- Required evidence (JSON): `{json_evidence['path']}`"
+        f" (exists={json_evidence['exists']}, ci_artifact_link={json_evidence['ci_artifact_link'] or 'n/a'})"
+    )
+    lines.append(
+        f"- Required evidence (Markdown): `{md_evidence['path']}`"
+        f" (exists={md_evidence['exists']}, ci_artifact_link={md_evidence['ci_artifact_link'] or 'n/a'})"
+    )
+    lines.append(f"- Evidence complete: {'yes' if readiness['evidence_complete'] else 'no'}")
+    lines.append(f"- P0 automatable failures: {', '.join(readiness['p0_automatable_failures']) or 'none'}")
+    lines.append(f"- P0 pass-rate regressed: {'yes' if readiness['p0_pass_rate_regressed'] else 'no'}")
+    lines.append(
+        "- Manual P1 checks lacking clear disposition: "
+        f"{', '.join(readiness['manual_p1_without_clear_disposition']) or 'none'}"
+    )
+    lines.append(f"- Hard policy: {readiness['policy']}")
+    lines.append(
+        "- Companion sprint start allowed: "
+        f"{'yes' if readiness['companion_sprint_start_allowed'] else 'no'}"
+    )
 
     md_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
