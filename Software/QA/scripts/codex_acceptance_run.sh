@@ -2,7 +2,7 @@
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)"
-BACKEND_DIR="$REPO_ROOT/Software/Backend_Prototype"
+BACKEND_DIR="$REPO_ROOT/Software/Backend"
 REPORT_DIR="$REPO_ROOT/Software/QA/reports"
 GATE_TIMEOUT_SECONDS="${GATE_TIMEOUT_SECONDS:-180}"
 READY_TIMEOUT_SECONDS="${READY_TIMEOUT_SECONDS:-30}"
