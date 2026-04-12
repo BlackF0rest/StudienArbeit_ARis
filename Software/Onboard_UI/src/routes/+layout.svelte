@@ -3,6 +3,7 @@
 	import { onMount } from 'svelte';
 	import favicon from '$lib/assets/favicon.svg';
 	import { detachInputControl, subscribeInputControl } from '$lib/input-controller';
+	import { isArCompactEnabled } from '$lib/runtime-flags';
 	import { hudTokens } from '$lib/ui/tokens';
 
 	let { children } = $props();
@@ -12,6 +13,7 @@
 
 		const body = document.body;
 		body.classList.add('ar-mode', hudTokens.density.compactClass);
+		body.classList.toggle('ar-compact', isArCompactEnabled());
 		body.style.setProperty('--hud-font-stack', hudTokens.font.stack);
 		body.style.setProperty('--hud-font-mono', hudTokens.font.mono);
 

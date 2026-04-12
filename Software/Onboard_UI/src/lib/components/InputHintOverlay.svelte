@@ -10,22 +10,22 @@
 	.input-hint {
 		position: fixed;
 		left: 50%;
-		bottom: 10px;
+		bottom: var(--hud-space-sm);
 		transform: translateX(-50%);
 		background: rgba(0, 0, 0, 0.72);
 		border: 1px solid #2f5a2f;
 		color: #b8ffb8;
-		padding: 0.25rem 0.6rem;
-		font-size: 0.85rem;
+		padding: var(--hud-space-xs) calc(var(--hud-space-sm) + 0.1rem);
+		font-size: var(--hud-font-sm);
 		font-family: var(--hud-font-stack);
 		z-index: 60;
 		white-space: nowrap;
 	}
 
 	.input-hint.compact {
-		font-size: 0.7rem;
-		padding: 0.15rem 0.4rem;
-		bottom: 6px;
+		font-size: var(--hud-font-xs);
+		padding: 0.15rem var(--hud-space-sm);
+		bottom: var(--hud-space-xs);
 		opacity: 0.82;
 	}
 </style>
