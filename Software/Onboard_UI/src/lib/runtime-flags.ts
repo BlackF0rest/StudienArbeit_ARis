@@ -18,17 +18,35 @@ function readEnvFlag(names: string[]): string {
 	return '';
 }
 
+function isTruthyFlag(value: string): boolean {
+	return TRUE_VALUES.has(normalize(value));
+}
+
 export function isArCompactEnabled(): boolean {
 	const envValue = readEnvFlag(['AR_COMPACT', 'VITE_AR_COMPACT']);
-	if (TRUE_VALUES.has(envValue)) return true;
+	if (isTruthyFlag(envValue)) return true;
 
 	if (!browser) return false;
 
 	const queryValue = normalize(new URLSearchParams(window.location.search).get('AR_COMPACT'));
-	if (TRUE_VALUES.has(queryValue)) return true;
+	if (isTruthyFlag(queryValue)) return true;
 
 	const storageValue = normalize(window.localStorage.getItem('AR_COMPACT'));
-	return TRUE_VALUES.has(storageValue);
+	return isTruthyFlag(storageValue);
+}
+
+export function isDebugUiEnabled(): boolean {
+	const envValue = readEnvFlag(['DEBUG_UI', 'VITE_DEBUG_UI']);
+	if (isTruthyFlag(envValue)) return true;
+
+	if (!browser) return false;
+
+	const params = new URLSearchParams(window.location.search);
+	const queryValue = normalize(params.get('DEBUG_UI') ?? params.get('debug_ui') ?? params.get('debug'));
+	if (isTruthyFlag(queryValue)) return true;
+
+	const storageValue = normalize(window.localStorage.getItem('DEBUG_UI'));
+	return isTruthyFlag(storageValue);
 }
 
 export function isProductionProfile(): boolean {
