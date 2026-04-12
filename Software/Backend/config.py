@@ -1,10 +1,14 @@
 import os
 from dataclasses import dataclass, field
+from pathlib import Path
+
+
+DEFAULT_DB_PATH = Path(__file__).resolve().parent / "data.db"
 
 
 @dataclass
 class AppConfig:
-    db_path: str = "data.db"
+    db_path: str = str(DEFAULT_DB_PATH)
     host: str = "0.0.0.0"
     port: int = 5000
     debug: bool = False
@@ -19,7 +23,7 @@ class AppConfig:
             cors_origins = ["*"]
 
         return cls(
-            db_path=os.getenv("DB_PATH", "data.db"),
+            db_path=os.getenv("DB_PATH", str(DEFAULT_DB_PATH)),
             host=os.getenv("HOST", "0.0.0.0"),
             port=int(os.getenv("PORT", "5000")),
             debug=os.getenv("DEBUG", "false").lower() in {"1", "true", "yes", "on"},
