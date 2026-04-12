@@ -1,0 +1,174 @@
+{
+  "generated_at": "2026-04-12T10:03:16.848289+00:00",
+  "criteria": [
+    {
+      "id": "API-001",
+      "severity": "P0",
+      "status": "FAIL",
+      "reason": "status_endpoint: missing result; messages_get_post_delete: missing result; teleprompter_send_current_history: missing result; teleprompter_reset: missing result; test-run-errors: API test run failed: Backend exited early: Traceback (most recent call last):\n  File \"/workspace/StudienArbeit_ARis/Software/Backend/run.py\", line 3, in <module>\n    from app import create_app\n  File \"/workspace/StudienArbeit_ARis/Software/Backend/app.py\", line 5, in <module>\n    from flask import Flask, g, jsonify, request\nModuleNotFoundError: No module named 'flask' | Integration smoke test run failed: Backend exited early: Traceback (most recent call last):\n  File \"/workspace/StudienArbeit_ARis/Software/Backend/run.py\", line 3, in <module>\n    from app import create_app\n  File \"/workspace/StudienArbeit_ARis/Software/Backend/app.py\", line 5, in <module>\n    from flask import Flask, g, jsonify, request\nModuleNotFoundError: No module named 'flask'",
+      "tests": [
+        "status_endpoint",
+        "messages_get_post_delete",
+        "teleprompter_send_current_history",
+        "teleprompter_reset"
+      ]
+    },
+    {
+      "id": "API-002",
+      "severity": "P0",
+      "status": "SKIPPED",
+      "reason": "No automated test mapping configured",
+      "tests": []
+    },
+    {
+      "id": "INT-001",
+      "severity": "P0",
+      "status": "FAIL",
+      "reason": "teleprompter_send_current_history: missing result; scenario_a_send_then_current: missing result; test-run-errors: API test run failed: Backend exited early: Traceback (most recent call last):\n  File \"/workspace/StudienArbeit_ARis/Software/Backend/run.py\", line 3, in <module>\n    from app import create_app\n  File \"/workspace/StudienArbeit_ARis/Software/Backend/app.py\", line 5, in <module>\n    from flask import Flask, g, jsonify, request\nModuleNotFoundError: No module named 'flask' | Integration smoke test run failed: Backend exited early: Traceback (most recent call last):\n  File \"/workspace/StudienArbeit_ARis/Software/Backend/run.py\", line 3, in <module>\n    from app import create_app\n  File \"/workspace/StudienArbeit_ARis/Software/Backend/app.py\", line 5, in <module>\n    from flask import Flask, g, jsonify, request\nModuleNotFoundError: No module named 'flask'",
+      "tests": [
+        "teleprompter_send_current_history",
+        "scenario_a_send_then_current"
+      ]
+    },
+    {
+      "id": "INT-002",
+      "severity": "P1",
+      "status": "FAIL",
+      "reason": "scenario_a_send_then_current: missing result; scenario_b_reset_defaults: missing result; test-run-errors: API test run failed: Backend exited early: Traceback (most recent call last):\n  File \"/workspace/StudienArbeit_ARis/Software/Backend/run.py\", line 3, in <module>\n    from app import create_app\n  File \"/workspace/StudienArbeit_ARis/Software/Backend/app.py\", line 5, in <module>\n    from flask import Flask, g, jsonify, request\nModuleNotFoundError: No module named 'flask' | Integration smoke test run failed: Backend exited early: Traceback (most recent call last):\n  File \"/workspace/StudienArbeit_ARis/Software/Backend/run.py\", line 3, in <module>\n    from app import create_app\n  File \"/workspace/StudienArbeit_ARis/Software/Backend/app.py\", line 5, in <module>\n    from flask import Flask, g, jsonify, request\nModuleNotFoundError: No module named 'flask'",
+      "tests": [
+        "scenario_a_send_then_current",
+        "scenario_b_reset_defaults"
+      ]
+    },
+    {
+      "id": "REG-001",
+      "severity": "P1",
+      "status": "FAIL",
+      "reason": "messages_get_post_delete: missing result; scenario_c_messages_roundtrip: missing result; test-run-errors: API test run failed: Backend exited early: Traceback (most recent call last):\n  File \"/workspace/StudienArbeit_ARis/Software/Backend/run.py\", line 3, in <module>\n    from app import create_app\n  File \"/workspace/StudienArbeit_ARis/Software/Backend/app.py\", line 5, in <module>\n    from flask import Flask, g, jsonify, request\nModuleNotFoundError: No module named 'flask' | Integration smoke test run failed: Backend exited early: Traceback (most recent call last):\n  File \"/workspace/StudienArbeit_ARis/Software/Backend/run.py\", line 3, in <module>\n    from app import create_app\n  File \"/workspace/StudienArbeit_ARis/Software/Backend/app.py\", line 5, in <module>\n    from flask import Flask, g, jsonify, request\nModuleNotFoundError: No module named 'flask'",
+      "tests": [
+        "messages_get_post_delete",
+        "scenario_c_messages_roundtrip"
+      ]
+    },
+    {
+      "id": "SMK-001",
+      "severity": "P0",
+      "status": "FAIL",
+      "reason": "scenario_a_send_then_current: missing result; scenario_b_reset_defaults: missing result; scenario_c_messages_roundtrip: missing result; test-run-errors: API test run failed: Backend exited early: Traceback (most recent call last):\n  File \"/workspace/StudienArbeit_ARis/Software/Backend/run.py\", line 3, in <module>\n    from app import create_app\n  File \"/workspace/StudienArbeit_ARis/Software/Backend/app.py\", line 5, in <module>\n    from flask import Flask, g, jsonify, request\nModuleNotFoundError: No module named 'flask' | Integration smoke test run failed: Backend exited early: Traceback (most recent call last):\n  File \"/workspace/StudienArbeit_ARis/Software/Backend/run.py\", line 3, in <module>\n    from app import create_app\n  File \"/workspace/StudienArbeit_ARis/Software/Backend/app.py\", line 5, in <module>\n    from flask import Flask, g, jsonify, request\nModuleNotFoundError: No module named 'flask'",
+      "tests": [
+        "scenario_a_send_then_current",
+        "scenario_b_reset_defaults",
+        "scenario_c_messages_roundtrip"
+      ]
+    },
+    {
+      "id": "MAN-001",
+      "severity": "P1",
+      "status": "SKIPPED",
+      "reason": "Manual verification required",
+      "tests": []
+    },
+    {
+      "id": "MAN-002",
+      "severity": "P1",
+      "status": "SKIPPED",
+      "reason": "Manual verification required",
+      "tests": []
+    },
+    {
+      "id": "MAN-003",
+      "severity": "P1",
+      "status": "SKIPPED",
+      "reason": "Manual verification required",
+      "tests": []
+    },
+    {
+      "id": "MAN-004",
+      "severity": "P2",
+      "status": "SKIPPED",
+      "reason": "Manual verification required",
+      "tests": []
+    }
+  ],
+  "manual_tracking": [
+    {
+      "id": "MAN-001",
+      "severity": "P1",
+      "disposition": "UNSET",
+      "disposition_clear": "no",
+      "owner": "UNASSIGNED",
+      "date": "UNSET",
+      "notes": ""
+    },
+    {
+      "id": "MAN-002",
+      "severity": "P1",
+      "disposition": "UNSET",
+      "disposition_clear": "no",
+      "owner": "UNASSIGNED",
+      "date": "UNSET",
+      "notes": ""
+    },
+    {
+      "id": "MAN-003",
+      "severity": "P1",
+      "disposition": "UNSET",
+      "disposition_clear": "no",
+      "owner": "UNASSIGNED",
+      "date": "UNSET",
+      "notes": ""
+    },
+    {
+      "id": "MAN-004",
+      "severity": "P2",
+      "disposition": "UNSET",
+      "disposition_clear": "no",
+      "owner": "UNASSIGNED",
+      "date": "UNSET",
+      "notes": ""
+    }
+  ],
+  "test_results": {
+    "api": [],
+    "integration": []
+  },
+  "test_run_errors": [
+    "API test run failed: Backend exited early: Traceback (most recent call last):\n  File \"/workspace/StudienArbeit_ARis/Software/Backend/run.py\", line 3, in <module>\n    from app import create_app\n  File \"/workspace/StudienArbeit_ARis/Software/Backend/app.py\", line 5, in <module>\n    from flask import Flask, g, jsonify, request\nModuleNotFoundError: No module named 'flask'",
+    "Integration smoke test run failed: Backend exited early: Traceback (most recent call last):\n  File \"/workspace/StudienArbeit_ARis/Software/Backend/run.py\", line 3, in <module>\n    from app import create_app\n  File \"/workspace/StudienArbeit_ARis/Software/Backend/app.py\", line 5, in <module>\n    from flask import Flask, g, jsonify, request\nModuleNotFoundError: No module named 'flask'"
+  ],
+  "trend": {
+    "previous_report": "2026-04-12T10:03:06.376429+00:00",
+    "p0_pass_rate": 0.0,
+    "previous_p0_pass_rate": 0.0,
+    "p0_pass_rate_regressed": false,
+    "status_changes": []
+  },
+  "readiness": {
+    "evidence": {
+      "json_report": {
+        "path": "/workspace/StudienArbeit_ARis/Software/QA/reports/latest.json",
+        "exists": true,
+        "ci_artifact_link": ""
+      },
+      "markdown_report": {
+        "path": "/workspace/StudienArbeit_ARis/Software/QA/reports/latest.md",
+        "exists": true,
+        "ci_artifact_link": ""
+      }
+    },
+    "evidence_complete": true,
+    "p0_automatable_failures": [
+      "API-001",
+      "INT-001",
+      "SMK-001"
+    ],
+    "p0_pass_rate_regressed": false,
+    "manual_p1_without_clear_disposition": [
+      "MAN-001",
+      "MAN-002",
+      "MAN-003"
+    ],
+    "companion_sprint_start_allowed": false,
+    "policy": "Companion sprint starts only when all P0 automatable checks pass and manual P1 checks have clear disposition."
+  }
+}

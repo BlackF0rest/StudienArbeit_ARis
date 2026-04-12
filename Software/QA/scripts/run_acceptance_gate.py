@@ -30,6 +30,10 @@ def main() -> int:
 
     trend = written_report.get("trend", {})
     p0_regressed = bool(trend.get("p0_pass_rate_regressed", False))
+    readiness = written_report.get("readiness", {})
+    manual_p1_unclear = readiness.get("manual_p1_without_clear_disposition", [])
+    evidence_complete = bool(readiness.get("evidence_complete", False))
+    companion_allowed = bool(readiness.get("companion_sprint_start_allowed", False))
 
     print(
         json.dumps(
@@ -37,6 +41,9 @@ def main() -> int:
                 "p0_failures": p0_failures,
                 "non_p0_failures": non_p0_failures,
                 "p0_pass_rate_regressed": p0_regressed,
+                "manual_p1_without_clear_disposition": manual_p1_unclear,
+                "evidence_complete": evidence_complete,
+                "companion_sprint_start_allowed": companion_allowed,
             },
             indent=2,
         )
@@ -47,6 +54,12 @@ def main() -> int:
         return 1
     if p0_regressed:
         print("Acceptance gate FAILED: P0 pass-rate regressed versus previous baseline.")
+        return 1
+    if not evidence_complete:
+        print("Acceptance gate FAILED: required latest.json/latest.md evidence or CI links missing.")
+        return 1
+    if manual_p1_unclear:
+        print("Acceptance gate FAILED: manual P1 criteria missing clear disposition for companion readiness.")
         return 1
     if non_p0_failures:
         print("Acceptance gate WARNING: only P1/P2 automatable criteria failed.")
