@@ -6,7 +6,7 @@ from typing import Callable
 from .connection_manager import ConnectionManager, ConnectionState
 from .translator import TransportPayload
 
-# Seeded from Backend_Prototype/backend_gatt_server.py (Nordic UART style service)
+# Seeded from Backend/backend_gatt_server.py (Nordic UART style service)
 TEXT_SERVICE_UUID = "6e400001-b5a3-f393-e0a9-e50e24dcca9e"
 TEXT_RX_UUID = "6e400002-b5a3-f393-e0a9-e50e24dcca9e"
 TEXT_TX_UUID = "6e400003-b5a3-f393-e0a9-e50e24dcca9e"

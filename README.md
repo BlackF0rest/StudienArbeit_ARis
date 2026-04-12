@@ -4,13 +4,15 @@
 
 The repository is now organized around active product tracks under `Software/`:
 
-- `Software/Backend_Prototype` — active backend services and APIs.
-- `Software/Svelte_Testing/minimal_hud` — active onboard UI track.
+- `Software/Backend` — active backend services and APIs.
+- `Software/Onboard_UI` — active onboard UI track.
 - `Software/Onboard_Runtime` — active onboard runtime and hardware integration.
 - `Software/QA` — quality assurance tests, scripts, and reports.
 - `Software/Companion_Prototype/ReactNative_Companion` — active mobile companion track.
 
 See `docs/repo_map.md` for owners and purpose details.
+
+Compatibility notice (one release cycle): legacy paths `Software/Backend_Prototype` and `Software/Svelte_Testing/minimal_hud` remain as symlinks to the new locations.
 
 ## Legacy Archived
 
