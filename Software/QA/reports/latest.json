@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-04-12T10:03:16.848289+00:00",
+  "generated_at": "2026-04-12T14:31:32.302642+00:00",
   "criteria": [
     {
       "id": "API-001",
@@ -137,7 +137,7 @@
     "Integration smoke test run failed: Backend exited early: Traceback (most recent call last):\n  File \"/workspace/StudienArbeit_ARis/Software/Backend/run.py\", line 3, in <module>\n    from app import create_app\n  File \"/workspace/StudienArbeit_ARis/Software/Backend/app.py\", line 5, in <module>\n    from flask import Flask, g, jsonify, request\nModuleNotFoundError: No module named 'flask'"
   ],
   "trend": {
-    "previous_report": "2026-04-12T10:03:06.376429+00:00",
+    "previous_report": "2026-04-12T10:03:16.848289+00:00",
     "p0_pass_rate": 0.0,
     "previous_p0_pass_rate": 0.0,
     "p0_pass_rate_regressed": false,
