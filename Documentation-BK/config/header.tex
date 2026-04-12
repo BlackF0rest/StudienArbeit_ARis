@@ -22,8 +22,7 @@
 \newcommand{\ifDocType}[3]{%
 	\IfStrEq{\documentType}{#1}{#2}{#3}%
 }
-\usepackage{comment}
-\usepackage{wrapfig}
+
 
 %% Seiteneinstellungen
 % Ränder
@@ -94,12 +93,15 @@
 	bibwarn=true,
 	bibencoding=utf8,		% Wenn die .bib-Datei mit utf8 kodiert ist, sonst ascii
 	sortlocale=de_DE,
-	style=\quoteStyle,
-]{biblatex}
+	%style=\quoteStyle,
+]{biblatex-chicago}
 \loadbibresources			% Lädt die Resourcen aus der config Datei
 \newcommand{\mkbibnodate}{o\adddot J\adddot}        % o. J.
 \AtEveryBibitem{\iffieldundef{year}{\restorefield{year}{\mkbibnodate}}{}}
 \usepackage{csquotes}               % Zitierung mit Sprache verknüpfen
+
+\usepackage{comment}
+\usepackage{wrapfig}
 
 %% Querverweise und Links
 \definecolor{LinkColor}{HTML}{00007A} % Farbe
