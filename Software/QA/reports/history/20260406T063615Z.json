@@ -1,0 +1,141 @@
+{
+  "generated_at": "2026-04-06T06:36:15.296306+00:00",
+  "criteria": [
+    {
+      "id": "API-001",
+      "severity": "P0",
+      "status": "PASS",
+      "reason": "All mapped tests passed",
+      "tests": [
+        "status_endpoint",
+        "messages_get_post_delete",
+        "teleprompter_send_current_history",
+        "teleprompter_reset"
+      ]
+    },
+    {
+      "id": "INT-001",
+      "severity": "P0",
+      "status": "PASS",
+      "reason": "All mapped tests passed",
+      "tests": [
+        "teleprompter_send_current_history",
+        "scenario_a_send_then_current"
+      ]
+    },
+    {
+      "id": "INT-002",
+      "severity": "P1",
+      "status": "PASS",
+      "reason": "All mapped tests passed",
+      "tests": [
+        "scenario_a_send_then_current",
+        "scenario_b_reset_defaults"
+      ]
+    },
+    {
+      "id": "REG-001",
+      "severity": "P1",
+      "status": "PASS",
+      "reason": "All mapped tests passed",
+      "tests": [
+        "messages_get_post_delete",
+        "scenario_c_messages_roundtrip"
+      ]
+    },
+    {
+      "id": "SMK-001",
+      "severity": "P0",
+      "status": "PASS",
+      "reason": "All mapped tests passed",
+      "tests": [
+        "scenario_a_send_then_current",
+        "scenario_b_reset_defaults",
+        "scenario_c_messages_roundtrip"
+      ]
+    },
+    {
+      "id": "MAN-001",
+      "severity": "P1",
+      "status": "SKIPPED",
+      "reason": "Manual verification required",
+      "tests": []
+    },
+    {
+      "id": "MAN-002",
+      "severity": "P1",
+      "status": "SKIPPED",
+      "reason": "Manual verification required",
+      "tests": []
+    },
+    {
+      "id": "MAN-003",
+      "severity": "P1",
+      "status": "SKIPPED",
+      "reason": "Manual verification required",
+      "tests": []
+    },
+    {
+      "id": "MAN-004",
+      "severity": "P2",
+      "status": "SKIPPED",
+      "reason": "Manual verification required",
+      "tests": []
+    }
+  ],
+  "test_results": {
+    "api": [
+      {
+        "name": "status_endpoint",
+        "passed": true,
+        "reason": "",
+        "details": null
+      },
+      {
+        "name": "messages_get_post_delete",
+        "passed": true,
+        "reason": "",
+        "details": null
+      },
+      {
+        "name": "teleprompter_send_current_history",
+        "passed": true,
+        "reason": "",
+        "details": null
+      },
+      {
+        "name": "teleprompter_reset",
+        "passed": true,
+        "reason": "",
+        "details": null
+      }
+    ],
+    "integration": [
+      {
+        "name": "scenario_a_send_then_current",
+        "passed": true,
+        "reason": "",
+        "details": null
+      },
+      {
+        "name": "scenario_b_reset_defaults",
+        "passed": true,
+        "reason": "",
+        "details": null
+      },
+      {
+        "name": "scenario_c_messages_roundtrip",
+        "passed": true,
+        "reason": "",
+        "details": null
+      }
+    ]
+  },
+  "trend": {
+    "previous_report": null,
+    "p0_pass_rate": 1.0,
+    "previous_p0_pass_rate": null,
+    "p0_pass_rate_regressed": false,
+    "status_changes": []
+  }
+}
