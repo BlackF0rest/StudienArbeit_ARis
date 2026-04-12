@@ -5,7 +5,7 @@
 	import { bootstrapFeatureHost } from '$lib/feature-registration';
 	import { featureHost, type FeatureRuntimeSnapshot } from '$lib/feature-host';
 	import { fetchPcLinkDiagnostics, type PcLinkDiagnostics } from '$lib/services/pc-link-diagnostics';
-	import { homeCarouselIndex, getHintForContext, setInputContext, type InputHint } from '$lib/input-controller';
+	import { homeCarouselIndex, shortPressPulse, getHintForContext, setInputContext, type InputHint } from '$lib/input-controller';
 	import InputHintOverlay from '$lib/components/InputHintOverlay.svelte';
 	import HudCard from '$lib/components/hud/HudCard.svelte';
 	import HudScaffold from '$lib/components/hud/HudScaffold.svelte';
@@ -23,6 +23,8 @@
 
 	let selectedApp = carouselApps[0];
 	let hint: InputHint = getHintForContext('home');
+	let pulseCard = false;
+	let pulseTimeout: ReturnType<typeof setTimeout> | undefined;
 
 	let debugUiEnabled = false;
 
@@ -73,12 +75,21 @@
 		const unsubscribe = homeCarouselIndex.subscribe((index) => {
 			selectedApp = carouselApps[index] ?? carouselApps[0];
 		});
+		const unsubscribePulse = shortPressPulse.subscribe(() => {
+			pulseCard = true;
+			if (pulseTimeout) clearTimeout(pulseTimeout);
+			pulseTimeout = setTimeout(() => {
+				pulseCard = false;
+			}, 160);
+		});
 		debugUiEnabled = isDebugUiEnabled();
 		bootstrapFeatureHost();
 		void refreshSnapshot();
 		const timer = setInterval(() => void refreshSnapshot(), COMPACT_MODE_POLL_INTERVAL_MS);
 		return () => {
 			unsubscribe();
+			unsubscribePulse();
+			if (pulseTimeout) clearTimeout(pulseTimeout);
 			clearInterval(timer);
 		};
 	});
@@ -92,7 +103,7 @@
 	</svelte:fragment>
 
 	<div class="hud-grid-3">
-		<HudCard title="Selected app" className="hud-compact-block">
+		<HudCard title="Selected app" className={`hud-compact-block ${pulseCard ? 'short-pulse' : ''}`}>
 			<p class="hud-primary-point">{selectedApp}</p>
 			<p class="hud-secondary-line">Long press to open · Route: {routeByApp[selectedApp]}</p>
 			<p class="hud-compact-line">Health: {selectedHealth?.ok ? 'Healthy' : 'Pending'}</p>

@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
 	import Header from '../header.svelte';
 	import { bootstrapFeatureHost } from '$lib/feature-registration';
@@ -43,10 +42,6 @@
 		pcDiagnostics = await fetchPcLinkDiagnostics();
 	}
 
-	async function returnHome(): Promise<void> {
-		await goto('/');
-	}
-
 	onMount(() => {
 		bootstrapFeatureHost();
 		setInputContext('debug');
@@ -55,7 +50,7 @@
 				void refreshSnapshot();
 			},
 			onLong: () => {
-				void returnHome();
+				featureHost.emit('basic-hud', 'debug.return_home', { reason: 'long-press' });
 			}
 		});
 		void refreshSnapshot();

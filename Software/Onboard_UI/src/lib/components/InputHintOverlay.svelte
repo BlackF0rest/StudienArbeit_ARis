@@ -1,10 +1,18 @@
 <script lang="ts">
-	import type { InputHint } from '$lib/input-controller';
+	import { longPressStatus, type InputHint } from '$lib/input-controller';
 
 	let { hint, compact = false }: { hint: InputHint; compact?: boolean } = $props();
 </script>
 
-<div class="input-hint" class:compact>{hint.short} · {hint.long}</div>
+<div class="input-hint" class:compact>
+	{#if $longPressStatus}
+		<span class="input-hint-status">{$longPressStatus}</span>
+	{:else}
+		<span>short: {hint.short}</span>
+		<span aria-hidden="true"> | </span>
+		<span>long: {hint.long}</span>
+	{/if}
+</div>
 
 <style>
 	.input-hint {
@@ -27,5 +35,9 @@
 		padding: 0.15rem var(--hud-space-sm);
 		bottom: var(--hud-space-xs);
 		opacity: 0.82;
+	}
+
+	.input-hint-status {
+		color: #e9ffe9;
 	}
 </style>
