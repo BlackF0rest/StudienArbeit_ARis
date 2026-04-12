@@ -12,13 +12,22 @@
 		subscribeInputControl();
 
 		const body = document.body;
+		const applyViewportBreakpointClasses = () => {
+			body.classList.toggle('hud-breakpoint-width-640', window.innerWidth <= 640);
+			body.classList.toggle('hud-breakpoint-height-420', window.innerHeight <= 420);
+		};
+
 		body.classList.add('ar-mode', hudTokens.density.compactClass);
 		body.classList.toggle('ar-compact', isArCompactEnabled());
 		body.style.setProperty('--hud-font-stack', hudTokens.font.stack);
 		body.style.setProperty('--hud-font-mono', hudTokens.font.mono);
+		applyViewportBreakpointClasses();
+		window.addEventListener('resize', applyViewportBreakpointClasses);
 
 		return () => {
 			detachInputControl();
+			window.removeEventListener('resize', applyViewportBreakpointClasses);
+			body.classList.remove('hud-breakpoint-width-640', 'hud-breakpoint-height-420');
 			body.classList.remove('ar-mode', hudTokens.density.compactClass);
 		};
 	});

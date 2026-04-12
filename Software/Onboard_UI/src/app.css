@@ -33,7 +33,7 @@ body {
 body.ar-mode.compact {
 	letter-spacing: 0.01em;
 	font-size: 15px;
-	line-height: 1.35;
+	line-height: 1.45;
 }
 
 .hud-scaffold {
@@ -80,6 +80,15 @@ body.ar-mode.compact {
 	border-radius: var(--hud-radius);
 	padding: var(--hud-space-md);
 	background: var(--hud-surface);
+}
+
+.hud-card.hud-compact-block p,
+.hud-compact-block .hud-compact-line {
+	margin: 0.15rem 0;
+	display: -webkit-box;
+	-webkit-line-clamp: 2;
+	-webkit-box-orient: vertical;
+	overflow: hidden;
 }
 
 .hud-card h3 {
@@ -154,11 +163,25 @@ body.ar-mode.compact {
 }
 
 .hud-button {
-	padding: var(--hud-space-sm) var(--hud-space-md);
+	padding: 0.55rem 0.8rem;
+	min-height: 2.25rem;
 	border: 1px solid var(--hud-border-accent);
 	background: #113111;
 	color: var(--hud-text);
 	border-radius: var(--hud-radius);
+}
+
+.hud-primary-point {
+	margin: 0.2rem 0;
+	font-size: clamp(1.2rem, 3.8vw, 1.9rem);
+	line-height: 1.2;
+	font-weight: 700;
+}
+
+.hud-secondary-line {
+	margin: 0.2rem 0;
+	color: var(--hud-muted);
+	font-size: var(--hud-font-sm);
 }
 
 .teleprompter-full {
@@ -248,12 +271,8 @@ body.ar-mode.compact {
 }
 
 .hud-compact-line {
-	margin: 0.15rem 0;
-	display: -webkit-box;
-	-webkit-line-clamp: 2;
-	-webkit-box-orient: vertical;
-	overflow: hidden;
 	font-size: var(--hud-font-sm);
+	line-height: 1.45;
 }
 
 .hud-home-debug-link a {
@@ -330,6 +349,13 @@ body.ar-compact .hud-button {
 	display: none;
 }
 
+a,
+button,
+.hud-button,
+.hud-input {
+	min-height: 2.25rem;
+}
+
 @media (max-width: 640px), (max-height: 420px) {
 	.hud-grid-3,
 	.hud-grid-2 {
@@ -344,4 +370,11 @@ body.ar-compact .hud-button {
 	.hud-card {
 		padding: 0.55rem;
 	}
+}
+
+body.hud-breakpoint-width-640 .hud-grid-3,
+body.hud-breakpoint-width-640 .hud-grid-2,
+body.hud-breakpoint-height-420 .hud-grid-3,
+body.hud-breakpoint-height-420 .hud-grid-2 {
+	grid-template-columns: 1fr;
 }
