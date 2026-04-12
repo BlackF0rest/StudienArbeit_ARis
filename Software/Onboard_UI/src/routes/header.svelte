@@ -2,8 +2,11 @@
 	import { onMount } from 'svelte';
 	import { fetchHudStatus, type HudStatus } from '$lib/services/basic-hud';
 	import { featureHost } from '$lib/feature-host';
+	import { isArCompactEnabled, isDebugUiEnabled } from '$lib/runtime-flags';
 
 	let now = new Date();
+	let compactMode = false;
+	let debugUiEnabled = false;
 	let status: HudStatus = {
 		battery: null,
 		temperature: null,
@@ -22,6 +25,8 @@
 	}
 
 	onMount(() => {
+		compactMode = isArCompactEnabled();
+		debugUiEnabled = isDebugUiEnabled();
 		now = new Date();
 		void refresh();
 
@@ -55,6 +60,16 @@
 	</div>
 </div>
 
+{#if debugUiEnabled && !compactMode}
+	<nav class="hud-nav-row" aria-label="Debug navigation shortcuts">
+		<a href="/">Home</a>
+		<a href="/Navigation">Navigation</a>
+		<a href="/Teleprompter?debug=1">Teleprompter</a>
+		<a href="/Messages">Messages</a>
+		<a href="/Debug">Debug</a>
+	</nav>
+{/if}
+
 <style>
 	.hud-header {
 		display: flex;
@@ -75,5 +90,21 @@
 
 	.connection {
 		font-size: var(--hud-font-xs);
+	}
+
+	.hud-nav-row {
+		display: flex;
+		align-items: center;
+		gap: var(--hud-space-sm);
+		padding: 0 var(--hud-space-md) var(--hud-space-xs);
+		font-size: var(--hud-font-xs);
+	}
+
+	.hud-nav-row a {
+		color: var(--hud-accent);
+		text-decoration: none;
+		padding: 0.1rem 0.35rem;
+		border: 1px solid var(--hud-border-accent);
+		border-radius: 999px;
 	}
 </style>

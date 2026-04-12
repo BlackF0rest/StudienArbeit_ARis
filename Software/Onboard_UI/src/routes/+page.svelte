@@ -10,6 +10,7 @@
 	import HudCard from '$lib/components/hud/HudCard.svelte';
 	import HudScaffold from '$lib/components/hud/HudScaffold.svelte';
 	import StatusPill from '$lib/components/hud/StatusPill.svelte';
+	import { isDebugUiEnabled } from '$lib/runtime-flags';
 
 	const COMPACT_MODE_POLL_INTERVAL_MS = 6000;
 
@@ -22,6 +23,8 @@
 
 	let selectedApp = carouselApps[0];
 	let hint: InputHint = getHintForContext('home');
+
+	let debugUiEnabled = false;
 
 	let snapshot: FeatureRuntimeSnapshot = {
 		registered: [],
@@ -70,6 +73,7 @@
 		const unsubscribe = homeCarouselIndex.subscribe((index) => {
 			selectedApp = carouselApps[index] ?? carouselApps[0];
 		});
+		debugUiEnabled = isDebugUiEnabled();
 		bootstrapFeatureHost();
 		void refreshSnapshot();
 		const timer = setInterval(() => void refreshSnapshot(), COMPACT_MODE_POLL_INTERVAL_MS);
@@ -104,7 +108,9 @@
 		</HudCard>
 	</div>
 
-	<p class="hud-muted hud-home-debug-link">Detailed telemetry/diagnostics moved to <a href="/Debug">Debug</a>.</p>
+	{#if debugUiEnabled}
+		<p class="hud-muted hud-home-debug-link">Detailed telemetry/diagnostics moved to <a href="/Debug">Debug</a>.</p>
+	{/if}
 
 	<svelte:fragment slot="hint">
 		<InputHintOverlay {hint} />

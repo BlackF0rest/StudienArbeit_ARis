@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { page } from '$app/stores';
 	import Teleprompter from './teleprompter.svelte';
+	import { isDebugUiEnabled } from '$lib/runtime-flags';
 
-	$: debugMode = $page.url.searchParams.get('mode') === 'debug' || $page.url.searchParams.get('debug') === '1';
+	$: debugMode = isDebugUiEnabled();
 </script>
 
 <Teleprompter {debugMode} />
