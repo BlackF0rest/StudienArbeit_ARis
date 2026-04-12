@@ -4,6 +4,7 @@ from datetime import datetime, timezone
 
 from flask import Flask, g, jsonify, request
 from flask_cors import CORS
+from werkzeug.exceptions import HTTPException
 
 from config import AppConfig
 from repositories.sqlite_repo import SQLiteRepository
@@ -61,6 +62,39 @@ def create_app(config: AppConfig | None = None) -> Flask:
 
     @app.errorhandler(Exception)
     def handle_exception(exc: Exception):
+        if isinstance(exc, HTTPException):
+            if exc.code == 404:
+                return (
+                    jsonify(
+                        {
+                            "ok": False,
+                            "error": {
+                                "code": "not_found",
+                                "message": "Route not found",
+                                "details": {"path": request.path},
+                            },
+                            "timestamp": datetime.now(timezone.utc).isoformat(),
+                            "trace_id": getattr(g, "trace_id", "n/a"),
+                        }
+                    ),
+                    404,
+                )
+
+            return (
+                jsonify(
+                    {
+                        "ok": False,
+                        "error": {
+                            "code": exc.name.lower().replace(" ", "_"),
+                            "message": exc.description,
+                        },
+                        "timestamp": datetime.now(timezone.utc).isoformat(),
+                        "trace_id": getattr(g, "trace_id", "n/a"),
+                    }
+                ),
+                exc.code or 500,
+            )
+
         app.logger.exception("unhandled_error", extra={"trace_id": getattr(g, "trace_id", "n/a")})
         return (
             jsonify(
