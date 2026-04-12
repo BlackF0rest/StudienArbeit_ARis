@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
-	import { browser, dev } from '$app/environment';
+	import { browser } from '$app/environment';
 	import { TeleprompterRuntime, defaultTeleprompterConfig, type TeleprompterConfig } from '$lib/services/teleprompter-runtime';
 	import { featureHost } from '$lib/feature-host';
 	import { getHintForContext, registerAppActions, setInputContext, type InputHint } from '$lib/input-controller';
@@ -16,10 +16,8 @@
 	let isScrolling = true;
 	let teleprompterContainer: HTMLElement;
 	let hint: InputHint = getHintForContext('teleprompter');
-	let longPressExitArmed = false;
-	let longPressExitResetTimer: ReturnType<typeof setTimeout> | null = null;
 
-	const SHOW_CLICK_HOME_FALLBACK = debugMode || dev;
+	const SHOW_CLICK_HOME_FALLBACK = debugMode;
 	const MIN_FONT_REM = 1.15;
 	const MAX_FONT_REM = 2.1;
 	const MIN_LINE_HEIGHT = 1.22;
@@ -32,29 +30,15 @@
 		await goto('/');
 	}
 
-	function armLongPressExit(): void {
-		longPressExitArmed = true;
-		if (longPressExitResetTimer) clearTimeout(longPressExitResetTimer);
-		longPressExitResetTimer = setTimeout(() => {
-			longPressExitArmed = false;
-		}, 2200);
-	}
-
 	function speedStep(): void {
 		const nextSpeed = Math.min(120, config.speed + 5);
 		config = { ...config, speed: nextSpeed };
 		featureHost.emit('teleprompter-runtime', 'teleprompter.speed_step', { speed: nextSpeed });
-		longPressExitArmed = false;
 	}
 
 	function onTeleprompterLongPress(): void {
-		if (longPressExitArmed) {
-			void returnHome();
-			return;
-		}
-		isScrolling = !isScrolling;
-		featureHost.emit('teleprompter-runtime', 'teleprompter.pause_toggle', { isScrolling });
-		armLongPressExit();
+		featureHost.emit('teleprompter-runtime', 'teleprompter.return_home', { reason: 'long-press' });
+		void returnHome();
 	}
 
 	onMount(() => {
@@ -103,7 +87,6 @@
 			if (browser) {
 				window.removeEventListener('keydown', handleKeyPress);
 			}
-			if (longPressExitResetTimer) clearTimeout(longPressExitResetTimer);
 			document.body.style.overflow = '';
 		};
 	});
@@ -112,7 +95,7 @@
 {#if debugMode}
 	<Header />
 	<div class="teleprompter-debug-state">
-		state={runtimeState} · speed={config.speed} · long-exit={longPressExitArmed ? 'armed' : 'idle'}
+		state={runtimeState} · speed={config.speed} · scroll={isScrolling ? 'running' : 'paused'}
 	</div>
 {/if}
 

@@ -157,7 +157,7 @@ export function getHintForContext(context: AppContext): InputHint {
 		case 'teleprompter':
 			return {
 				short: 'speed + step',
-				long: 'pause / resume'
+				long: 'return home'
 			};
 		case 'navigation':
 			return {

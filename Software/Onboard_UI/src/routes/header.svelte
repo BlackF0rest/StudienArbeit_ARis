@@ -55,24 +55,17 @@
 	</div>
 </div>
 
-<nav class="main-nav">
-	<a href="/">Host</a>
-	<a href="/Navigation">Navigation</a>
-	<a href="/Teleprompter">Teleprompter</a>
-	<a href="/Messages">AI Chat</a>
-	<a href="/Debug">Debug</a>
-</nav>
-
 <style>
 	.hud-header {
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
-		gap: 1rem;
-		padding: 0.8rem 1rem;
+		gap: var(--hud-space-sm);
+		padding: var(--hud-space-sm) var(--hud-space-md);
 		border: 1px dashed #2fff44;
 		color: #9dff9d;
 		font-family: var(--hud-font-stack);
+		font-size: var(--hud-font-sm);
 	}
 
 	.divider {
@@ -81,20 +74,6 @@
 	}
 
 	.connection {
-		font-size: 0.9rem;
-	}
-
-	.main-nav {
-		display: flex;
-		gap: 1rem;
-		padding: 0.8rem 0.4rem 0.4rem;
-		font-family: var(--hud-font-stack);
-	}
-
-	a {
-		color: #80ff80;
-		text-decoration: none;
-		border: 1px solid #1f5e1f;
-		padding: 0.25rem 0.55rem;
+		font-size: var(--hud-font-xs);
 	}
 </style>
