@@ -83,12 +83,14 @@
 	<HudTabs tabs={sections} activeIndex={activeSectionIndex} />
 
 	{#if activeSectionIndex === 0}
-		<HudCard title="Compact status">
+		<HudCard title="Compact status" className="hud-compact-block">
+			<p class="hud-primary-point">{history.length}</p>
+			<p class="hud-secondary-line">messages stored</p>
 			<p class="hud-compact-line">{provider.name} · {provider.enabled ? 'live' : 'mock/demo'} · {busy ? 'working' : 'idle'}</p>
-			<p class="hud-compact-line">Stored messages: {history.length} · Showing latest {Math.min(previewMessages.length, 2)}</p>
+			<p class="hud-compact-line">Showing latest {Math.min(previewMessages.length, 2)} entries</p>
 		</HudCard>
 
-		<HudCard title="Latest messages">
+		<HudCard title="Latest messages" className="hud-compact-block">
 			{#if previewMessages.length === 0}
 				<p>Noch keine Nachrichten.</p>
 			{:else}

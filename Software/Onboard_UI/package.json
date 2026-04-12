@@ -18,7 +18,8 @@
 		"db:migrate": "drizzle-kit migrate",
 		"db:studio": "drizzle-kit studio",
 		"storybook": "storybook dev -c tools/storybook/.storybook -p 6006",
-		"build-storybook": "storybook build -c tools/storybook/.storybook"
+		"build-storybook": "storybook build -c tools/storybook/.storybook",
+		"check:breakpoints": "node scripts/verify-breakpoints.mjs"
 	},
 	"devDependencies": {
 		"@chromatic-com/storybook": "^4.1.1",

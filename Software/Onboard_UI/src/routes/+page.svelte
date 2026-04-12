@@ -92,17 +92,18 @@
 	</svelte:fragment>
 
 	<div class="hud-grid-3">
-		<HudCard title="Selected app">
-			<p class="hud-compact-line"><strong>{selectedApp}</strong> · open with long press</p>
-			<p class="hud-compact-line">Route: {routeByApp[selectedApp]} · {selectedHealth?.ok ? 'healthy' : 'health check pending'}</p>
+		<HudCard title="Selected app" className="hud-compact-block">
+			<p class="hud-primary-point">{selectedApp}</p>
+			<p class="hud-secondary-line">Long press to open · Route: {routeByApp[selectedApp]}</p>
+			<p class="hud-compact-line">Health: {selectedHealth?.ok ? 'Healthy' : 'Pending'}</p>
 		</HudCard>
 
-		<HudCard title="Connection summary">
+		<HudCard title="Connection summary" className="hud-compact-block">
 			<p class="hud-compact-line">PC Link: {pcDiagnostics.pc_link.active ? 'Connected' : 'Offline'} · Sessions: {pcDiagnostics.pc_link.sessions.length}</p>
 			<p class="hud-compact-line">Stream: {pcDiagnostics.stream_metrics.connected ? 'Connected' : 'Disconnected'} · Quality: {pcDiagnostics.stream_metrics.quality}</p>
 		</HudCard>
 
-		<HudCard title="Current hint">
+		<HudCard title="Current hint" className="hud-compact-block">
 			<p class="hud-compact-line">short: {hint.short}</p>
 			<p class="hud-compact-line">long: {hint.long}</p>
 		</HudCard>

@@ -19,6 +19,8 @@
 			<StatusPill text="Debug Overlay Enabled" tone="info" />
 		</svelte:fragment>
 		<HudCard title="Runtime mode" muted={true}>
+			<p class="hud-primary-point">LIVE</p>
+			<p class="hud-secondary-line">Teleprompter overlay running</p>
 			<p class="hud-compact-line">Fullscreen teleprompter is active in the overlay below.</p>
 		</HudCard>
 		<svelte:fragment slot="hint">

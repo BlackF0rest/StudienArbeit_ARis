@@ -85,8 +85,8 @@
 	</HudCard>
 
 	<HudCard title="PC Link Diagnostics">
-		<p><strong>PC Link:</strong> {pcDiagnostics.pc_link.active ? 'Connected' : 'Offline'}</p>
-		<p><strong>Stream:</strong> {pcDiagnostics.stream_metrics.connected ? 'Connected' : 'Disconnected'} ({pcDiagnostics.stream_metrics.quality})</p>
+		<p class="hud-primary-point">{pcDiagnostics.pc_link.active ? 'PC Link Connected' : 'PC Link Offline'}</p>
+		<p class="hud-secondary-line">Stream {pcDiagnostics.stream_metrics.connected ? 'connected' : 'disconnected'} ({pcDiagnostics.stream_metrics.quality})</p>
 		<p><strong>Reconnects:</strong> {pcDiagnostics.stream_metrics.reconnect_attempts} · <strong>Bandwidth:</strong> {pcDiagnostics.stream_metrics.avg_bandwidth_mbps ?? 'n/a'} Mbps · <strong>Frame Drop:</strong> {pcDiagnostics.stream_metrics.avg_frame_drop_ratio ?? 'n/a'}</p>
 		<p><strong>Display Mode:</strong> {pcDiagnostics.stream_metrics.onboard_only_mode ? 'Onboard-only fallback' : 'Hybrid streaming'}</p>
 		<p><strong>Overlay Contract:</strong> v{pcDiagnostics.overlay_contract.contract_version} · {pcDiagnostics.overlay_contract.coordinate_space} · {pcDiagnostics.overlay_contract.z_order.join(' → ')}</p>
