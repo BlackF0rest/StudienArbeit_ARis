@@ -31,7 +31,7 @@ jobs:
         run: |
           mkdir -p Software/QA/reports
           nohup env HOST=127.0.0.1 PORT=${BACKEND_PORT} DB_PATH=Software/QA/reports/ci_backend.db PYTHONUNBUFFERED=1 \
-            python Software/Backend_Prototype/run.py > Software/QA/reports/ci_backend.log 2>&1 &
+            python Software/Backend/run.py > Software/QA/reports/ci_backend.log 2>&1 &
           echo $! > backend.pid
 
       - name: Wait for backend readiness
