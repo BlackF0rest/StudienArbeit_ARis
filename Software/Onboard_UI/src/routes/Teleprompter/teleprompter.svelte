@@ -15,12 +15,14 @@
 	let scrollPosition = 0;
 	let isScrolling = true;
 	let teleprompterContainer: HTMLElement;
+	let feedbackText = '';
+	let feedbackTimeout: ReturnType<typeof setTimeout> | undefined;
 
 	const SHOW_CLICK_HOME_FALLBACK = debugMode;
-	const MIN_FONT_REM = 1.15;
-	const MAX_FONT_REM = 2.1;
-	const MIN_LINE_HEIGHT = 1.22;
-	const MAX_LINE_HEIGHT = 1.68;
+	const MIN_FONT_REM = 1.0;
+	const MAX_FONT_REM = 1.9;
+	const MIN_LINE_HEIGHT = 1.18;
+	const MAX_LINE_HEIGHT = 1.52;
 
 	$: clampedFontSize = Math.min(MAX_FONT_REM, Math.max(MIN_FONT_REM, Number(config.fontSize) || defaultTeleprompterConfig.fontSize));
 	$: clampedLineHeight = Math.min(MAX_LINE_HEIGHT, Math.max(MIN_LINE_HEIGHT, Number(config.lineHeight) || defaultTeleprompterConfig.lineHeight));
@@ -29,10 +31,26 @@
 		await goto('/');
 	}
 
+	function showFeedback(message: string): void {
+		feedbackText = message;
+		if (feedbackTimeout) clearTimeout(feedbackTimeout);
+		feedbackTimeout = setTimeout(() => {
+			feedbackText = '';
+		}, 900);
+	}
+
+	function togglePauseResume(): void {
+		isScrolling = !isScrolling;
+		const state = isScrolling ? 'running' : 'paused';
+		featureHost.emit('teleprompter-runtime', `teleprompter.${state}`, { speed: config.speed });
+		showFeedback(state);
+	}
+
 	function speedStep(): void {
 		const nextSpeed = Math.min(120, config.speed + 5);
 		config = { ...config, speed: nextSpeed };
 		featureHost.emit('teleprompter-runtime', 'teleprompter.speed_step', { speed: nextSpeed });
+		showFeedback(`speed ${nextSpeed}`);
 	}
 
 	function onTeleprompterLongPress(): void {
@@ -74,6 +92,11 @@
 
 		const handleKeyPress = (event: KeyboardEvent) => {
 			if (event.key === 'Escape') void returnHome();
+			if (event.key === ' ') {
+				event.preventDefault();
+				togglePauseResume();
+			}
+			if (event.key === 'Enter') speedStep();
 		};
 		if (browser) {
 			window.addEventListener('keydown', handleKeyPress);
@@ -86,6 +109,7 @@
 			if (browser) {
 				window.removeEventListener('keydown', handleKeyPress);
 			}
+			if (feedbackTimeout) clearTimeout(feedbackTimeout);
 			document.body.style.overflow = '';
 		};
 	});
@@ -103,14 +127,19 @@
 	</div>
 {/if}
 
-<div class="teleprompter-full" style="background-color: {config.backgroundColor};">
-	<div class="teleprompter-state">{isScrolling ? '▶ running' : '⏸ paused'} · {config.speed}</div>
+<div class="teleprompter-full" style="background-color: {config.backgroundColor};" on:pointerup={togglePauseResume}>
+	<div class="teleprompter-state">
+		{isScrolling ? '▶' : '⏸'} {config.speed}
+		{#if feedbackText}
+			<span class="teleprompter-feedback"> · {feedbackText}</span>
+		{/if}
+	</div>
 	<div
 		class="teleprompter-content"
 		bind:this={teleprompterContainer}
 		style="
             transform: translateY({scrollPosition}px);
-            font-size: clamp({MIN_FONT_REM}rem, {clampedFontSize}rem, {MAX_FONT_REM}rem);
+            font-size: clamp({MIN_FONT_REM}rem, calc(0.72rem + 2.3vw), {clampedFontSize}rem);
             color: {config.fontColor};
             font-family: {config.fontFamily};
             line-height: {clampedLineHeight};
