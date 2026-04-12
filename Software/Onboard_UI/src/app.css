@@ -217,6 +217,20 @@ body.ar-mode.compact {
 	color: var(--hud-muted);
 }
 
+.teleprompter-debug-overlay {
+	position: fixed;
+	top: var(--hud-space-sm);
+	left: var(--hud-space-sm);
+	z-index: 58;
+	width: min(32rem, calc(100vw - (2 * var(--hud-space-sm))));
+}
+
+.teleprompter-debug-headline {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--hud-space-sm);
+}
+
 .compass-wrap {
 	position: relative;
 	width: 160px;
@@ -246,6 +260,25 @@ body.ar-mode.compact {
 	color: var(--hud-accent);
 }
 
+.hud-stack-sm {
+	display: grid;
+	gap: var(--hud-space-sm);
+}
+
+.hud-meta-line {
+	font-size: var(--hud-font-xs);
+}
+
+.hud-message-content {
+	border-left: 3px solid var(--hud-border-accent);
+	padding-left: var(--hud-space-sm);
+	margin-top: var(--hud-space-xs);
+}
+
+.hud-message-content.is-assistant {
+	border-left-color: #7ea9ff;
+}
+
 .nav-panel-heading {
 	margin: 0 0 0.35rem;
 	font-size: var(--hud-font-sm);
@@ -265,6 +298,24 @@ body.ar-mode.compact {
 	width: 190px;
 	height: 190px;
 	margin: 0.4rem 0 0.2rem;
+}
+
+.nav-marker-n {
+	position: absolute;
+	top: var(--hud-space-sm);
+	color: var(--hud-accent);
+	font-weight: 700;
+	font-size: 1.4rem;
+}
+
+.nav-marker-arrow {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform-origin: 50% 90%;
+	font-size: 3.3rem;
+	color: #9dff9d;
+	transform: translate(-50%, -90%) rotate(var(--heading-deg, 0deg));
 }
 
 body.ar-compact .hud-subtitle,

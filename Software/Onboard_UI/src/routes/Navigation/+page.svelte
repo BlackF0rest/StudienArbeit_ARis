@@ -85,8 +85,8 @@
 		{:else}
 			<p class="nav-panel-heading">Heading marker</p>
 			<div class="compass-wrap nav-marker-large">
-				<div style="position:absolute;top:8px;color:#7eff7e;font-weight:bold;font-size:1.4rem;">N</div>
-				<div style="position:absolute;top:50%;left:50%;transform-origin:50% 90%;font-size:3.3rem;color:#9dff9d;transform:translate(-50%,-90%) rotate({nav.headingDeg}deg);">↑</div>
+				<div class="nav-marker-n">N</div>
+				<div class="nav-marker-arrow" style={`--heading-deg:${nav.headingDeg}deg;`}>↑</div>
 			</div>
 			<p class="nav-panel-main">{Math.round(nav.headingDeg)}°</p>
 		{/if}
