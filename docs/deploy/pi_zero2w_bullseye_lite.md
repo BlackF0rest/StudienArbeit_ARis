@@ -67,6 +67,19 @@ sudo systemctl daemon-reload
 sudo systemctl enable --now aris-backend aris-ui aris-kiosk
 ```
 
+## Automated deployment scripts
+
+From the repository root, run:
+
+```bash
+bash Software/deploy/pi/install_pi.sh
+bash Software/deploy/pi/update_onboard.sh
+```
+
+Notes:
+- `install_pi.sh` is safe to re-run: it reuses existing Node/Python environments and only overwrites systemd service files when contents changed.
+- `update_onboard.sh` performs a fast-forward-only `git pull`, rebuilds `Software/Onboard_UI`, and restarts `aris-backend`, `aris-ui`, and `aris-kiosk`.
+
 ## 6. Verification
 
 Run these checks:
