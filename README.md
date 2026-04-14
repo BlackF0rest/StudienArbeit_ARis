@@ -17,6 +17,12 @@ Development/operator routes (`/Debug`, `/dev/*`) are outside launch scope.
 
 Compatibility notice (one release cycle): legacy paths `Software/Backend_Prototype` and `Software/Svelte_Testing/minimal_hud` remain as symlinks to the new locations.
 
+## Team safety rules (Pi + local development)
+
+- Never run `sudo pip` inside a project virtual environment (`.venv`).
+- Never run `sudo npm` in project directories.
+- If a repository tree becomes root-owned after accidental `sudo`, restore ownership before reinstalling dependencies (example: `sudo chown -R pi:pi /home/pi/aris`).
+
 ## Legacy Archived
 
 The following legacy prototypes were archived (not hard-deleted) to:
