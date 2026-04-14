@@ -24,9 +24,19 @@
 	const MIN_LINE_HEIGHT = 1.18;
 	const MAX_LINE_HEIGHT = 1.52;
 
-	$: clampedFontSize = Math.min(MAX_FONT_REM, Math.max(MIN_FONT_REM, Number(config.fontSize) || defaultTeleprompterConfig.fontSize));
-	$: clampedLineHeight = Math.min(MAX_LINE_HEIGHT, Math.max(MIN_LINE_HEIGHT, Number(config.lineHeight) || defaultTeleprompterConfig.lineHeight));
+	const clampedFontSize = $derived(
+		Math.min(
+			MAX_FONT_REM,
+			Math.max(MIN_FONT_REM, Number(config.fontSize) || defaultTeleprompterConfig.fontSize)
+		)
+	);
 
+	const clampedLineHeight = $derived(
+		Math.min(
+			MAX_LINE_HEIGHT,
+			Math.max(MIN_LINE_HEIGHT, Number(config.lineHeight) || defaultTeleprompterConfig.lineHeight)
+		)
+	);
 	async function returnHome(): Promise<void> {
 		await goto('/');
 	}

@@ -11,14 +11,15 @@
 	let lastPulseToken = pulseToken;
 	let pulseTimeout: ReturnType<typeof setTimeout> | undefined;
 
-	$: if (pulseToken !== lastPulseToken) {
+	$effect(() => {
+		if (pulseToken === lastPulseToken) return;
 		lastPulseToken = pulseToken;
 		shouldPulse = true;
 		if (pulseTimeout) clearTimeout(pulseTimeout);
 		pulseTimeout = setTimeout(() => {
 			shouldPulse = false;
 		}, 160);
-	}
+	});
 
 	onDestroy(() => {
 		if (pulseTimeout) clearTimeout(pulseTimeout);
