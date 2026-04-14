@@ -40,15 +40,15 @@ node -v && npm -v
 
 ## 4. Clone and install project
 
-Clone the repository and install UI/backend dependencies:
+Clone the repository and install UI/backend dependencies (single deploy user: `admin`):
 
 ```bash
-git clone <YOUR_REPO_URL> /home/pi/aris
-cd /home/pi/aris/Software/Onboard_UI
+git clone <YOUR_REPO_URL> /home/admin/aris
+cd /home/admin/aris/Software/Onboard_UI
 npm ci
 npm run build
 
-cd /home/pi/aris/Software/Backend
+cd /home/admin/aris/Software/Backend
 python3 -m venv .venv
 source .venv/bin/activate
 pip install flask flask-cors
@@ -100,6 +100,6 @@ systemctl status aris-backend aris-ui aris-kiosk --no-pager
   - Confirm enough free memory/storage (`free -h`, `df -h`).
 - **Backend down**
   - Check backend logs: `journalctl -u aris-backend -b --no-pager`.
-  - Verify Python virtualenv and dependencies are installed in `/home/pi/aris/Software/Backend`.
+  - Verify Python virtualenv and dependencies are installed in `/home/admin/aris/Software/Backend`.
 - **AV mode mismatch**
   - Re-check `/boot/config.txt` values (`enable_tvout=1`, `sdtv_mode=2`) and reboot.
