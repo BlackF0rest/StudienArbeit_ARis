@@ -1,0 +1,16 @@
+[Unit]
+Description=ARis Chromium Kiosk (X11)
+After=systemd-user-sessions.service aris-ui.service
+Requires=aris-ui.service
+
+[Service]
+Type=simple
+User=pi
+Environment=HOME=/home/pi
+WorkingDirectory=/home/pi
+ExecStart=/usr/bin/startx /home/pi/aris/Software/deploy/pi/kiosk/start_onboard.sh -- :0 vt1
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target

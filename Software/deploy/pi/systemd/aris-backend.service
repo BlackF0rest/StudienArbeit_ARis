@@ -1,0 +1,18 @@
+[Unit]
+Description=ARis Backend
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=pi
+WorkingDirectory=/home/pi/aris/Software/Backend
+Environment=HOST=127.0.0.1
+Environment=PORT=5000
+Environment=DB_PATH=/home/pi/aris/Software/Backend/data.db
+ExecStart=/usr/bin/python3 /home/pi/aris/Software/Backend/run.py
+Restart=always
+RestartSec=2
+
+[Install]
+WantedBy=multi-user.target
