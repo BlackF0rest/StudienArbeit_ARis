@@ -7,7 +7,7 @@ Requires=aris-backend.service
 [Service]
 Type=simple
 User=pi
-WorkingDirectory=/home/pi/aris/Software/Onboard_UI
+WorkingDirectory=/home/StudienArbeit_ARis/Software/Onboard_UI
 Environment=HOST=127.0.0.1
 Environment=PORT=4173
 ExecStart=/usr/bin/npm run preview -- --host 127.0.0.1 --port 4173
