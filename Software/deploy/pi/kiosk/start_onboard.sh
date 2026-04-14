@@ -2,8 +2,8 @@
 set -euo pipefail
 
 export DISPLAY=:0
-export XAUTHORITY=/home/pi/.Xauthority
-export DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus
+export XAUTHORITY=/home/admin/.Xauthority
+export DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/$(id -u)/bus"
 
 # Wait for backend + UI server
 for i in {1..60}; do

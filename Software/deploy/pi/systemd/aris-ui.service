@@ -6,7 +6,7 @@ Requires=aris-backend.service
 
 [Service]
 Type=simple
-User=pi
+User=admin
 WorkingDirectory=/home/StudienArbeit_ARis/Software/Onboard_UI
 Environment=HOST=127.0.0.1
 Environment=PORT=4173
