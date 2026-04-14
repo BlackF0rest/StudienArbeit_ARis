@@ -9,6 +9,7 @@ export DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus
 for i in {1..60}; do
   curl -fsS http://127.0.0.1:5000/api/status >/dev/null 2>&1 && \
   curl -fsS http://127.0.0.1:4173 >/dev/null 2>&1 && break
+  echo "whaiting for backend and UI Server"
   sleep 1
 done
 
