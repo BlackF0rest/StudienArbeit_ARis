@@ -6,9 +6,9 @@ Requires=aris-ui.service
 [Service]
 Type=simple
 User=pi
-Environment=HOME=/home/pi
-WorkingDirectory=/home/pi
-ExecStart=/usr/bin/startx /home/pi/aris/Software/deploy/pi/kiosk/start_onboard.sh -- :0 vt1
+Environment=HOME=/home
+WorkingDirectory=/home
+ExecStart=/usr/bin/startx /home/StudienArbeit_ARis/Software/deploy/pi/kiosk/start_onboard.sh -- :0 vt1
 Restart=always
 RestartSec=3
 
