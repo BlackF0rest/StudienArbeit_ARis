@@ -132,6 +132,26 @@ To disable rotation, set:
 Environment=ARIS_DISPLAY_ROTATION=normal
 ```
 
+
+### Fallback: kiosk startup via `~/.bash_profile` (tty1)
+
+If `aris-kiosk.service` cannot be used on your device, you can start ARIS kiosk from the login shell on `tty1`.
+Use the tracked template file:
+
+- `Software/deploy/pi/kiosk/bash_profile.kiosk.example`
+
+Install it for user `admin`:
+
+```bash
+cp Software/deploy/pi/kiosk/bash_profile.kiosk.example /home/admin/.bash_profile
+chown admin:admin /home/admin/.bash_profile
+```
+
+Important notes:
+- This fallback depends on local login on `/dev/tty1` and **must not** run in parallel with an enabled `aris-kiosk.service`.
+- The template already exports the required variables (`ARIS_APP_URL`, `ARIS_BACKEND_STATUS_URL`, `ARIS_KIOSK_BROWSER`, `ARIS_DISPLAY_ROTATION`, `XAUTHORITY`) before calling `start_onboard.sh`.
+- `start_onboard.sh` also supports overriding these values via environment variables, so you can tune behavior without changing the script.
+
 ## 6. Verification
 
 Run these checks:

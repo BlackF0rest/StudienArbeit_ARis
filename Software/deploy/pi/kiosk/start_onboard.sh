@@ -1,11 +1,13 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-export DISPLAY=:0
-export XAUTHORITY=/home/admin/.Xauthority
-export DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/$(id -u)/bus"
+# Runtime configuration (can be overridden via environment).
+export DISPLAY="${DISPLAY:-:0}"
+export XAUTHORITY="${XAUTHORITY:-${HOME:-/home/admin}/.Xauthority}"
+export DBUS_SESSION_BUS_ADDRESS="${DBUS_SESSION_BUS_ADDRESS:-unix:path=/run/user/$(id -u)/bus}"
 
-APP_URL="http://127.0.0.1:4173"
+APP_URL="${ARIS_APP_URL:-http://127.0.0.1:4173}"
+BACKEND_STATUS_URL="${ARIS_BACKEND_STATUS_URL:-http://127.0.0.1:5000/api/status}"
 KIOSK_BROWSER="${ARIS_KIOSK_BROWSER:-chromium}"
 DISPLAY_ROTATION="${ARIS_DISPLAY_ROTATION:-inverted}"
 
@@ -85,7 +87,7 @@ apply_display_rotation() {
 
 # Wait for backend + UI server
 for i in {1..60}; do
-  curl -fsS http://127.0.0.1:5000/api/status >/dev/null 2>&1 && \
+  curl -fsS "$BACKEND_STATUS_URL" >/dev/null 2>&1 && \
   curl -fsS "$APP_URL" >/dev/null 2>&1 && break
   echo "waiting for backend and UI server"
   sleep 1
