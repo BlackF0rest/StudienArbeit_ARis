@@ -1,0 +1,22 @@
+# ~/.bash_profile
+#
+# ARIS kiosk fallback startup via tty1 login.
+# Use this only when aris-kiosk.service is intentionally disabled or unavailable.
+
+# Optional debug log for startup diagnostics
+echo "$(date) .bash_profile executed | tty=$(tty) | DISPLAY=${DISPLAY:-<empty>}" >> /home/admin/profile-debug.log
+
+if [ -f ~/.profile ]; then
+  . ~/.profile
+fi
+
+# Auto-start ARIS kiosk only on local tty1 login
+if [ -z "${DISPLAY:-}" ] && [ "$(tty)" = "/dev/tty1" ]; then
+  export ARIS_APP_URL="http://127.0.0.1:4173"
+  export ARIS_BACKEND_STATUS_URL="http://127.0.0.1:5000/api/status"
+  export ARIS_KIOSK_BROWSER="midori"
+  export ARIS_DISPLAY_ROTATION="inverted"
+  export XAUTHORITY="/home/admin/.Xauthority"
+
+  /usr/bin/startx /home/admin/aris/Software/deploy/pi/kiosk/start_onboard.sh -- :0 vt1 >> /home/admin/aris-kiosk.log 2>&1
+fi
