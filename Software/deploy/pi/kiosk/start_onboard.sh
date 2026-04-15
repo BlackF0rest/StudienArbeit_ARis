@@ -10,6 +10,7 @@ APP_URL="${ARIS_APP_URL:-http://127.0.0.1:4173}"
 BACKEND_STATUS_URL="${ARIS_BACKEND_STATUS_URL:-http://127.0.0.1:5000/api/status}"
 KIOSK_BROWSER="${ARIS_KIOSK_BROWSER:-midori}"
 DISPLAY_ROTATION="${ARIS_DISPLAY_ROTATION:-inverted}"
+COG_LAUNCHER="${ARIS_COG_LAUNCHER:-cage}"
 
 is_low_ram_wrapper() {
   local candidate="$1"
@@ -76,7 +77,10 @@ apply_display_rotation() {
   fi
 
   local output=""
-  output="$(xrandr --query | awk '/ connected/{print $1; exit}')"
+  if ! output="$(xrandr --query 2>/dev/null | awk '/ connected/{print $1; exit}')"; then
+    echo "xrandr query failed (likely no X11 session); skipping rotation"
+    return 0
+  fi
   if [[ -z "$output" ]]; then
     echo "No connected display output found via xrandr; skipping rotation"
     return 0
@@ -105,7 +109,22 @@ case "$KIOSK_BROWSER" in
       exit 1
     fi
 
-    exec cog --platform=x11 "$APP_URL"
+    case "$COG_LAUNCHER" in
+      cage)
+        if ! command -v cage >/dev/null 2>&1; then
+          echo "ARIS_COG_LAUNCHER=cage requested, but cage is not installed"
+          exit 1
+        fi
+        exec cage -- cog "$APP_URL"
+        ;;
+      x11)
+        exec cog --platform=x11 "$APP_URL"
+        ;;
+      *)
+        echo "Unsupported ARIS_COG_LAUNCHER value: $COG_LAUNCHER (supported: cage, x11)"
+        exit 1
+        ;;
+    esac
     ;;
   midori)
     if command -v flatpak >/dev/null 2>&1 && flatpak info org.midori_browser.Midori >/dev/null 2>&1; then
