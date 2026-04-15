@@ -80,6 +80,48 @@ Notes:
 - `install_pi.sh` is safe to re-run: it reuses existing Node/Python environments and only overwrites systemd service files when contents changed.
 - `update_onboard.sh` performs a fast-forward-only `git pull`, rebuilds `Software/Onboard_UI`, and restarts `aris-backend`, `aris-ui`, and `aris-kiosk`.
 
+
+### Browser selection (Chromium, Cog, Midori)
+
+The kiosk launcher (`Software/deploy/pi/kiosk/start_onboard.sh`) supports three modes:
+
+- `ARIS_KIOSK_BROWSER=chromium` (default): launches the real Chromium binary and skips Raspberry Pi wrapper scripts that show the `<1GB RAM` popup.
+- `ARIS_KIOSK_BROWSER=cog`: launches [Cog](https://wpewebkit.org/) (WPE WebKit), which is typically lighter than Chromium for kiosk-style single-page apps.
+- `ARIS_KIOSK_BROWSER=midori`: launches Midori in fullscreen app mode (lightweight GTK WebKit browser).
+
+To switch browser without editing tracked service files, create a systemd override:
+
+```bash
+sudo systemctl edit aris-kiosk.service
+```
+
+Add:
+
+```ini
+[Service]
+Environment=ARIS_KIOSK_BROWSER=midori
+```
+
+Then reload + restart:
+
+```bash
+sudo systemctl daemon-reload
+sudo systemctl restart aris-kiosk.service
+```
+
+If you use `cog` or `midori`, install them first:
+
+```bash
+sudo apt install -y cog midori
+```
+
+If one package is not available in your current Debian/Raspberry Pi release, keep the other and verify via:
+
+```bash
+command -v cog || true
+command -v midori || command -v midori-browser || true
+```
+
 ## 6. Verification
 
 Run these checks:
@@ -95,8 +137,12 @@ systemctl status aris-backend aris-ui aris-kiosk --no-pager
 - **Blank screen / no X**
   - Check X packages were installed (`xserver-xorg`, `xinit`, `openbox`).
   - Review kiosk/UI logs: `journalctl -u aris-kiosk -u aris-ui -b --no-pager`.
+- **Chromium `<1GB RAM` popup blocks startup**
+  - Confirm the kiosk unit runs `Software/deploy/pi/kiosk/start_onboard.sh` (this script now skips low-RAM wrapper scripts automatically).
+  - Check logs for wrapper detection: `journalctl -u aris-kiosk -b --no-pager | grep -i wrapper`.
+  - If Chromium remains unstable on Pi Zero 2 W, switch to `ARIS_KIOSK_BROWSER=midori` or `ARIS_KIOSK_BROWSER=cog` using the override shown above.
 - **Chromium crash loop**
-  - Verify `chromium-browser` is installed and launch flags are correct in kiosk startup/service scripts.
+  - Verify Chromium/Cog package installation and launch flags in kiosk startup/service scripts.
   - Confirm enough free memory/storage (`free -h`, `df -h`).
 - **Backend down**
   - Check backend logs: `journalctl -u aris-backend -b --no-pager`.
