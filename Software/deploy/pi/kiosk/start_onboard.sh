@@ -7,6 +7,7 @@ export DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/$(id -u)/bus"
 
 APP_URL="http://127.0.0.1:4173"
 KIOSK_BROWSER="${ARIS_KIOSK_BROWSER:-chromium}"
+DISPLAY_ROTATION="${ARIS_DISPLAY_ROTATION:-inverted}"
 
 is_low_ram_wrapper() {
   local candidate="$1"
@@ -56,6 +57,32 @@ find_midori_binary() {
   return 1
 }
 
+apply_display_rotation() {
+  local rotation="$1"
+
+  case "$rotation" in
+    normal|left|right|inverted) ;;
+    *)
+      echo "Unsupported ARIS_DISPLAY_ROTATION value: $rotation (supported: normal, left, right, inverted)"
+      return 1
+      ;;
+  esac
+
+  if ! command -v xrandr >/dev/null 2>&1; then
+    echo "xrandr is not installed; skipping display rotation"
+    return 0
+  fi
+
+  local output=""
+  output="$(xrandr --query | awk '/ connected/{print $1; exit}')"
+  if [[ -z "$output" ]]; then
+    echo "No connected display output found via xrandr; skipping rotation"
+    return 0
+  fi
+
+  xrandr --output "$output" --rotate "$rotation"
+}
+
 # Wait for backend + UI server
 for i in {1..60}; do
   curl -fsS http://127.0.0.1:5000/api/status >/dev/null 2>&1 && \
@@ -66,6 +93,8 @@ done
 
 # Hide cursor (optional)
 unclutter -idle 0.1 -root &
+
+apply_display_rotation "$DISPLAY_ROTATION"
 
 case "$KIOSK_BROWSER" in
   cog)
