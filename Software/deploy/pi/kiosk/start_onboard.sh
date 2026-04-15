@@ -108,9 +108,13 @@ case "$KIOSK_BROWSER" in
     exec cog --platform=x11 "$APP_URL"
     ;;
   midori)
+    if command -v flatpak >/dev/null 2>&1 && flatpak info org.midori_browser.Midori >/dev/null 2>&1; then
+      exec flatpak run org.midori_browser.Midori "$APP_URL"
+    fi
+
     BROWSER_BIN="$(find_midori_binary || true)"
     if [[ -z "$BROWSER_BIN" ]]; then
-      echo "ARIS_KIOSK_BROWSER=midori requested, but no midori binary was found"
+      echo "ARIS_KIOSK_BROWSER=midori requested, but neither flatpak Midori nor a native midori binary was found"
       exit 1
     fi
 
