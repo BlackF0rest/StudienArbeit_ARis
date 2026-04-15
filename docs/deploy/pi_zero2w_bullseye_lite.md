@@ -89,6 +89,8 @@ The kiosk launcher (`Software/deploy/pi/kiosk/start_onboard.sh`) supports three 
 - `ARIS_KIOSK_BROWSER=cog`: launches [Cog](https://wpewebkit.org/) (WPE WebKit), which is typically lighter than Chromium for kiosk-style single-page apps.
 - `ARIS_KIOSK_BROWSER=midori`: launches Midori in fullscreen app mode (lightweight GTK WebKit browser).
 
+The launcher also applies display rotation on startup via `xrandr`. By default it uses a 180° rotation (`ARIS_DISPLAY_ROTATION=inverted`).
+
 To switch browser without editing tracked service files, create a systemd override:
 
 ```bash
@@ -100,6 +102,7 @@ Add:
 ```ini
 [Service]
 Environment=ARIS_KIOSK_BROWSER=midori
+Environment=ARIS_DISPLAY_ROTATION=inverted
 ```
 
 Then reload + restart:
@@ -120,6 +123,13 @@ If one package is not available in your current Debian/Raspberry Pi release, kee
 ```bash
 command -v cog || true
 command -v midori || command -v midori-browser || true
+```
+
+To disable rotation, set:
+
+```ini
+[Service]
+Environment=ARIS_DISPLAY_ROTATION=normal
 ```
 
 ## 6. Verification
