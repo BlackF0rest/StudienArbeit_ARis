@@ -8,6 +8,7 @@ Type=simple
 User=admin
 Environment=HOME=/home/admin
 Environment=ARIS_KIOSK_BROWSER=midori
+Environment=ARIS_DISPLAY_ROTATION=inverted
 WorkingDirectory=/home/admin
 ExecStart=/usr/bin/startx /home/StudienArbeit_ARis/Software/deploy/pi/kiosk/start_onboard.sh -- :0 vt1
 Restart=always
