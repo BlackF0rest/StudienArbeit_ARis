@@ -7,6 +7,7 @@ Requires=aris-ui.service
 Type=simple
 User=admin
 Environment=HOME=/home/admin
+Environment=ARIS_KIOSK_BROWSER=midori
 WorkingDirectory=/home/admin
 ExecStart=/usr/bin/startx /home/StudienArbeit_ARis/Software/deploy/pi/kiosk/start_onboard.sh -- :0 vt1
 Restart=always
