@@ -1,5 +1,5 @@
 [Unit]
-Description=ARis Chromium Kiosk (X11)
+Description=ARis Kiosk Launcher
 After=systemd-user-sessions.service aris-ui.service
 Requires=aris-ui.service
 
@@ -7,10 +7,11 @@ Requires=aris-ui.service
 Type=simple
 User=admin
 Environment=HOME=/home/admin
-Environment=ARIS_KIOSK_BROWSER=midori
+Environment=ARIS_KIOSK_BROWSER=cog
+Environment=ARIS_COG_LAUNCHER=cage
 Environment=ARIS_DISPLAY_ROTATION=inverted
 WorkingDirectory=/home/admin
-ExecStart=/usr/bin/startx /home/StudienArbeit_ARis/Software/deploy/pi/kiosk/start_onboard.sh -- :0 vt1
+ExecStart=/home/StudienArbeit_ARis/Software/deploy/pi/kiosk/start_onboard.sh
 Restart=always
 RestartSec=3
 
