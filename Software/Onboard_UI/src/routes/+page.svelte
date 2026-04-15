@@ -2,129 +2,166 @@
 	import { onMount } from 'svelte';
 	import { get } from 'svelte/store';
 	import Header from './header.svelte';
-	import { bootstrapFeatureHost } from '$lib/feature-registration';
-	import { featureHost, type FeatureRuntimeSnapshot } from '$lib/feature-host';
-	import { fetchPcLinkDiagnostics, type PcLinkDiagnostics } from '$lib/services/pc-link-diagnostics';
-	import { homeCarouselIndex, shortPressPulse, getHintForContext, setInputContext, type InputHint } from '$lib/input-controller';
 	import InputHintOverlay from '$lib/components/InputHintOverlay.svelte';
-	import HudCard from '$lib/components/hud/HudCard.svelte';
-	import HudScaffold from '$lib/components/hud/HudScaffold.svelte';
-	import StatusPill from '$lib/components/hud/StatusPill.svelte';
-	import { isDebugUiEnabled } from '$lib/runtime-flags';
+	import {
+		homeCarouselIndex,
+		shortPressPulse,
+		getHintForContext,
+		setInputContext,
+		type InputHint
+	} from '$lib/input-controller';
 
-	const COMPACT_MODE_POLL_INTERVAL_MS = 6000;
+	const apps = [
+		{ name: 'Navigation', route: '/Navigation', info: 'Pfeile, Kompass und Richtung' },
+		{ name: 'Teleprompter', route: '/Teleprompter', info: 'Text groß und klar anzeigen' },
+		{ name: 'Messages', route: '/Messages', info: 'Kurze Mitteilungen lesen' }
+	] as const;
 
-	const carouselApps = ['Navigation', 'Teleprompter', 'Messages/HUD'];
-	const routeByApp: Record<string, string> = {
-		Navigation: '/Navigation',
-		Teleprompter: '/Teleprompter',
-		'Messages/HUD': '/Messages'
-	};
-
-	let selectedApp = carouselApps[0];
-	let hint: InputHint = getHintForContext('home');
+	let selectedIndex = 0;
 	let pulseCard = false;
 	let pulseTimeout: ReturnType<typeof setTimeout> | undefined;
+	let hint: InputHint = getHintForContext('home');
 
-	let debugUiEnabled = false;
-
-	let snapshot: FeatureRuntimeSnapshot = {
-		registered: [],
-		health: {},
-		telemetry: []
-	};
-
-	let pcDiagnostics: PcLinkDiagnostics = {
-		pc_link: { active: false, sessions: [] },
-		stream_metrics: {
-			connected: false,
-			reconnect_attempts: 0,
-			quality: 'medium',
-			avg_bandwidth_mbps: null,
-			avg_frame_drop_ratio: null,
-			onboard_only_mode: false,
-			last_updated: new Date(0).toISOString()
-		},
-		overlay_contract: {
-			contract_version: '1.0',
-			coordinate_space: 'normalized',
-			safe_area: { x: 0, y: 0, width: 1, height: 1 },
-			z_order: ['streamed-scene', 'streamed-overlay', 'onboard-hud'],
-			last_synced_at: new Date(0).toISOString()
-		}
-	};
-
-	$: selectedModule =
-		snapshot.registered.find((module) => {
-			if (selectedApp === 'Messages/HUD') return module.id === 'ai-chat-scaffold';
-			if (selectedApp === 'Navigation') return module.id === 'navigation-mvp';
-			if (selectedApp === 'Teleprompter') return module.id === 'teleprompter-runtime';
-			return false;
-		}) ?? null;
-
-	$: selectedHealth = selectedModule ? snapshot.health[selectedModule.id] : undefined;
-
-	async function refreshSnapshot(): Promise<void> {
-		snapshot = await featureHost.snapshot();
-		pcDiagnostics = await fetchPcLinkDiagnostics();
-	}
+	$: selectedApp = apps[selectedIndex] ?? apps[0];
 
 	onMount(() => {
 		setInputContext('home');
-		selectedApp = carouselApps[get(homeCarouselIndex)] ?? carouselApps[0];
-		const unsubscribe = homeCarouselIndex.subscribe((index) => {
-			selectedApp = carouselApps[index] ?? carouselApps[0];
+		selectedIndex = get(homeCarouselIndex);
+
+		const unsubscribeIndex = homeCarouselIndex.subscribe((index) => {
+			selectedIndex = index;
 		});
+
 		const unsubscribePulse = shortPressPulse.subscribe(() => {
 			pulseCard = true;
 			if (pulseTimeout) clearTimeout(pulseTimeout);
 			pulseTimeout = setTimeout(() => {
 				pulseCard = false;
-			}, 160);
+			}, 180);
 		});
-		debugUiEnabled = isDebugUiEnabled();
-		bootstrapFeatureHost();
-		void refreshSnapshot();
-		const timer = setInterval(() => void refreshSnapshot(), COMPACT_MODE_POLL_INTERVAL_MS);
+
 		return () => {
-			unsubscribe();
+			unsubscribeIndex();
 			unsubscribePulse();
 			if (pulseTimeout) clearTimeout(pulseTimeout);
-			clearInterval(timer);
 		};
 	});
 </script>
 
 <Header />
 
-<HudScaffold title="Host Home" subtitle="600x400 profile: 3 compact blocks, 2 lines per block">
-	<svelte:fragment slot="header">
-		<StatusPill text={pcDiagnostics.pc_link.active ? 'PC Link Connected' : 'PC Link Offline'} tone={pcDiagnostics.pc_link.active ? 'ok' : 'warn'} />
-	</svelte:fragment>
+<main class="main-compact">
+	<section class="focus-card {pulseCard ? 'pulse' : ''}">
+		<p class="label">Aktive Ansicht</p>
+		<h1>{selectedApp.name}</h1>
+		<p class="description">{selectedApp.info}</p>
+		<a class="open-link" href={selectedApp.route}>Öffnen</a>
+	</section>
 
-	<div class="hud-grid-3">
-		<HudCard title="Selected app" className={`hud-compact-block ${pulseCard ? 'short-pulse' : ''}`}>
-			<p class="hud-primary-point">{selectedApp}</p>
-			<p class="hud-secondary-line">Long press to open · Route: {routeByApp[selectedApp]}</p>
-			<p class="hud-compact-line">Health: {selectedHealth?.ok ? 'Healthy' : 'Pending'}</p>
-		</HudCard>
+	<section class="quick-grid">
+		{#each apps as app, index}
+			<a class="quick-item" class:is-active={index === selectedIndex} href={app.route}>
+				<span class="quick-title">{app.name}</span>
+				<span class="quick-route">{app.route}</span>
+			</a>
+		{/each}
+	</section>
 
-		<HudCard title="Connection summary" className="hud-compact-block">
-			<p class="hud-compact-line">PC Link: {pcDiagnostics.pc_link.active ? 'Connected' : 'Offline'} · Sessions: {pcDiagnostics.pc_link.sessions.length}</p>
-			<p class="hud-compact-line">Stream: {pcDiagnostics.stream_metrics.connected ? 'Connected' : 'Disconnected'} · Quality: {pcDiagnostics.stream_metrics.quality}</p>
-		</HudCard>
-
-		<HudCard title="Current hint" className="hud-compact-block">
-			<p class="hud-compact-line">short: {hint.short}</p>
-			<p class="hud-compact-line">long: {hint.long}</p>
-		</HudCard>
-	</div>
-
-	{#if debugUiEnabled}
-		<p class="hud-muted hud-home-debug-link">Detailed telemetry/diagnostics moved to <a href="/Debug">Debug</a>.</p>
-	{/if}
-
-	<svelte:fragment slot="hint">
+	<footer class="hint-wrap">
 		<InputHintOverlay {hint} />
-	</svelte:fragment>
-</HudScaffold>
+	</footer>
+</main>
+
+<style>
+	.main-compact {
+		min-height: calc(100dvh - 3rem);
+		padding: 0.75rem;
+		display: grid;
+		gap: 0.75rem;
+		align-content: start;
+	}
+
+	.focus-card {
+		border: 1px solid var(--hud-border-accent);
+		border-radius: 0.75rem;
+		padding: 0.8rem;
+		background: linear-gradient(160deg, #0f1f0f 0%, #090909 100%);
+	}
+
+	.focus-card.pulse {
+		box-shadow: 0 0 0 2px rgb(158 255 158 / 25%);
+	}
+
+	.label {
+		margin: 0;
+		font-size: 0.82rem;
+		color: var(--hud-muted);
+		text-transform: uppercase;
+		letter-spacing: 0.04em;
+	}
+
+	h1 {
+		margin: 0.2rem 0;
+		font-size: clamp(1.55rem, 9vw, 2.4rem);
+		line-height: 1.05;
+	}
+
+	.description {
+		margin: 0;
+		font-size: 1rem;
+		color: #d5f2d5;
+	}
+
+	.open-link {
+		display: inline-flex;
+		margin-top: 0.75rem;
+		padding: 0.45rem 0.9rem;
+		border-radius: 0.55rem;
+		border: 1px solid var(--hud-border-accent);
+		background: #143614;
+		font-size: 1rem;
+		font-weight: 700;
+		text-decoration: none;
+		color: var(--hud-text);
+	}
+
+	.quick-grid {
+		display: grid;
+		gap: 0.55rem;
+	}
+
+	.quick-item {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		gap: 0.75rem;
+		padding: 0.62rem 0.68rem;
+		border-radius: 0.65rem;
+		border: 1px solid var(--hud-border);
+		text-decoration: none;
+		background: var(--hud-surface);
+		color: var(--hud-text);
+	}
+
+	.quick-item.is-active {
+		border-color: var(--hud-border-accent);
+		background: #0f1b0f;
+	}
+
+	.quick-title {
+		font-size: 1.05rem;
+		font-weight: 650;
+	}
+
+	.quick-route {
+		font-size: 0.9rem;
+		color: var(--hud-muted);
+		font-family: var(--hud-font-mono);
+	}
+
+	.hint-wrap {
+		min-height: 1.8rem;
+		display: grid;
+		align-items: end;
+	}
+</style>
