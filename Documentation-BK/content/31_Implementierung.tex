@@ -12,9 +12,11 @@ Mit dem ankommen der einzelnen Teile wurden diese in den mechanischen Aufbau int
 \label{sec:softwareImplementierung}
 Das Softwaredesign wurde nach der Konzeption nicht direkt umgesetzt. Zuerst wurden einige Tests mit den verschiedenen Komponenten, Libraries und Hardwarekomponenten durchgeführt. 
 
-Dabei wurden anfänglich noch verschiedene Libraries und Frameworks getestet, um lzu der letztendlich erarbeiteten Struktur zu kommen. Diese wird in den folgenden unterkapiteln beschrieben.
+Dabei wurden anfänglich noch verschiedene Libraries und Frameworks getestet, um zu der letztendlich erarbeiteten Struktur zu kommen. Diese wird in den folgenden unterkapiteln beschrieben. Hauptsächlich behandeln die Kapitel also die tatsächliche LÖsung und das abgegebene nur in Spezialfällen den Weg zu dieser.
 
-Vorab zu bemerken ist, dass der Code hier nur Beispielhaft oder prinzipiell besprochen wird und nicht auf spezifischen Code eingegangen wird. Dies liegt der Komplexität und dem Wiederholenden Character von Code zugrunde. Hier geht es mehr um das verständnis der Funktion und der Umsetzung - nicht der genauen Zeilen. Dafür bitte in den Code selbst schauen, da dieser gut Dokummentiert ist, um für zukünftige Erweiterungen offen zu sein.
+Zu beginn der Entwicklungszeit wurde der Grundstein der Software gelegt während die verschiedenen Bauteile ankamen. Dabei wurden die verschiedenen Hardwarekomponenten einzeln getestet. Nach dem Abschluss dieser Tests wurden die Bauteile abgegeben, um in die Brille zusammengebaut zu werden. Während dieser Zeit wurden die verschiedenen Softwareteile wie Frontend und Backend systemabgesondert entwickelt. Nach dem Abschluss der Hardwareentwicklung konnte die Finale Softwareintegration beginnen. Dabei wurden einige Herausforderungen bezüglich der tatsächlichen Größe des Displays und der Verbindung mit dessen und dem Raspberry Pi gefunden. Deshalb wurde das Feature Set reduziert, um mehr Zeit zum debugging und Lösen dieser Themen zu schaffen. Dies wird im späteren Verlauf der Arbeit noch weiter besprocheh sowie dessen genaue ausmaße auf das gesamte System.
+
+Zu bemerken ist, dass der Code hier nur Beispielhaft oder prinzipiell besprochen wird und nicht auf spezifischen Code eingegangen wird. Dies liegt der Komplexität und dem Wiederholenden Character von Code zugrunde. Hier geht es mehr um das verständnis der Funktion und der Umsetzung - nicht der genauen Zeilen. Dafür bitte in den Code selbst schauen, da dieser gut Dokummentiert ist, um für zukünftige Erweiterungen offen zu sein.
 
 \subsection{Frontend - Svelte Implementierung}
 \label{subsec:SvelteImplemeniterung}
@@ -24,6 +26,16 @@ Svelte an sich ist recht einfach aufgebaut. Neben den verschiedenen Konfiguratio
 Nach diesem Prinzip wurden alle Seiten entwickelt. 
 In dem Verzeichnis routes befindet sich ebenfalls die Datei "+layout.svelte", welche das generelle Layout der Seiten bestimmt. Diese wirken sich auf die ganze Website aus. Dies ist ebenfalls für header.svete der fall.
 Die einzelnen Svelte Seiten erhalten die von diesen benötigten Dateien immer durch das Python backend und die dazugehörigen REST abfragen. Diese werden zu beginn der Svelte Dateien durch typescript oder Javascript gezogen.
+
+Im finalen Code sind verschiedene Seiten bereits umgesetzt, welche durch das Backend supported und damit gestartet werden können. Das sind:
+\begin{description}
+    \item[Hub] - dies ist die Hauptseite welche als Basis für die AR Brille dient. Hier werden grundinformatinen über das System angezeigt und die grundlegende Navigation wird ermöglicht.
+    \item[Navigation (TbT)] - die Navigation ist eine App, welche eine Physische Navigation mithilfe der Companion App ermöglicht.
+    \item[(AI-)Chat] - eine Chatfunktion die unter anderem mit ChatGPT genutzt werden kann. Dabei muss ebenfalls eine Verbindung mit der CompanionApp bestehen, über welche die Kommunikation mit einer KI-API möglich ist. Mit weiterer Entwicklungzeit wäre auch eine direkte Anbindung an eine KI-API möglich, gegeben das System hat eine Internetverbindung.
+    \item[Teleprompter] - durch den Teleprompter ist es möglich, einen Text über den Bildschirm laufen zu lassen. Dieser kann in der Companion App eingegeben und die Geschwindigkeit usw. eingestellt werden.
+\end{description}
+
+Weitere Seiten können wie oben gezeigt gebaut und eingebunden werden. Durch das schreiben einer neuen +page.svelte im eigenen Ordner wird automatische eine neue Seite eingebaut werden. Um diese auch in die Navigation einzubinden muss die neue Seite unter der Navigationsführung ebenfalls eingebunden werden.
 
 \subsection{Backend - Python Implementierung}
 \label{subsec:PythongImplementierung}
@@ -38,3 +50,4 @@ Die Datenbank ist für das Speichern von jeglichen Daten welche während der lau
 
 \subsection{Pixel Streaming Implementierung}
 \label{subsec:PixelStreamingImplementierung}
+Die Pixelstreaming Komponente wurde wegen der Zeitkomponente und den Technischen Herausforderungen nur vorbereitet, jedoch nicht umgesetzt oder getestet. Es gibt jedoch im Code bereits eine Anbindungsstelle, welche die Verbindung mit einem im Netz verfügbaren PixelStreaming Streams ermöglicht. Pixelstreaming ermöglicht das Streamen einer Unreal Engine Datei, welche auf einem externen Rechner gerendert und ausgeführt wird. Dies ermöglicht das einfache Bauen von zum Beispiel Anleitungen für eine Produktionsstätte oder der Wartung von Maschinen. Eine Anleitung könnte dabei in Unreal Engine Schritt für Schritt oder per Video angezeigt werden.
