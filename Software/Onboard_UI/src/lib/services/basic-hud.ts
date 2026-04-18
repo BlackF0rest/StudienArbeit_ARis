@@ -17,7 +17,12 @@ const FALLBACK_STATUS: HudStatus = {
 function pickNumber(value: unknown): number | null {
 	if (typeof value === 'number' && Number.isFinite(value)) return value;
 	if (typeof value === 'string') {
-		const parsed = Number(value);
+		const direct = Number(value);
+		if (Number.isFinite(direct)) return direct;
+
+		const match = value.match(/-?\d+(\.\d+)?/);
+		if (!match) return null;
+		const parsed = Number(match[0]);
 		if (Number.isFinite(parsed)) return parsed;
 	}
 	return null;
@@ -27,12 +32,16 @@ export async function fetchHudStatus(): Promise<HudStatus> {
 	try {
 		const response = await fetch('http://localhost:5000/api/mainInfo');
 		if (!response.ok) throw new Error(`mainInfo returned ${response.status}`);
-		const data = (await response.json()) as Record<string, unknown>;
+		const responseBody = (await response.json()) as { data?: Record<string, unknown> } & Record<
+			string,
+			unknown
+		>;
+		const data = (responseBody.data as Record<string, unknown> | undefined) ?? responseBody;
 
 		return {
-			battery: pickNumber(data.Battery),
-			temperature: pickNumber(data.Temperature),
-			humidity: pickNumber(data.Humidity),
+			battery: pickNumber(data.battery_percent ?? data.Battery),
+			temperature: pickNumber(data.temperature_c ?? data.Temperature),
+			humidity: pickNumber(data.humidity_percent ?? data.Humidity),
 			connection: 'connected',
 			lastUpdated: new Date().toISOString()
 		};
