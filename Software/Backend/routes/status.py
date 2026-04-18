@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
 
-from flask import Blueprint, g, jsonify
+from flask import Blueprint, current_app, g, jsonify
 
 bp = Blueprint("status", __name__)
 
@@ -47,6 +47,7 @@ def get_status():
                 "teleprompter_send": "/api/teleprompter/send (POST)",
                 "teleprompter_history": "/api/teleprompter/history",
                 "teleprompter_reset": "/api/teleprompter/reset (POST)",
+                "sensors": "/api/sensors",
             },
         }
     )
@@ -55,6 +56,29 @@ def get_status():
 @bp.route("/api/v1/status", methods=["GET"])
 def get_status_v1():
     return get_status()
+
+
+@bp.route("/api/sensors", methods=["GET"])
+def get_sensor_snapshot():
+    sensor_service = current_app.extensions.get("services", {}).get("sensor")
+
+    if sensor_service is None:
+        return (
+            jsonify(
+                {
+                    "ok": False,
+                    "error": {
+                        "code": "sensor_service_unavailable",
+                        "message": "Sensor service is not registered",
+                    },
+                    "timestamp": datetime.now(timezone.utc).isoformat(),
+                    "trace_id": g.trace_id,
+                }
+            ),
+            503,
+        )
+
+    return _success(sensor_service.get_snapshot())
 
 
 @bp.route("/api/debug/diagnostics", methods=["GET"])
