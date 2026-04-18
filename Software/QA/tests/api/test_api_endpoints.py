@@ -41,6 +41,17 @@ def run_api_tests() -> list[TestResult]:
         except Exception as exc:  # noqa: BLE001
             results.append(TestResult(name="status_endpoint", passed=False, reason=str(exc)))
 
+
+        try:
+            sensors_response = request_json(server.base_url, "GET", "/api/sensors")
+            sensors_data = _unwrap_ok_payload(sensors_response)
+            assert_true("button" in sensors_data, "Sensors payload missing button field")
+            assert_true("mpu6050" in sensors_data, "Sensors payload missing mpu6050 field")
+            assert_true("gy63" in sensors_data, "Sensors payload missing gy63 field")
+            results.append(TestResult(name="sensors_snapshot", passed=True))
+        except Exception as exc:  # noqa: BLE001
+            results.append(TestResult(name="sensors_snapshot", passed=False, reason=str(exc)))
+
         try:
             diagnostics_response = request_json(server.base_url, "GET", "/api/debug/diagnostics")
             assert_true(

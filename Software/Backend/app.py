@@ -12,6 +12,7 @@ from routes.messages import bp as messages_bp
 from routes.status import bp as status_bp
 from routes.teleprompter import bp as teleprompter_bp
 from services.message_service import MessageService
+from services.sensor_service import SensorService
 from services.teleprompter_service import TeleprompterService
 
 
@@ -37,6 +38,7 @@ def create_app(config: AppConfig | None = None) -> Flask:
             repo=repo,
             strict_validation=app_config.strict_teleprompter_validation,
         ),
+        "sensor": SensorService(),
     }
 
     @app.before_request
