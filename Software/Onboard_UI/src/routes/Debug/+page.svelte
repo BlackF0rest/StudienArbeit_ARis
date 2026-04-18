@@ -4,6 +4,7 @@
 	import { bootstrapFeatureHost } from '$lib/feature-registration';
 	import { featureHost, type FeatureRuntimeSnapshot } from '$lib/feature-host';
 	import { fetchPcLinkDiagnostics, type PcLinkDiagnostics } from '$lib/services/pc-link-diagnostics';
+	import { fetchSensorDiagnostics, type SensorDiagnostics } from '$lib/services/sensor-diagnostics';
 	import { getHintForContext, registerAppActions, setInputContext, type InputHint } from '$lib/input-controller';
 	import InputHintOverlay from '$lib/components/InputHintOverlay.svelte';
 	import HudCard from '$lib/components/hud/HudCard.svelte';
@@ -36,10 +37,28 @@
 			last_synced_at: new Date(0).toISOString()
 		}
 	};
+	let sensorDiagnostics: SensorDiagnostics = {
+		connection: 'offline',
+		button: { pin: 40, state: 'unknown', lastEventAt: null },
+		mpu6050: {
+			sdaPin: 3,
+			sclPin: 5,
+			gyro: { x: null, y: null, z: null },
+			accel: { x: null, y: null, z: null }
+		},
+		gy63: {
+			sdaPin: 3,
+			sclPin: 5,
+			pressureHpa: null,
+			altitudeM: null
+		},
+		lastUpdated: new Date(0).toISOString()
+	};
 
 	async function refreshSnapshot(): Promise<void> {
 		snapshot = await featureHost.snapshot();
 		pcDiagnostics = await fetchPcLinkDiagnostics();
+		sensorDiagnostics = await fetchSensorDiagnostics();
 	}
 
 	onMount(() => {
@@ -85,6 +104,26 @@
 		<p><strong>Reconnects:</strong> {pcDiagnostics.stream_metrics.reconnect_attempts} · <strong>Bandwidth:</strong> {pcDiagnostics.stream_metrics.avg_bandwidth_mbps ?? 'n/a'} Mbps · <strong>Frame Drop:</strong> {pcDiagnostics.stream_metrics.avg_frame_drop_ratio ?? 'n/a'}</p>
 		<p><strong>Display Mode:</strong> {pcDiagnostics.stream_metrics.onboard_only_mode ? 'Onboard-only fallback' : 'Hybrid streaming'}</p>
 		<p><strong>Overlay Contract:</strong> v{pcDiagnostics.overlay_contract.contract_version} · {pcDiagnostics.overlay_contract.coordinate_space} · {pcDiagnostics.overlay_contract.z_order.join(' → ')}</p>
+	</HudCard>
+
+	<HudCard title="Onboard Sensors">
+		<p class="hud-primary-point">{sensorDiagnostics.connection === 'connected' ? 'Sensors online' : 'Sensor data offline (fallback)'}</p>
+		<p class="hud-muted"><strong>Updated:</strong> {sensorDiagnostics.lastUpdated}</p>
+		<p>
+			<strong>Button (Pin {sensorDiagnostics.button.pin}):</strong>
+			{sensorDiagnostics.button.state}
+			· <strong>Last event:</strong> {sensorDiagnostics.button.lastEventAt ?? 'n/a'}
+		</p>
+		<p>
+			<strong>MPU-6050 (SDA {sensorDiagnostics.mpu6050.sdaPin}, SCL {sensorDiagnostics.mpu6050.sclPin}):</strong>
+			Gyro x/y/z {sensorDiagnostics.mpu6050.gyro.x ?? 'n/a'} / {sensorDiagnostics.mpu6050.gyro.y ?? 'n/a'} / {sensorDiagnostics.mpu6050.gyro.z ?? 'n/a'}
+			· Accel x/y/z {sensorDiagnostics.mpu6050.accel.x ?? 'n/a'} / {sensorDiagnostics.mpu6050.accel.y ?? 'n/a'} / {sensorDiagnostics.mpu6050.accel.z ?? 'n/a'}
+		</p>
+		<p>
+			<strong>GY-63 (SDA {sensorDiagnostics.gy63.sdaPin}, SCL {sensorDiagnostics.gy63.sclPin}):</strong>
+			Druck {sensorDiagnostics.gy63.pressureHpa ?? 'n/a'} hPa
+			· Höhe {sensorDiagnostics.gy63.altitudeM ?? 'n/a'} m
+		</p>
 	</HudCard>
 
 	<svelte:fragment slot="hint">
