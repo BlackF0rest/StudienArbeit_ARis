@@ -73,6 +73,8 @@ function pickRecord(value: unknown): Record<string, unknown> {
 function pickState(value: unknown): ButtonDiagnostics['state'] {
 	if (value === 'pressed' || value === 'released') return value;
 	if (typeof value === 'boolean') return value ? 'pressed' : 'released';
+	if (value === 0 || value === '0') return 'pressed';
+	if (value === 1 || value === '1') return 'released';
 	return 'unknown';
 }
 
@@ -86,15 +88,35 @@ export async function fetchSensorDiagnostics(): Promise<SensorDiagnostics> {
 		const button = pickRecord(data.button);
 		const mpu6050 = pickRecord(data.mpu6050 ?? data.mpu_6050 ?? data.imu);
 		const gy63 = pickRecord(data.gy63 ?? data.gy_63 ?? data.barometer);
-		const gyro = pickRecord(mpu6050.gyro);
-		const accel = pickRecord(mpu6050.accel ?? mpu6050.accelerometer);
+		const gyro = pickRecord(mpu6050.gyro ?? mpu6050.gyroscope_dps);
+		const accel = pickRecord(mpu6050.accel ?? mpu6050.accelerometer ?? mpu6050.accelerometer_g);
+		const pressureHpaFromResponse = pickNumber(gy63.pressureHpa ?? gy63.pressure_hpa ?? gy63.pressure);
+		const pressurePa = pickNumber(gy63.pressure_pa);
+		const pressureHpa = pressureHpaFromResponse ?? (pressurePa !== null ? pressurePa / 100 : null);
+
+		const hasLiveNumericData =
+			gyro.x !== null ||
+			gyro.y !== null ||
+			gyro.z !== null ||
+			accel.x !== null ||
+			accel.y !== null ||
+			accel.z !== null ||
+			pressureHpa !== null ||
+			pickNumber(gy63.altitudeM ?? gy63.altitude_m ?? gy63.altitude) !== null;
 
 		return {
-			connection: 'connected',
+			connection: hasLiveNumericData ? 'connected' : 'offline',
 			button: {
 				pin: pickNumber(button.pin) ?? 40,
 				state: pickState(button.state ?? button.pressed),
-				lastEventAt: typeof button.lastEventAt === 'string' ? button.lastEventAt : typeof button.last_event_at === 'string' ? button.last_event_at : null
+				lastEventAt:
+					typeof button.lastEventAt === 'string'
+						? button.lastEventAt
+						: typeof button.last_event_at === 'string'
+							? button.last_event_at
+							: typeof button.last_event === 'string'
+								? button.last_event
+								: null
 			},
 			mpu6050: {
 				sdaPin: pickNumber(mpu6050.sdaPin ?? mpu6050.sda_pin) ?? 3,
@@ -113,7 +135,7 @@ export async function fetchSensorDiagnostics(): Promise<SensorDiagnostics> {
 			gy63: {
 				sdaPin: pickNumber(gy63.sdaPin ?? gy63.sda_pin) ?? 3,
 				sclPin: pickNumber(gy63.sclPin ?? gy63.scl_pin) ?? 5,
-				pressureHpa: pickNumber(gy63.pressureHpa ?? gy63.pressure_hpa ?? gy63.pressure),
+				pressureHpa,
 				altitudeM: pickNumber(gy63.altitudeM ?? gy63.altitude_m ?? gy63.altitude)
 			},
 			lastUpdated: new Date().toISOString()

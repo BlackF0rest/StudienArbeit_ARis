@@ -180,10 +180,12 @@ class SensorService:
             "ok": True,
             "pin": BUTTON_PIN,
             "state": state.stable_value,
+            "state_label": "pressed" if state.stable_value == 0 else "released",
             "raw_state": state.raw_value,
             "debounce_ms": int(self._debounce_s * 1000),
             "transition_count": self._button_transitions,
             "last_event": self._last_button_event,
+            "last_event_at": self._last_button_event["timestamp"] if self._last_button_event else None,
         }
 
     def _read_mpu6050(self) -> dict[str, Any]:
@@ -226,6 +228,16 @@ class SensorService:
                 "z": round(accel_z / 16384.0, 5),
             },
             "gyroscope_dps": {
+                "x": round(gyro_x / 131.0, 5),
+                "y": round(gyro_y / 131.0, 5),
+                "z": round(gyro_z / 131.0, 5),
+            },
+            "accel": {
+                "x": round(accel_x / 16384.0, 5),
+                "y": round(accel_y / 16384.0, 5),
+                "z": round(accel_z / 16384.0, 5),
+            },
+            "gyro": {
                 "x": round(gyro_x / 131.0, 5),
                 "y": round(gyro_y / 131.0, 5),
                 "z": round(gyro_z / 131.0, 5),
@@ -306,6 +318,7 @@ class SensorService:
             "ok": True,
             "address": GY63_ADDRESS,
             "pressure_pa": float(pressure),
+            "pressure_hpa": round(float(pressure) / 100.0, 2),
             "altitude_m": round(float(altitude_m), 3),
             "temperature_c": round(float(temp_c), 2),
         }

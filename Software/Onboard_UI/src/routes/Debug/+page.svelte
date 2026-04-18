@@ -55,6 +55,19 @@
 		lastUpdated: new Date(0).toISOString()
 	};
 
+	function hasNumericSensorValues(data: SensorDiagnostics): boolean {
+		return (
+			data.mpu6050.gyro.x !== null ||
+			data.mpu6050.gyro.y !== null ||
+			data.mpu6050.gyro.z !== null ||
+			data.mpu6050.accel.x !== null ||
+			data.mpu6050.accel.y !== null ||
+			data.mpu6050.accel.z !== null ||
+			data.gy63.pressureHpa !== null ||
+			data.gy63.altitudeM !== null
+		);
+	}
+
 	async function refreshSnapshot(): Promise<void> {
 		snapshot = await featureHost.snapshot();
 		pcDiagnostics = await fetchPcLinkDiagnostics();
@@ -108,6 +121,7 @@
 
 	<HudCard title="Onboard Sensors">
 		<p class="hud-primary-point">{sensorDiagnostics.connection === 'connected' ? 'Sensors online' : 'Sensor data offline (fallback)'}</p>
+		<p class="hud-secondary-line">{hasNumericSensorValues(sensorDiagnostics) ? 'Live numeric values received' : 'No live numeric values yet'}</p>
 		<p class="hud-muted"><strong>Updated:</strong> {sensorDiagnostics.lastUpdated}</p>
 		<p>
 			<strong>Button (Pin {sensorDiagnostics.button.pin}):</strong>
@@ -116,8 +130,8 @@
 		</p>
 		<p>
 			<strong>MPU-6050 (SDA {sensorDiagnostics.mpu6050.sdaPin}, SCL {sensorDiagnostics.mpu6050.sclPin}):</strong>
-			Gyro x/y/z {sensorDiagnostics.mpu6050.gyro.x ?? 'n/a'} / {sensorDiagnostics.mpu6050.gyro.y ?? 'n/a'} / {sensorDiagnostics.mpu6050.gyro.z ?? 'n/a'}
-			· Accel x/y/z {sensorDiagnostics.mpu6050.accel.x ?? 'n/a'} / {sensorDiagnostics.mpu6050.accel.y ?? 'n/a'} / {sensorDiagnostics.mpu6050.accel.z ?? 'n/a'}
+			Gyro (dps) x/y/z {sensorDiagnostics.mpu6050.gyro.x ?? 'n/a'} / {sensorDiagnostics.mpu6050.gyro.y ?? 'n/a'} / {sensorDiagnostics.mpu6050.gyro.z ?? 'n/a'}
+			· Accel (g) x/y/z {sensorDiagnostics.mpu6050.accel.x ?? 'n/a'} / {sensorDiagnostics.mpu6050.accel.y ?? 'n/a'} / {sensorDiagnostics.mpu6050.accel.z ?? 'n/a'}
 		</p>
 		<p>
 			<strong>GY-63 (SDA {sensorDiagnostics.gy63.sdaPin}, SCL {sensorDiagnostics.gy63.sclPin}):</strong>
