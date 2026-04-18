@@ -2,6 +2,8 @@ from datetime import datetime, timezone
 
 from flask import Blueprint, current_app, g, jsonify
 
+from hardware.pinmap import PINMAP_RESPONSE
+
 bp = Blueprint("status", __name__)
 
 
@@ -29,6 +31,7 @@ def get_main_info():
             "battery_unit": "%",
             "temperature_unit": "°C",
             "humidity_unit": "%",
+            "pinmap": PINMAP_RESPONSE,
         }
     )
 
@@ -49,6 +52,7 @@ def get_status():
                 "teleprompter_reset": "/api/teleprompter/reset (POST)",
                 "sensors": "/api/sensors",
             },
+            "pinmap": PINMAP_RESPONSE,
         }
     )
 

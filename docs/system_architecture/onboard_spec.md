@@ -201,3 +201,31 @@ Target operational budgets (normal mode):
 
 - Every boundary emits structured errors: `{code, message, component, correlation_id, recoverable}`.
 - Debugging-interface must expose rolling error counters and last-fault snapshots for each module.
+
+---
+
+## 6) Onboard Hardware Pin Mapping (Backend)
+
+Die zentrale Zuordnung liegt in `Software/Backend/hardware/pinmap.py` und wird vom Backend in API-Antworten mitgeliefert.
+
+### GPIO/I2C-Belegung
+
+- `button_pin`: **40** (physischer BOARD-Pin, `GPIO.BOARD` Modus)
+- `i2c_sda_pin`: **3**
+- `i2c_scl_pin`: **5**
+- `i2c_bus_id`: **1** (`/dev/i2c-1`)
+
+### Gerätezuordnung auf I2C
+
+- `mpu6050`: Bus **1**, Adresse `0x68`
+- `gy63`: Bus **1**, Adresse `0x77`
+
+Damit nutzen **MPU6050** und **GY-63** denselben I2C-Bus, aber unterschiedliche Adressen.
+
+### API-Sichtbarkeit
+
+Das Backend liefert die Belegung für die UI in den Antworten von:
+
+- `GET /api/status` (Feld `data.pinmap`)
+- `GET /api/mainInfo` (Feld `data.pinmap`)
+- `GET /api/sensors` (Feld `data.pinmap` plus Bus/Device-Details)
