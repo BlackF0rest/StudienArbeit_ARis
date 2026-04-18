@@ -21,11 +21,16 @@ def _success(data, status_code: int = 200):
 
 @bp.route("/api/mainInfo", methods=["GET"])
 def get_main_info():
-    return _success({
-        "Battery": "85%",
-        "Temperature": "36.5°C",
-        "Humidity": "45%",
-    })
+    return _success(
+        {
+            "battery_percent": 85,
+            "temperature_c": 36.5,
+            "humidity_percent": 45,
+            "battery_unit": "%",
+            "temperature_unit": "°C",
+            "humidity_unit": "%",
+        }
+    )
 
 
 @bp.route("/api/status", methods=["GET"])
