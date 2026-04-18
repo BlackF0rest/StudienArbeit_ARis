@@ -6,6 +6,17 @@ from dataclasses import dataclass
 from datetime import datetime, timezone
 from typing import Any
 
+from hardware.pinmap import (
+    BUTTON_PIN,
+    DEVICE_I2C_ASSIGNMENTS,
+    GY63_ADDRESS,
+    I2C_BUS_ID,
+    I2C_SCL_PIN,
+    I2C_SDA_PIN,
+    MPU6050_ADDRESS,
+    PINMAP_RESPONSE,
+)
+
 try:
     import RPi.GPIO as GPIO
 except Exception:  # noqa: BLE001
@@ -17,10 +28,6 @@ except Exception:  # noqa: BLE001
     SMBus = None
 
 
-BUTTON_PIN = 40  # physical board pin
-I2C_BUS_ID = 1
-MPU6050_ADDRESS = 0x68
-GY63_ADDRESS = 0x77
 SEA_LEVEL_PRESSURE_PA = 101325.0
 
 
@@ -313,11 +320,19 @@ class SensorService:
             "updated_at": self._utc_now(),
             "bus": {
                 "ok": self._i2c_bus is not None,
-                "name": "i2c-1",
-                "pins": {"sda": 3, "scl": 5},
+                "name": f"i2c-{I2C_BUS_ID}",
+                "pins": {"sda": I2C_SDA_PIN, "scl": I2C_SCL_PIN},
+                "devices": {
+                    name: {
+                        "bus_id": assignment.bus_id,
+                        "address": hex(assignment.address),
+                    }
+                    for name, assignment in DEVICE_I2C_ASSIGNMENTS.items()
+                },
                 "error": self._i2c_error,
             },
             "button": button,
             "mpu6050": mpu6050,
             "gy63": gy63,
+            "pinmap": PINMAP_RESPONSE,
         }
