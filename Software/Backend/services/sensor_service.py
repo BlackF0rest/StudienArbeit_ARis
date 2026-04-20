@@ -4,6 +4,7 @@ import threading
 import time
 from dataclasses import dataclass
 from datetime import datetime, timezone
+from pathlib import Path
 from typing import Any
 
 from hardware.pinmap import (
@@ -321,6 +322,29 @@ class SensorService:
             "pressure_hpa": round(float(pressure) / 100.0, 2),
             "altitude_m": round(float(altitude_m), 3),
             "temperature_c": round(float(temp_c), 2),
+        }
+
+    def get_hardware_readiness(self) -> dict[str, Any]:
+        i2c_device_path = f"/dev/i2c-{I2C_BUS_ID}"
+        i2c_device_exists = Path(i2c_device_path).exists()
+        gpio_ok = self._gpio_ready
+        i2c_ok = self._i2c_bus is not None
+
+        return {
+            "ok": gpio_ok and i2c_ok and i2c_device_exists,
+            "gpio": {
+                "initialized": gpio_ok,
+                "error": self._gpio_error,
+                "provider": "RPi.GPIO",
+            },
+            "i2c": {
+                "initialized": i2c_ok,
+                "error": self._i2c_error,
+                "provider": "smbus2",
+                "bus_id": I2C_BUS_ID,
+                "device_path": i2c_device_path,
+                "device_path_exists": i2c_device_exists,
+            },
         }
 
     def get_snapshot(self) -> dict[str, Any]:

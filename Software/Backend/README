@@ -1,0 +1,36 @@
+# Backend (Flask)
+
+## Pflichtabhängigkeiten für Raspberry Pi Hardwarezugriff
+
+Für GPIO- und I2C-Sensorik müssen auf dem Zielsystem folgende Python-Pakete installiert sein:
+
+- `RPi.GPIO`
+- `smbus2`
+
+Beispiel (im Backend-Venv):
+
+```bash
+pip install RPi.GPIO smbus2
+```
+
+## I2C muss aktiviert sein
+
+Zusätzlich muss I2C im Raspberry-Pi-System aktiviert sein, damit das Device
+`/dev/i2c-1` vorhanden ist.
+
+Prüfen:
+
+```bash
+ls -l /dev/i2c-1
+```
+
+Wenn das Device fehlt, ist I2C in der Regel noch nicht aktiviert
+(z. B. via `raspi-config` oder passende Boot-Config).
+
+## Laufzeitverhalten
+
+Beim App-Start schreibt das Backend einen Health-Logeintrag `hardware_health`,
+der den Initialisierungsstatus von GPIO und I2C ausgibt.
+
+Zusätzlich liefert `GET /api/status` im Feld `hardware_ready` den aktuellen
+Hardware-Status (GPIO/I2C inklusive Fehlerdetails).
