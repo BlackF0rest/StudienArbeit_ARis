@@ -32,14 +32,29 @@ def create_app(config: AppConfig | None = None) -> Flask:
     repo = SQLiteRepository(app_config.db_path)
     repo.init_db()
 
+    sensor_service = SensorService()
     app.extensions["services"] = {
         "message": MessageService(repo),
         "teleprompter": TeleprompterService(
             repo=repo,
             strict_validation=app_config.strict_teleprompter_validation,
         ),
-        "sensor": SensorService(),
+        "sensor": sensor_service,
     }
+
+    hardware_readiness = sensor_service.get_hardware_readiness()
+    app.logger.info(
+        "hardware_health",
+        extra={
+            "hardware_ready": hardware_readiness["ok"],
+            "gpio_initialized": hardware_readiness["gpio"]["initialized"],
+            "gpio_error": hardware_readiness["gpio"]["error"],
+            "i2c_initialized": hardware_readiness["i2c"]["initialized"],
+            "i2c_error": hardware_readiness["i2c"]["error"],
+            "i2c_device_path": hardware_readiness["i2c"]["device_path"],
+            "i2c_device_path_exists": hardware_readiness["i2c"]["device_path_exists"],
+        },
+    )
 
     @app.before_request
     def before_request():

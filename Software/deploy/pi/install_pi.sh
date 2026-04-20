@@ -52,7 +52,7 @@ install_python_dependencies() {
   fi
 
   "${venv_dir}/bin/pip" install --upgrade pip
-  "${venv_dir}/bin/pip" install flask flask-cors
+  "${venv_dir}/bin/pip" install flask flask-cors RPi.GPIO smbus2
 }
 
 copy_systemd_service_if_needed() {

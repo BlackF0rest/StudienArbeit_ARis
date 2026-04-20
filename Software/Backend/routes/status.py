@@ -38,11 +38,22 @@ def get_main_info():
 
 @bp.route("/api/status", methods=["GET"])
 def get_status():
+    sensor_service = current_app.extensions.get("services", {}).get("sensor")
+    hardware_ready = (
+        sensor_service.get_hardware_readiness()
+        if sensor_service is not None
+        else {
+            "ok": False,
+            "error": "Sensor service is not registered",
+        }
+    )
+
     return _success(
         {
             "app": "AR-Brille Backend",
             "version": "1.0",
             "health": "ok",
+            "hardware_ready": hardware_ready,
             "endpoints": {
                 "messages": "/api/messages",
                 "mainInfo": "/api/mainInfo",
