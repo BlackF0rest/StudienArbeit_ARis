@@ -78,11 +78,11 @@
 		bootstrapFeatureHost();
 		setInputContext('debug');
 		const unregister = registerAppActions({
-			onShort: () => {
+			onSingle: () => {
 				void refreshSnapshot();
 			},
-			onLong: () => {
-				featureHost.emit('basic-hud', 'debug.return_home', { reason: 'long-press' });
+			onDouble: () => {
+				featureHost.emit('basic-hud', 'debug.return_home', { reason: 'double-tap' });
 			}
 		});
 		void refreshSnapshot();

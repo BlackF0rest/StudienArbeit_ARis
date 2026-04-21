@@ -63,20 +63,17 @@
 		showFeedback(`speed ${nextSpeed}`);
 	}
 
-	function onTeleprompterLongPress(): void {
-		featureHost.emit('teleprompter-runtime', 'teleprompter.return_home', { reason: 'long-press' });
-		showFeedback('Returning home…');
-		setTimeout(() => {
-			void returnHome();
-		}, 170);
+	function onTeleprompterDoubleTap(): void {
+		featureHost.emit('teleprompter-runtime', 'teleprompter.open_navigation', { reason: 'double-tap' });
+		showFeedback('Opening navigation…');
 	}
 
 	onMount(() => {
 		setInputContext('teleprompter');
 		document.body.style.overflow = 'hidden';
 		const unregister = registerAppActions({
-			onShort: speedStep,
-			onLong: onTeleprompterLongPress
+			onSingle: speedStep,
+			onDouble: onTeleprompterDoubleTap
 		});
 
 		const runtime = new TeleprompterRuntime(

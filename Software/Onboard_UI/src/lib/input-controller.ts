@@ -2,13 +2,13 @@ import { goto } from '$app/navigation';
 import { browser } from '$app/environment';
 import { writable } from 'svelte/store';
 
-export type InputGesture = 'short' | 'long';
-export type InputFsmState = 'home-carousel' | 'feature-active' | 'confirm-exit';
+export type InputGesture = 'single' | 'double';
+export type InputFsmState = 'home-carousel' | 'feature-active';
 export type AppContext = 'home' | 'teleprompter' | 'navigation' | 'messages' | 'chat' | 'debug';
 
 export interface InputHint {
-	short: string;
-	long: string;
+	single: string;
+	double: string;
 }
 
 interface InputControlEvent {
@@ -17,8 +17,8 @@ interface InputControlEvent {
 }
 
 interface AppActionHandlers {
-	onShort?: () => void;
-	onLong?: () => void;
+	onSingle?: () => void;
+	onDouble?: () => void;
 }
 
 const HOME_APPS = [
@@ -30,74 +30,51 @@ const HOME_APPS = [
 export const inputFsmState = writable<InputFsmState>('home-carousel');
 export const homeCarouselIndex = writable(0);
 export const shortPressPulse = writable(0);
-export const longPressStatus = writable('');
+export const inputStatus = writable('');
 
 let currentContext: AppContext = 'home';
 let handlers: AppActionHandlers = {};
 let teardownInput: (() => void) | null = null;
-let confirmExitTimer: ReturnType<typeof setTimeout> | null = null;
-let longPressStatusTimer: ReturnType<typeof setTimeout> | null = null;
+let inputStatusTimer: ReturnType<typeof setTimeout> | null = null;
 
 function normalizeGesture(payload: unknown): InputGesture | null {
 	if (!payload || typeof payload !== 'object') return null;
 	const value = (payload as Record<string, unknown>).gesture;
-	if (value === 'short' || value === 'long') return value;
+	if (value === 'single' || value === 'double') return value;
 	return null;
 }
 
-function enterConfirmExitState(): void {
-	inputFsmState.set('confirm-exit');
-	longPressStatus.set('Returning home…');
-	if (confirmExitTimer) clearTimeout(confirmExitTimer);
-	confirmExitTimer = setTimeout(() => {
-		inputFsmState.set('home-carousel');
-		void goto('/');
-	}, 170);
-	if (longPressStatusTimer) clearTimeout(longPressStatusTimer);
-	longPressStatusTimer = setTimeout(() => {
-		longPressStatus.set('');
+function triggerGlobalNavigation(): void {
+	inputFsmState.set('feature-active');
+	inputStatus.set('Opening navigation…');
+	if (inputStatusTimer) clearTimeout(inputStatusTimer);
+	inputStatusTimer = setTimeout(() => {
+		inputStatus.set('');
 	}, 950);
+	void goto('/Navigation');
 }
 
-function onHomeShort(): void {
+function onHomeSingle(): void {
 	homeCarouselIndex.update((index) => (index + 1) % HOME_APPS.length);
 }
 
-function onHomeLong(): void {
-	let target = HOME_APPS[0];
-	homeCarouselIndex.update((index) => {
-		target = HOME_APPS[index] ?? HOME_APPS[0];
-		return index;
-	});
-	inputFsmState.set('feature-active');
-	void goto(target.route);
-}
-
 function onGesture(gesture: InputGesture): void {
+	if (gesture === 'double') {
+		triggerGlobalNavigation();
+		handlers.onDouble?.();
+		return;
+	}
+
 	if (currentContext === 'chat') return;
 
 	if (currentContext === 'home') {
-		if (gesture === 'short') {
-			shortPressPulse.update((value) => value + 1);
-			onHomeShort();
-		}
-		if (gesture === 'long') onHomeLong();
-		return;
-	}
-
-	if (gesture === 'short') {
 		shortPressPulse.update((value) => value + 1);
-		handlers.onShort?.();
+		onHomeSingle();
 		return;
 	}
 
-	if (currentContext === 'teleprompter') {
-		handlers.onLong?.();
-		return;
-	}
-
-	handlers.onLong?.();
-	enterConfirmExitState();
+	shortPressPulse.update((value) => value + 1);
+	handlers.onSingle?.();
 }
 
 function eventHandler(event: Event): void {
@@ -108,14 +85,14 @@ function eventHandler(event: Event): void {
 }
 
 function keyboardFallback(event: KeyboardEvent): void {
-	if (event.key === ' ' || event.key === 'ArrowRight') {
+	if (event.key === ' ') {
 		event.preventDefault();
-		onGesture('short');
+		onGesture('single');
 	}
 
 	if (event.key === 'Enter') {
 		event.preventDefault();
-		onGesture('long');
+		onGesture('double');
 	}
 }
 
@@ -133,11 +110,9 @@ export function subscribeInputControl(): void {
 
 export function detachInputControl(): void {
 	teardownInput?.();
-	if (confirmExitTimer) clearTimeout(confirmExitTimer);
-	confirmExitTimer = null;
-	if (longPressStatusTimer) clearTimeout(longPressStatusTimer);
-	longPressStatusTimer = null;
-	longPressStatus.set('');
+	if (inputStatusTimer) clearTimeout(inputStatusTimer);
+	inputStatusTimer = null;
+	inputStatus.set('');
 }
 
 export function setInputContext(context: AppContext): void {
@@ -145,17 +120,17 @@ export function setInputContext(context: AppContext): void {
 	if (context === 'home') {
 		inputFsmState.set('home-carousel');
 		handlers = {};
-		longPressStatus.set('');
+		inputStatus.set('');
 		return;
 	}
 	if (context === 'chat') {
 		inputFsmState.set('feature-active');
 		handlers = {};
-		longPressStatus.set('');
+		inputStatus.set('');
 		return;
 	}
 	inputFsmState.set('feature-active');
-	longPressStatus.set('');
+	inputStatus.set('');
 }
 
 export function registerAppActions(actionHandlers: AppActionHandlers): () => void {
@@ -169,33 +144,33 @@ export function getHintForContext(context: AppContext): InputHint {
 	switch (context) {
 		case 'home':
 			return {
-				short: 'next app',
-				long: 'open selected app'
+				single: 'next app',
+				double: 'open navigation'
 			};
 		case 'teleprompter':
 			return {
-				short: 'speed + step',
-				long: 'return home'
+				single: 'speed + step',
+				double: 'open navigation'
 			};
 		case 'navigation':
 			return {
-				short: 'cycle info panel',
-				long: 'return home'
+				single: 'cycle info panel',
+				double: 'open navigation'
 			};
 		case 'messages':
 			return {
-				short: 'cycle sections',
-				long: 'return home'
+				single: 'cycle sections',
+				double: 'open navigation'
 			};
 		case 'chat':
 			return {
-				short: 'n/a',
-				long: 'AI chat input via companion app'
+				single: 'n/a',
+				double: 'open navigation'
 			};
 		case 'debug':
 			return {
-				short: 'refresh diagnostics',
-				long: 'return home'
+				single: 'refresh diagnostics',
+				double: 'open navigation'
 			};
 	}
 }

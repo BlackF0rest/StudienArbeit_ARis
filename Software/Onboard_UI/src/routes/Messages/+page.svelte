@@ -61,9 +61,9 @@
 			pulseToken = value;
 		});
 		const unregister = registerAppActions({
-			onShort: cycleSections,
-			onLong: () => {
-				featureHost.emit('ai-chat-scaffold', 'chat.return_home', { reason: 'long-press' });
+			onSingle: cycleSections,
+			onDouble: () => {
+				featureHost.emit('ai-chat-scaffold', 'chat.return_home', { reason: 'double-tap' });
 			}
 		});
 

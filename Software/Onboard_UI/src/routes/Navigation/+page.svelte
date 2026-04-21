@@ -49,9 +49,9 @@
 			pulseToken = value;
 		});
 		const unregister = registerAppActions({
-			onShort: cycleInfoPanel,
-			onLong: () => {
-				featureHost.emit('navigation-mvp', 'navigation.return_home', { reason: 'long-press' });
+			onSingle: cycleInfoPanel,
+			onDouble: () => {
+				featureHost.emit('navigation-mvp', 'navigation.return_home', { reason: 'double-tap' });
 			}
 		});
 
