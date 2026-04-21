@@ -206,7 +206,12 @@ def build_criterion_summary() -> dict[str, Any]:
         "INT-001": ["teleprompter_send_current_history", "scenario_a_send_then_current"],
         "INT-002": ["scenario_a_send_then_current", "scenario_b_reset_defaults"],
         "REG-001": ["messages_get_post_delete", "scenario_c_messages_roundtrip"],
-        "SMK-001": ["scenario_a_send_then_current", "scenario_b_reset_defaults", "scenario_c_messages_roundtrip"],
+        "SMK-001": [
+            "scenario_a_send_then_current",
+            "scenario_b_reset_defaults",
+            "scenario_c_messages_roundtrip",
+            "scenario_d_hid_gesture_normalization",
+        ],
     }
 
     all_results = {**api_results, **smoke_results}

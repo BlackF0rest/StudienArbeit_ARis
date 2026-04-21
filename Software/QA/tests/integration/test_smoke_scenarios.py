@@ -6,6 +6,7 @@ from Software.QA.scripts.backend_test_harness import (
     assert_true,
     request_json,
 )
+from Software.Onboard_Runtime.hardware.subscriptions import _normalize_input_control_value
 
 
 def run_smoke_scenarios() -> list[TestResult]:
@@ -66,6 +67,22 @@ def run_smoke_scenarios() -> list[TestResult]:
             results.append(TestResult(name="scenario_c_messages_roundtrip", passed=True))
         except Exception as exc:  # noqa: BLE001
             results.append(TestResult(name="scenario_c_messages_roundtrip", passed=False, reason=str(exc)))
+
+    try:
+        short_press = _normalize_input_control_value({"press": "short_press"})
+        assert_true(short_press["gesture"] == "single", "Legacy short_press should normalize to single")
+
+        long_press = _normalize_input_control_value({"press": "long_press"})
+        assert_true(long_press["gesture"] == "double", "Legacy long_press should normalize to double")
+
+        canonical_single = _normalize_input_control_value({"gesture": "single"})
+        assert_true(canonical_single["gesture"] == "single", "Canonical single gesture should remain unchanged")
+
+        canonical_double = _normalize_input_control_value({"gesture": "double"})
+        assert_true(canonical_double["gesture"] == "double", "Canonical double gesture should remain unchanged")
+        results.append(TestResult(name="scenario_d_hid_gesture_normalization", passed=True))
+    except Exception as exc:  # noqa: BLE001
+        results.append(TestResult(name="scenario_d_hid_gesture_normalization", passed=False, reason=str(exc)))
 
     return results
 
