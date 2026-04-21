@@ -1,16 +1,16 @@
 <script lang="ts">
-	import { longPressStatus, type InputHint } from '$lib/input-controller';
+	import { inputStatus, type InputHint } from '$lib/input-controller';
 
 	let { hint, compact = false }: { hint: InputHint; compact?: boolean } = $props();
 </script>
 
 <div class="input-hint" class:compact>
-	{#if $longPressStatus}
-		<span class="input-hint-status">{$longPressStatus}</span>
+	{#if $inputStatus}
+		<span class="input-hint-status">{$inputStatus}</span>
 	{:else}
-		<span>short: {hint.short}</span>
+		<span>single: {hint.single}</span>
 		<span aria-hidden="true"> | </span>
-		<span>long: {hint.long}</span>
+		<span>double: {hint.double}</span>
 	{/if}
 </div>
 
