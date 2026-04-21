@@ -3,7 +3,7 @@
 	import Header from '../header.svelte';
 	import { buildNavigationProvider, type NavigationSnapshot } from '$lib/services/navigation';
 	import { featureHost } from '$lib/feature-host';
-	import { shortPressPulse, getHintForContext, registerAppActions, setInputContext, type InputHint } from '$lib/input-controller';
+	import { shortPressPulse, getHintForContext, openNavigationViaInput, setInputContext, type InputHint } from '$lib/input-controller';
 	import InputHintOverlay from '$lib/components/InputHintOverlay.svelte';
 	import HudCard from '$lib/components/hud/HudCard.svelte';
 	import HudScaffold from '$lib/components/hud/HudScaffold.svelte';
@@ -44,21 +44,21 @@
 	}
 
 	onMount(() => {
-		setInputContext('navigation');
-		const unsubscribePulse = shortPressPulse.subscribe((value) => {
-			pulseToken = value;
-		});
-		const unregister = registerAppActions({
+		const clearActions = setInputContext('navigation', {
 			onSingle: cycleInfoPanel,
 			onDouble: () => {
+				openNavigationViaInput();
 				featureHost.emit('navigation-mvp', 'navigation.return_home', { reason: 'double-tap' });
 			}
+		});
+		const unsubscribePulse = shortPressPulse.subscribe((value) => {
+			pulseToken = value;
 		});
 
 		void refreshNavigation();
 		const timer = setInterval(() => void refreshNavigation(), 3000);
 		return () => {
-			unregister();
+			clearActions();
 			unsubscribePulse();
 			clearInterval(timer);
 		};

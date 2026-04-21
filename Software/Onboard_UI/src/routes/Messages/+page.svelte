@@ -3,7 +3,7 @@
 	import Header from '../header.svelte';
 	import { createChatProvider, loadHistory, saveHistory, newMessage, type ChatMessage } from '$lib/services/ai-chat';
 	import { featureHost } from '$lib/feature-host';
-	import { shortPressPulse, getHintForContext, registerAppActions, setInputContext, type InputHint } from '$lib/input-controller';
+	import { shortPressPulse, getHintForContext, openNavigationViaInput, setInputContext, type InputHint } from '$lib/input-controller';
 	import InputHintOverlay from '$lib/components/InputHintOverlay.svelte';
 	import HudCard from '$lib/components/hud/HudCard.svelte';
 	import HudScaffold from '$lib/components/hud/HudScaffold.svelte';
@@ -56,19 +56,19 @@
 	}
 
 	onMount(() => {
-		setInputContext('messages');
-		const unsubscribePulse = shortPressPulse.subscribe((value) => {
-			pulseToken = value;
-		});
-		const unregister = registerAppActions({
+		const clearActions = setInputContext('messages', {
 			onSingle: cycleSections,
 			onDouble: () => {
+				openNavigationViaInput();
 				featureHost.emit('ai-chat-scaffold', 'chat.return_home', { reason: 'double-tap' });
 			}
 		});
+		const unsubscribePulse = shortPressPulse.subscribe((value) => {
+			pulseToken = value;
+		});
 
 		return () => {
-			unregister();
+			clearActions();
 			unsubscribePulse();
 		};
 	});
