@@ -148,33 +148,33 @@ export function getHintForContext(context: AppContext): InputHint {
 	switch (context) {
 		case 'home':
 			return {
-				single: 'next app',
-				double: 'open navigation'
+				single: 'select next app in carousel',
+				double: 'open navigation screen'
 			};
 		case 'teleprompter':
 			return {
-				single: 'speed + step',
-				double: 'open navigation'
+				single: 'increase speed and advance one step',
+				double: 'open navigation screen'
 			};
 		case 'navigation':
 			return {
-				single: 'cycle info panel',
-				double: 'open navigation'
+				single: 'cycle to next info panel',
+				double: 'reopen navigation home'
 			};
 		case 'messages':
 			return {
-				single: 'cycle sections',
-				double: 'open navigation'
+				single: 'switch to next message section',
+				double: 'open navigation screen'
 			};
 		case 'chat':
 			return {
-				single: 'n/a',
-				double: 'open navigation'
+				single: 'no action in chat',
+				double: 'open navigation screen'
 			};
 		case 'debug':
 			return {
-				single: 'refresh diagnostics',
-				double: 'open navigation'
+				single: 'refresh diagnostics view',
+				double: 'open navigation screen'
 			};
 	}
 }
