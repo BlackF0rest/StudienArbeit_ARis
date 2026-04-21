@@ -19,7 +19,13 @@ class _TapState:
 
 
 class HIDInputAdapter:
-    """Processes raw button transitions into debounced single/double tap gestures."""
+    """Processes raw button transitions into normalized `input.control` events.
+
+    Final runtime contract for ``event_type="input.control"``:
+    - Producer writes ``payload["value"]["gesture"]`` with one of ``"single"`` or ``"double"``.
+    - ``tap_count`` and ``duration_ms`` are auxiliary metadata.
+    - Legacy fields such as ``press`` / ``short_press`` / ``long_press`` are not emitted anymore.
+    """
 
     def __init__(
         self,
@@ -121,6 +127,7 @@ class HIDInputAdapter:
             event_type="input.control",
             source=f"hid:{button_id}",
             value={
+                # Canonical payload contract for all producers.
                 "gesture": gesture,
                 "tap_count": tap_count,
                 "duration_ms": duration_ms,

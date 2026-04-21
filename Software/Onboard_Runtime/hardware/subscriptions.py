@@ -21,7 +21,41 @@ class _BaseSubscription:
     def _on_hardware_event(self, message: EventMessage) -> None:
         event_type = str(message.payload.get("event_type", ""))
         if event_type in self.interested_types:
-            self.received_events.append(message.payload)
+            normalized_payload = dict(message.payload)
+            if event_type == "input.control":
+                normalized_payload["value"] = _normalize_input_control_value(
+                    message.payload.get("value")
+                )
+            self.received_events.append(normalized_payload)
+
+
+def _normalize_input_control_value(value: Any) -> dict[str, Any]:
+    """Normalize `input.control` values to the canonical `gesture` contract.
+
+    Transition phase behavior:
+    - Prefer `gesture` when already present.
+    - If only legacy `press` data is present (e.g. `short_press`/`long_press`), map it to `gesture`.
+    - Always return a payload that writes `gesture` as the canonical field.
+    """
+    if not isinstance(value, dict):
+        return {}
+
+    normalized = dict(value)
+    gesture = normalized.get("gesture")
+    if isinstance(gesture, str) and gesture:
+        return normalized
+
+    legacy_press = normalized.get("press")
+    if isinstance(legacy_press, str):
+        legacy_to_gesture = {
+            "short_press": "single",
+            "long_press": "double",
+        }
+        mapped = legacy_to_gesture.get(legacy_press, legacy_press)
+        if mapped:
+            normalized["gesture"] = mapped
+
+    return normalized
 
 
 class BasicHUDSubscription(_BaseSubscription):
