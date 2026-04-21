@@ -54,6 +54,23 @@ source .venv/bin/activate
 pip install flask flask-cors
 ```
 
+If package installs fail with permission errors (for example after a previous `sudo` run), reset ownership and recreate the backend virtual environment:
+
+```bash
+sudo chown -R pi:pi /home/pi/aris
+cd /home/pi/aris/Software/Backend
+rm -rf .venv
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install --upgrade pip setuptools wheel
+pip install flask flask-cors
+python -c "import flask, flask_cors; print('ok')"
+```
+
+Safety rules for operators/contributors:
+- Never run `sudo pip` inside a project `.venv`.
+- Never run `sudo npm` in project directories.
+
 ## 5. Install and enable services
 
 1. Copy service files:
