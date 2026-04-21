@@ -4,7 +4,7 @@
 	import { browser } from '$app/environment';
 	import { TeleprompterRuntime, defaultTeleprompterConfig, type TeleprompterConfig } from '$lib/services/teleprompter-runtime';
 	import { featureHost } from '$lib/feature-host';
-	import { registerAppActions, setInputContext } from '$lib/input-controller';
+	import { openNavigationViaInput, setInputContext } from '$lib/input-controller';
 	import HudCard from '$lib/components/hud/HudCard.svelte';
 	import StatusPill from '$lib/components/hud/StatusPill.svelte';
 
@@ -64,17 +64,17 @@
 	}
 
 	function onTeleprompterDoubleTap(): void {
+		openNavigationViaInput();
 		featureHost.emit('teleprompter-runtime', 'teleprompter.open_navigation', { reason: 'double-tap' });
 		showFeedback('Opening navigation…');
 	}
 
 	onMount(() => {
-		setInputContext('teleprompter');
-		document.body.style.overflow = 'hidden';
-		const unregister = registerAppActions({
+		const clearActions = setInputContext('teleprompter', {
 			onSingle: speedStep,
 			onDouble: onTeleprompterDoubleTap
 		});
+		document.body.style.overflow = 'hidden';
 
 		const runtime = new TeleprompterRuntime(
 			(nextConfig) => {
@@ -113,7 +113,7 @@
 		}
 
 		return () => {
-			unregister();
+			clearActions();
 			runtime.stop();
 			cancelAnimationFrame(animationId);
 			if (browser) {

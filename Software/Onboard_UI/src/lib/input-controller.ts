@@ -54,14 +54,25 @@ function triggerGlobalNavigation(): void {
 	void goto('/Navigation');
 }
 
+export function openNavigationViaInput(): void {
+	triggerGlobalNavigation();
+}
+
 function onHomeSingle(): void {
 	homeCarouselIndex.update((index) => (index + 1) % HOME_APPS.length);
 }
 
 function onGesture(gesture: InputGesture): void {
 	if (gesture === 'double') {
+		if (currentContext === 'home') {
+			triggerGlobalNavigation();
+			return;
+		}
+		if (handlers.onDouble) {
+			handlers.onDouble();
+			return;
+		}
 		triggerGlobalNavigation();
-		handlers.onDouble?.();
 		return;
 	}
 
@@ -115,26 +126,20 @@ export function detachInputControl(): void {
 	inputStatus.set('');
 }
 
-export function setInputContext(context: AppContext): void {
+export function setInputContext(context: AppContext, actionHandlers: AppActionHandlers = {}): () => void {
 	currentContext = context;
+	handlers = actionHandlers;
+
 	if (context === 'home') {
 		inputFsmState.set('home-carousel');
-		handlers = {};
 		inputStatus.set('');
-		return;
+		return () => {
+			handlers = {};
+		};
 	}
-	if (context === 'chat') {
-		inputFsmState.set('feature-active');
-		handlers = {};
-		inputStatus.set('');
-		return;
-	}
+
 	inputFsmState.set('feature-active');
 	inputStatus.set('');
-}
-
-export function registerAppActions(actionHandlers: AppActionHandlers): () => void {
-	handlers = actionHandlers;
 	return () => {
 		handlers = {};
 	};

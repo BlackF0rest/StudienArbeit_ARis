@@ -5,7 +5,7 @@
 	import { featureHost, type FeatureRuntimeSnapshot } from '$lib/feature-host';
 	import { fetchPcLinkDiagnostics, type PcLinkDiagnostics } from '$lib/services/pc-link-diagnostics';
 	import { fetchSensorDiagnostics, type SensorDiagnostics } from '$lib/services/sensor-diagnostics';
-	import { getHintForContext, registerAppActions, setInputContext, type InputHint } from '$lib/input-controller';
+	import { getHintForContext, openNavigationViaInput, setInputContext, type InputHint } from '$lib/input-controller';
 	import InputHintOverlay from '$lib/components/InputHintOverlay.svelte';
 	import HudCard from '$lib/components/hud/HudCard.svelte';
 	import HudScaffold from '$lib/components/hud/HudScaffold.svelte';
@@ -76,19 +76,19 @@
 
 	onMount(() => {
 		bootstrapFeatureHost();
-		setInputContext('debug');
-		const unregister = registerAppActions({
+		const clearActions = setInputContext('debug', {
 			onSingle: () => {
 				void refreshSnapshot();
 			},
 			onDouble: () => {
+				openNavigationViaInput();
 				featureHost.emit('basic-hud', 'debug.return_home', { reason: 'double-tap' });
 			}
 		});
 		void refreshSnapshot();
 		const timer = setInterval(() => void refreshSnapshot(), 3000);
 		return () => {
-			unregister();
+			clearActions();
 			clearInterval(timer);
 		};
 	});
