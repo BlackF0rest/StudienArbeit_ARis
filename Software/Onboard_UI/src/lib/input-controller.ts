@@ -3,6 +3,7 @@ import { browser } from '$app/environment';
 import { writable } from 'svelte/store';
 
 export type InputGesture = 'single' | 'double';
+export type InputSwitchState = 'high' | 'low';
 export type InputFsmState = 'home-carousel' | 'feature-active';
 export type AppContext = 'home' | 'teleprompter' | 'navigation' | 'messages' | 'chat' | 'debug';
 
@@ -13,6 +14,7 @@ export interface InputHint {
 
 interface InputControlEvent {
 	gesture: InputGesture;
+	switch_state?: InputSwitchState;
 	source?: string;
 }
 
@@ -30,6 +32,7 @@ export const inputFsmState = writable<InputFsmState>('home-carousel');
 export const homeCarouselIndex = writable(0);
 export const shortPressPulse = writable(0);
 export const inputStatus = writable('');
+export const inputSwitchState = writable<InputSwitchState>('low');
 
 let currentContext: AppContext = 'home';
 let handlers: AppActionHandlers = {};
@@ -40,6 +43,13 @@ function normalizeGesture(payload: unknown): InputGesture | null {
 	if (!payload || typeof payload !== 'object') return null;
 	const value = (payload as Record<string, unknown>).gesture;
 	if (value === 'single' || value === 'double') return value;
+	return null;
+}
+
+function normalizeSwitchState(payload: unknown): InputSwitchState | null {
+	if (!payload || typeof payload !== 'object') return null;
+	const value = (payload as Record<string, unknown>).switch_state;
+	if (value === 'high' || value === 'low') return value;
 	return null;
 }
 
@@ -91,6 +101,10 @@ function eventHandler(event: Event): void {
 	const custom = event as CustomEvent<InputControlEvent>;
 	const gesture = normalizeGesture(custom.detail);
 	if (!gesture) return;
+	const switchState = normalizeSwitchState(custom.detail);
+	if (switchState) {
+		inputSwitchState.set(switchState);
+	}
 	onGesture(gesture);
 }
 
