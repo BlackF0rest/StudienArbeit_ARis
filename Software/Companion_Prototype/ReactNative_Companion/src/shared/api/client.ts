@@ -1,4 +1,4 @@
-import { getConnectionState } from '@shared/state/store';
+import { getConnectionState, registerRequestResult } from '@shared/state/store';
 
 const DEFAULT_TIMEOUT_MS = 8_000;
 const DEFAULT_RETRIES = 2;
@@ -69,6 +69,16 @@ const buildUrl = (baseUrl: string, path: string) => {
   return `${normalizedBase}${normalizedPath}`;
 };
 
+const createTraceId = (): string => {
+  const randomUUID = globalThis.crypto?.randomUUID;
+  if (typeof randomUUID === 'function') {
+    return randomUUID.call(globalThis.crypto);
+  }
+
+  const randomPart = Math.random().toString(16).slice(2, 10);
+  return `trace-${Date.now()}-${randomPart}`;
+};
+
 const mapFetchError = (error: unknown): ApiClientError => {
   if (error instanceof ApiClientError) {
     return error;
@@ -137,7 +147,6 @@ export const apiRequest = async <T>(path: string, options: RequestOptions = {}):
   const requestUrl = buildUrl(connection.baseUrl, path);
   const timeoutMs = options.timeoutMs ?? DEFAULT_TIMEOUT_MS;
   const retries = isReadMethod(method) ? (options.retries ?? DEFAULT_RETRIES) : 0;
-  const traceId = options.traceId ?? connection.traceId;
 
   let attempt = 0;
   let lastError: ApiClientError | undefined;
@@ -145,15 +154,20 @@ export const apiRequest = async <T>(path: string, options: RequestOptions = {}):
   while (attempt <= retries) {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+    const traceId = options.traceId ?? createTraceId();
+    const startedAt = Date.now();
 
     try {
+      console.info(`[Companion][request] ${method} ${path}`, { traceId, attempt: attempt + 1 });
+
       const response = await fetch(requestUrl, {
         method,
         signal: controller.signal,
         headers: {
           Accept: 'application/json',
+          'X-Client-Type': 'companion',
           ...(options.body !== undefined ? { 'Content-Type': 'application/json' } : {}),
-          ...(traceId ? { 'X-Trace-ID': traceId } : {}),
+          'X-Trace-ID': traceId,
           ...options.headers
         },
         ...(options.body !== undefined ? { body: JSON.stringify(options.body) } : {})
@@ -185,9 +199,37 @@ export const apiRequest = async <T>(path: string, options: RequestOptions = {}):
       }
 
       const parsed = parseEnvelope<T>(payload, response.headers.get('X-Trace-ID') ?? traceId);
+      const latencyMs = Date.now() - startedAt;
+      registerRequestResult({
+        path,
+        traceId: parsed.traceId ?? traceId,
+        latencyMs,
+        success: true,
+        responseTimestamp: parsed.timestamp
+      });
+      console.info(`[Companion][response] ${method} ${path}`, {
+        traceId: parsed.traceId ?? traceId,
+        status: response.status,
+        latencyMs,
+        backendTimestamp: parsed.timestamp
+      });
       return parsed.data;
     } catch (error) {
       lastError = mapFetchError(error);
+      const latencyMs = Date.now() - startedAt;
+      registerRequestResult({
+        path,
+        traceId: lastError.traceId ?? traceId,
+        latencyMs,
+        success: false
+      });
+      console.warn(`[Companion][error] ${method} ${path}`, {
+        traceId: lastError.traceId ?? traceId,
+        code: lastError.code,
+        message: lastError.message,
+        latencyMs
+      });
+
       const shouldRetry = isReadMethod(method) && attempt < retries;
       if (!shouldRetry) {
         throw lastError;
