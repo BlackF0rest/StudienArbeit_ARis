@@ -64,6 +64,7 @@ def get_status():
                         "teleprompter",
                         "messages",
                         "sensors",
+                        "navigation",
                     ],
                 },
             },
@@ -76,6 +77,7 @@ def get_status():
                 "teleprompter_history": "/api/teleprompter/history",
                 "teleprompter_reset": "/api/teleprompter/reset (POST)",
                 "sensors": "/api/sensors",
+                "navigation_current": "/api/navigation/current",
             },
             "pinmap": PINMAP_RESPONSE,
         }
