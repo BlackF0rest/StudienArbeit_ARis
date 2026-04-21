@@ -33,6 +33,37 @@ class SQLiteRepository:
                 )
                 """
             )
+
+            c.execute(
+                """
+                CREATE TABLE IF NOT EXISTS pairing_sessions (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    device_id TEXT NOT NULL,
+                    device_name TEXT,
+                    code_hash TEXT NOT NULL,
+                    code_salt TEXT NOT NULL,
+                    status TEXT NOT NULL DEFAULT 'open',
+                    expires_at TEXT NOT NULL,
+                    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+                )
+                """
+            )
+            c.execute(
+                """
+                CREATE TABLE IF NOT EXISTS auth_tokens (
+                    token_id TEXT PRIMARY KEY,
+                    device_id TEXT NOT NULL,
+                    token_prefix TEXT NOT NULL,
+                    token_hash TEXT NOT NULL,
+                    token_salt TEXT NOT NULL,
+                    status TEXT NOT NULL DEFAULT 'active',
+                    expires_at TEXT NOT NULL,
+                    revoked_reason TEXT,
+                    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                    revoked_at TEXT
+                )
+                """
+            )
             conn.commit()
 
     def get_messages(self) -> list[dict[str, Any]]:
@@ -126,3 +157,117 @@ class SQLiteRepository:
             "lineHeight": row[6],
             "opacity": row[7],
         }
+
+
+    def create_pairing_session(
+        self,
+        device_id: str,
+        device_name: str | None,
+        code_hash: str,
+        code_salt: str,
+        expires_at,
+    ) -> int:
+        with sqlite3.connect(self.db_path) as conn:
+            c = conn.cursor()
+            c.execute(
+                """
+                INSERT INTO pairing_sessions (device_id, device_name, code_hash, code_salt, expires_at)
+                VALUES (?, ?, ?, ?, ?)
+                """,
+                (device_id, device_name, code_hash, code_salt, expires_at.isoformat()),
+            )
+            conn.commit()
+            return int(c.lastrowid)
+
+    def get_latest_open_pairing_session(self, device_id: str) -> dict[str, Any] | None:
+        with sqlite3.connect(self.db_path) as conn:
+            c = conn.cursor()
+            c.execute(
+                """
+                SELECT id, code_hash, code_salt, expires_at
+                FROM pairing_sessions
+                WHERE device_id = ? AND status = 'open'
+                ORDER BY id DESC
+                LIMIT 1
+                """,
+                (device_id,),
+            )
+            row = c.fetchone()
+        if not row:
+            return None
+        return {"id": row[0], "code_hash": row[1], "code_salt": row[2], "expires_at": row[3]}
+
+    def close_pairing_session(self, session_id: int, status: str) -> None:
+        with sqlite3.connect(self.db_path) as conn:
+            c = conn.cursor()
+            c.execute("UPDATE pairing_sessions SET status = ? WHERE id = ?", (status, session_id))
+            conn.commit()
+
+    def revoke_tokens_for_other_devices(self, device_id: str) -> None:
+        with sqlite3.connect(self.db_path) as conn:
+            c = conn.cursor()
+            c.execute(
+                """
+                UPDATE auth_tokens
+                SET status = 'revoked', revoked_reason = 'device_switch', revoked_at = CURRENT_TIMESTAMP
+                WHERE status = 'active' AND device_id != ?
+                """,
+                (device_id,),
+            )
+            conn.commit()
+
+    def store_auth_token(
+        self,
+        token_id: str,
+        device_id: str,
+        token_plain: str,
+        token_hash: str,
+        token_salt: str,
+        expires_at,
+    ) -> None:
+        with sqlite3.connect(self.db_path) as conn:
+            c = conn.cursor()
+            c.execute(
+                """
+                INSERT INTO auth_tokens (token_id, device_id, token_prefix, token_hash, token_salt, expires_at)
+                VALUES (?, ?, ?, ?, ?, ?)
+                """,
+                (token_id, device_id, token_plain[:10], token_hash, token_salt, expires_at.isoformat()),
+            )
+            conn.commit()
+
+    def get_active_tokens_by_prefix(self, token_prefix: str) -> list[dict[str, Any]]:
+        with sqlite3.connect(self.db_path) as conn:
+            c = conn.cursor()
+            c.execute(
+                """
+                SELECT token_id, device_id, token_hash, token_salt, expires_at
+                FROM auth_tokens
+                WHERE token_prefix = ? AND status = 'active'
+                """,
+                (token_prefix,),
+            )
+            rows = c.fetchall()
+        return [
+            {
+                "token_id": row[0],
+                "device_id": row[1],
+                "token_hash": row[2],
+                "token_salt": row[3],
+                "expires_at": row[4],
+            }
+            for row in rows
+        ]
+
+    def revoke_token(self, token_id: str, reason: str) -> None:
+        with sqlite3.connect(self.db_path) as conn:
+            c = conn.cursor()
+            c.execute(
+                """
+                UPDATE auth_tokens
+                SET status = 'revoked', revoked_reason = ?, revoked_at = CURRENT_TIMESTAMP
+                WHERE token_id = ?
+                """,
+                (reason, token_id),
+            )
+            conn.commit()

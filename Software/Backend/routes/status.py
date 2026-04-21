@@ -70,6 +70,9 @@ def get_status():
             },
             "hardware_ready": hardware_ready,
             "endpoints": {
+                "auth_pairing_start": "/api/auth/pairing/start (POST)",
+                "auth_pairing_exchange": "/api/auth/pairing/exchange (POST)",
+                "auth_revoke": "/api/auth/session/revoke (POST)",
                 "messages": "/api/messages",
                 "mainInfo": "/api/mainInfo",
                 "teleprompter": "/api/teleprompter",
@@ -78,6 +81,7 @@ def get_status():
                 "teleprompter_reset": "/api/teleprompter/reset (POST)",
                 "sensors": "/api/sensors",
                 "navigation_current": "/api/navigation/current",
+                "debug_diagnostics": "/api/debug/diagnostics" if current_app.config["APP_CONFIG"].debug else None,
             },
             "pinmap": PINMAP_RESPONSE,
         }

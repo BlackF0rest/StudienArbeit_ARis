@@ -14,6 +14,21 @@ class AppConfig:
     debug: bool = False
     cors_origins: list[str] = field(default_factory=lambda: ["*"])
     strict_teleprompter_validation: bool = False
+    auth_pairing_ttl_seconds: int = 300
+    auth_token_ttl_days: int = 30
+    auth_required_paths: list[str] = field(default_factory=lambda: ["/api/messages", "/api/teleprompter", "/api/navigation", "/api/sensors"])
+    companion_whitelist_paths: list[str] = field(default_factory=lambda: [
+        "/api/status",
+        "/api/mainInfo",
+        "/api/messages",
+        "/api/teleprompter",
+        "/api/navigation/current",
+        "/api/sensors",
+        "/api/auth/pairing/start",
+        "/api/auth/pairing/exchange",
+        "/api/auth/session/revoke",
+    ])
+    write_rate_limit_per_minute: int = 60
 
     @classmethod
     def from_env(cls) -> "AppConfig":
@@ -21,6 +36,16 @@ class AppConfig:
         cors_origins = [origin.strip() for origin in origins_raw.split(",") if origin.strip()]
         if not cors_origins:
             cors_origins = ["*"]
+
+        auth_required_paths = [
+            part.strip() for part in os.getenv("AUTH_REQUIRED_PATHS", "/api/messages,/api/teleprompter,/api/navigation,/api/sensors").split(",") if part.strip()
+        ]
+        companion_whitelist_paths = [
+            part.strip() for part in os.getenv(
+                "COMPANION_WHITELIST_PATHS",
+                "/api/status,/api/mainInfo,/api/messages,/api/teleprompter,/api/navigation/current,/api/sensors,/api/auth/pairing/start,/api/auth/pairing/exchange,/api/auth/session/revoke",
+            ).split(",") if part.strip()
+        ]
 
         return cls(
             db_path=os.getenv("DB_PATH", str(DEFAULT_DB_PATH)),
@@ -32,4 +57,9 @@ class AppConfig:
                 os.getenv("TELEPROMPTER_STRICT_VALIDATION", "false").lower()
                 in {"1", "true", "yes", "on"}
             ),
+            auth_pairing_ttl_seconds=int(os.getenv("AUTH_PAIRING_TTL_SECONDS", "300")),
+            auth_token_ttl_days=int(os.getenv("AUTH_TOKEN_TTL_DAYS", "30")),
+            auth_required_paths=auth_required_paths,
+            companion_whitelist_paths=companion_whitelist_paths,
+            write_rate_limit_per_minute=int(os.getenv("WRITE_RATE_LIMIT_PER_MINUTE", "60")),
         )
