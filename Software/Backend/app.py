@@ -2,7 +2,7 @@ import logging
 import uuid
 from datetime import datetime, timezone
 
-from flask import Flask, g, jsonify, request
+from flask import Flask, g, has_request_context, jsonify, request
 from flask_cors import CORS
 from werkzeug.exceptions import HTTPException
 
@@ -21,6 +21,15 @@ from services.rate_limiter import InMemoryRateLimiter
 from services.teleprompter_service import TeleprompterService
 
 
+class RequestContextFilter(logging.Filter):
+    def filter(self, record: logging.LogRecord) -> bool:
+        if not hasattr(record, "trace_id"):
+            record.trace_id = getattr(g, "trace_id", "-") if has_request_context() else "-"
+        if not hasattr(record, "client_type"):
+            record.client_type = request.headers.get("X-Client-Type", "-") if has_request_context() else "-"
+        return True
+
+
 def create_app(config: AppConfig | None = None) -> Flask:
     app_config = config or AppConfig.from_env()
 
@@ -31,8 +40,10 @@ def create_app(config: AppConfig | None = None) -> Flask:
 
     logging.basicConfig(
         level=logging.DEBUG if app_config.debug else logging.INFO,
-        format="%(asctime)s %(levelname)s %(message)s",
+        format="%(asctime)s %(levelname)s [trace_id=%(trace_id)s client=%(client_type)s] %(message)s",
     )
+    for handler in logging.getLogger().handlers:
+        handler.addFilter(RequestContextFilter())
 
     repo = SQLiteRepository(app_config.db_path)
     repo.init_db()
@@ -76,6 +87,15 @@ def create_app(config: AppConfig | None = None) -> Flask:
     def before_request():
         g.trace_id = request.headers.get("X-Trace-ID", str(uuid.uuid4()))
         g.request_start = datetime.now(timezone.utc)
+        app.logger.info(
+            "request_start",
+            extra={
+                "trace_id": g.trace_id,
+                "client_type": request.headers.get("X-Client-Type", "-"),
+                "method": request.method,
+                "path": request.path,
+            },
+        )
 
         is_companion = request.headers.get("X-Client-Type", "").lower() == "companion"
         if is_companion and not any(
