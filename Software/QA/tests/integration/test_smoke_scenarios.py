@@ -1,11 +1,15 @@
 from __future__ import annotations
 
+from datetime import datetime, timedelta, timezone
+
 from Software.QA.scripts.backend_test_harness import (
     BackendServer,
     TestResult,
     assert_true,
     request_json,
 )
+from Software.Onboard_Runtime.event_bus import RuntimeEvent, SharedEventBus
+from Software.Onboard_Runtime.hardware import HIDInputAdapter, HIDRuntimeEventPump, HardwareEventPublisher
 from Software.Onboard_Runtime.hardware.subscriptions import _normalize_input_control_value
 
 
@@ -83,6 +87,31 @@ def run_smoke_scenarios() -> list[TestResult]:
         results.append(TestResult(name="scenario_d_hid_gesture_normalization", passed=True))
     except Exception as exc:  # noqa: BLE001
         results.append(TestResult(name="scenario_d_hid_gesture_normalization", passed=False, reason=str(exc)))
+
+    try:
+        event_bus = SharedEventBus()
+        publisher = HardwareEventPublisher(event_bus)
+        adapter = HIDInputAdapter(double_tap_window_ms=350)
+        event_pump = HIDRuntimeEventPump(adapter=adapter, publisher=publisher)
+        emitted_events: list[dict[str, object]] = []
+
+        event_bus.subscribe(RuntimeEvent.HARDWARE_EVENT, lambda message: emitted_events.append(message.payload))
+
+        t0 = datetime(2026, 1, 1, tzinfo=timezone.utc)
+        event_pump.process_transition(button_id="button-a", pressed=True, at=t0)
+        event_pump.process_transition(button_id="button-a", pressed=False, at=t0 + timedelta(milliseconds=60))
+        assert_true(len(emitted_events) == 0, "Single tap should remain pending before timeout flush")
+
+        event_pump.tick(at=t0 + timedelta(milliseconds=500))
+        assert_true(len(emitted_events) == 1, "Timeout flush should emit exactly one event")
+
+        first_event = emitted_events[0]
+        event_value = first_event.get("value") if isinstance(first_event, dict) else None
+        assert_true(isinstance(event_value, dict), "Emitted hardware payload must contain value object")
+        assert_true(event_value.get("gesture") == "single", "Flush should emit gesture=single")
+        results.append(TestResult(name="scenario_e_single_tap_timeout_flush", passed=True))
+    except Exception as exc:  # noqa: BLE001
+        results.append(TestResult(name="scenario_e_single_tap_timeout_flush", passed=False, reason=str(exc)))
 
     return results
 

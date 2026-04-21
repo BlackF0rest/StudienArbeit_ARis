@@ -1,5 +1,6 @@
 from .events import HardwareEvent
 from .hid import HIDInputAdapter
+from .hid_event_pump import HIDRuntimeEventPump
 from .publisher import HardwareEventPublisher
 from .sensors import (
     BME280Adapter,
@@ -17,6 +18,7 @@ from .subscriptions import (
 __all__ = [
     "HardwareEvent",
     "HIDInputAdapter",
+    "HIDRuntimeEventPump",
     "SensorAdapter",
     "BME280Adapter",
     "GyroAdapter",
