@@ -27,27 +27,192 @@ Nach diesem Prinzip wurden alle Seiten entwickelt.
 In dem Verzeichnis routes befindet sich ebenfalls die Datei "+layout.svelte", welche das generelle Layout der Seiten bestimmt. Diese wirken sich auf die ganze Website aus. Dies ist ebenfalls für header.svete der fall.
 Die einzelnen Svelte Seiten erhalten die von diesen benötigten Dateien immer durch das Python backend und die dazugehörigen REST abfragen. Diese werden zu beginn der Svelte Dateien durch typescript oder Javascript gezogen.
 
-Im finalen Code sind verschiedene Seiten bereits umgesetzt, welche durch das Backend supported und damit gestartet werden können. Das sind:
+Die Projektstruktur folgt dem SvelteKit-Dateisystem-Routing: Alle Seiten befinden sich unter
+\texttt{src/routes/}, wobei jeder Unterordner eine eigenständige Route repräsentiert, die über
+den Pfad \texttt{/[Ordnername]} im Browser erreichbar ist. Die globale Layoutdatei
+\texttt{+layout.svelte} bindet systemweit gültige Styles und den persistenten Header ein, sodass
+dieser über alle App-Seiten hinweg konsistent angezeigt wird. Der Header-Baustein
+(\texttt{header.svelte}) ruft über \texttt{onMount} alle fünf Sekunden den REST-Endpunkt
+\texttt{/api/mainInfo} des Python-Backends ab und stellt die empfangenen Systemdaten --- Uhrzeit,
+Akkustand, Temperatur und Luftfeuchtigkeit --- in einer einzeiligen Statusleiste dar. Das
+folgende Listing zeigt das Grundprinzip einer Svelte-Komponente am Beispiel des Headers:
+
+\begin{lstlisting}[
+    language=HTML,
+    caption={Svelte-Komponente \texttt{header.svelte}: Datenabruf und reaktive Darstellung},
+    label={lst:svelteHeader}
+]
+<script lang="ts">
+  import { onMount } from 'svelte';
+  let data: { Battery?: string; Temperature?: string; Humidity?: string } = {};
+
+  async function fetchData() {
+    const res = await fetch('http://localhost:5000/api/mainInfo');
+    data = await res.json();
+  }
+
+  onMount(() => {
+    fetchData();
+    const interval = setInterval(fetchData, 5000);
+    return () => clearInterval(interval);
+  });
+</script>
+
+<div id="interface">
+  <h1>{data.Battery ?? '?'} | {data.Temperature ?? '?'}</h1>
+</div>
+\end{lstlisting}
+
+Der \texttt{<script>}-Block enthält die TypeScript-Logik inklusive reaktiver Zustandsvariablen,
+während der untere Markup-Teil die Darstellung definiert. Reaktive Abhängigkeiten werden in
+Svelte durch das \texttt{\$:}-Präfix deklariert, wodurch eine automatische Neuberechnung bei
+Zustandsänderungen ausgelöst wird --- ohne expliziten State-Management-Code.
+
+Im finalen Stand sind die folgenden Seiten implementiert und durch das Backend unterstützt:
+
 \begin{description}
-    \item[Hub] - dies ist die Hauptseite welche als Basis für die AR Brille dient. Hier werden grundinformatinen über das System angezeigt und die grundlegende Navigation wird ermöglicht.
-    \item[Navigation (TbT)] - die Navigation ist eine App, welche eine Physische Navigation mithilfe der Companion App ermöglicht.
-    \item[(AI-)Chat] - eine Chatfunktion die unter anderem mit ChatGPT genutzt werden kann. Dabei muss ebenfalls eine Verbindung mit der CompanionApp bestehen, über welche die Kommunikation mit einer KI-API möglich ist. Mit weiterer Entwicklungzeit wäre auch eine direkte Anbindung an eine KI-API möglich, gegeben das System hat eine Internetverbindung.
-    \item[Teleprompter] - durch den Teleprompter ist es möglich, einen Text über den Bildschirm laufen zu lassen. Dieser kann in der Companion App eingegeben und die Geschwindigkeit usw. eingestellt werden.
+    \item[\textbf{Hub} (\texttt{/})] Die Startseite der AR-Brille, die grundlegende
+        Systeminformationen und die Navigationsübersicht darstellt.
+    \item[\textbf{Navigation} (\texttt{/Navigation})] Ermöglicht eine schrittweise
+        Turn-by-Turn-Navigation auf Basis von Daten, die über die Companion~App übermittelt
+        werden.
+    \item[\textbf{(AI-)Chat} (\texttt{/Messages})] Eine Chatfunktion, die via Companion~App an
+        externe KI-APIs (z.\,B.\ OpenAI ChatGPT) angebunden werden kann.
+    \item[\textbf{Teleprompter} (\texttt{/Teleprompter})] Stellt einen von der Companion~App
+        konfigurierbaren, scrollenden Text dar; Geschwindigkeit, Schriftgröße und Farbe sind
+        vollständig parametrisierbar.
 \end{description}
 
-Weitere Seiten können wie oben gezeigt gebaut und eingebunden werden. Durch das schreiben einer neuen +page.svelte im eigenen Ordner wird automatische eine neue Seite eingebaut werden. Um diese auch in die Navigation einzubinden muss die neue Seite unter der Navigationsführung ebenfalls eingebunden werden.
+Neue Seiten lassen sich durch Anlegen eines neuen Ordners mit einer \texttt{+page.svelte}-Datei
+unter \texttt{src/routes/} hinzufügen, ohne weitere Konfigurationsänderungen vornehmen zu müssen;
+die Einbindung in die Navigationsstruktur erfordert lediglich eine Ergänzung im
+Navigationsmenü des Hubs.
 
-\subsection{Backend - Python Implementierung}
+\subsection{Python Implementierung}
 \label{subsec:PythongImplementierung}
-Das Backend ist die Hauptverbingungskomponente. Hier werden alle Daten von den verschiednen Teilen Der Software und Systeme gesammelt und für das Frontend aufbereitet. Das wird dann alles über das REST Prinzipfür Svelte bereitgestellt.
+Das Python-Backend bildet die zentrale Koordinationsschicht des ARis-Softwaresystems. Es wurde als Flask-Applikation realisiert, die alle Datenflüsse zwischen den Systemkomponenten — Frontend, Companion App, Bluetooth-Modul und Datenbank — orchestriert und über ein REST-API nach außen exponiert . Flask-CORS ist aktiviert, um Cross-Origin-Anfragen des im Browser laufenden Svelte-Frontends zu erlauben.
+
+Beim Start der Applikation wird die SQLite-Datenbank durch die Funktion \texttt{init\_db()}
+initialisiert, welche die benötigten Tabellen bei Bedarf anlegt
+(vgl.\ Abschnitt~\ref{subsec:DatenbankImplementierung}). Danach stellt der Flask-Server auf Port
+5000 die in Tabelle~\ref{tab:restEndpoints} aufgeführten REST-Endpunkte bereit.
+
+\begin{comment}
+    \begin{table}[htbp]
+    \centering
+    \caption{REST-Endpunkte des Python-Backends}
+    \label{tab:restEndpoints}
+    \begin{tabularx}{\textwidth}{l l X}
+        \toprule
+        \textbf{Endpunkt} & \textbf{Methode(n)} & \textbf{Funktion} \\
+        \midrule
+        \texttt{/api/mainInfo}              & GET              & Liefert Akkustand, Temperatur, Luftfeuchtigkeit \\
+        \texttt{/api/messages}              & GET, POST, DELETE & Lese- und Schreibzugriff auf Nachrichten \\
+        \texttt{/api/teleprompter}          & GET              & Liefert aktuelle Teleprompter-Konfiguration \\
+        \texttt{/api/teleprompter/send}     & POST             & Companion~App setzt neue Konfiguration \\
+        \texttt{/api/teleprompter/current}  & GET              & Polling-Endpunkt für die AR-Brille \\
+        \texttt{/api/teleprompter/history}  & GET              & Letzte 10 gespeicherte Konfigurationen \\
+        \texttt{/api/teleprompter/reset}    & POST             & Setzt Konfiguration auf Standardwerte zurück \\
+        \texttt{/api/status}                & GET              & Debug-Endpunkt mit Systemstatus \\
+        \bottomrule
+    \end{tabularx}
+\end{table}
+\end{comment}
+
+Die Teleprompter-Konfiguration wird zur Laufzeit als serverinternes Python-Dictionary
+(\texttt{current\_teleprompter\_config}) vorgehalten, das bei jedem POST auf
+\texttt{/api/teleprompter/send} mit den übertragenen Parametern überschrieben wird. Das
+Svelte-Frontend pollt den Endpunkt \texttt{/api/teleprompter/current} einmal pro Sekunde und
+rendert die jeweils aktuelle Konfiguration. Durch diesen Polling-Mechanismus wird eine annähernd
+Echtzeit-Synchronisation zwischen Companion~App und AR-Brille erreicht, ohne eine komplexere
+WebSocket-Infrastruktur einführen zu müssen.
+
+Neben der Flask-REST-Komponente enthält das Backend eine zweite, davon unabhängige Komponente:
+den Bluetooth-GATT-Server (\texttt{backend\_gatt\_server.py}), der über die Linux-D-Bus-Schnittstelle
+und den BlueZ-Bluetooth-Stack als nativer GATT-Server auf dem Raspberry~Pi registriert wird.
+Dieser implementiert zwei GATT-Services: einen \texttt{TextService} mit den Nordic-UART-Service-UUIDs
+(\texttt{6e400001-\ldots}) für den bidirektionalen Texttransfer sowie einen \texttt{TestService}
+zu Diagnosezwecken. Der \texttt{TextRxCharacteristic} empfängt Datenpakete von der Companion~App
+und interpretiert dabei ein einfaches Textprotokoll mit den Kommandos
+\texttt{CMD:TELEPROMPTER\_START}, \texttt{TXT:[chunk]} und \texttt{CMD:TELEPROMPTER\_END}, um den
+rekonstruierten Volltext an die weitere Verarbeitungslogik zu übergeben. Die
+\texttt{TextTxCharacteristic} ermöglicht Notifications vom Raspberry~Pi zur verbundenen App.
+Wie in \todo{Module Map} dargestellt besteht der in Python geschriebene Teil des Programms aus verschiedenen Modulen. Diese werden nun Stück für Stück vorgestellt:
+
+Das \textbf{Python Backend} ist für die Zentrale Koordination des Programmes darin werden Zentrale Entscheidungen getroffen und die vers        
+
 
 \subsection{Backend - Datenbank Implementierung}
 \label{subsec:DatenbankImplementierung}
-Die Datenbank ist für das Speichern von jeglichen Daten welche während der laufzeit anfallen und benötigt werden zuständig. \todo{Schema?}
+Die Datenhaltung erfolgt über eine eingebettete SQLite-Datenbank (\texttt{data.db}), die ohne
+separaten Datenbankserver direkt im Dateisystem des Raspberry~Pi persistiert wird. SQLite wurde
+aufgrund seiner geringen Ressourcenanforderungen und der fehlenden Notwendigkeit einer separaten
+Server-Infrastruktur ausgewählt, was dem eingeschränkten Rechenumfeld des Raspberry~Pi
+entgegenkommt.
 
-\subsection{Companion - React Native Implementierung}
+Das Datenbankschema umfasst zwei Tabellen, deren DDL-Definitionen in
+Listing~\ref{lst:dbSchema} dargestellt sind:
+
+\begin{lstlisting}[
+    language=SQL,
+    caption={SQLite-Datenbankschema des ARis-Backends},
+    label={lst:dbSchema}
+]
+CREATE TABLE IF NOT EXISTS messages1 (
+    id      INTEGER PRIMARY KEY AUTOINCREMENT,
+    content TEXT
+);
+
+CREATE TABLE IF NOT EXISTS teleprompter_history (
+    id              INTEGER PRIMARY KEY AUTOINCREMENT,
+    text            TEXT,
+    speed           REAL,
+    fontSize        REAL,
+    fontColor       TEXT,
+    backgroundColor TEXT,
+    fontFamily      TEXT,
+    lineHeight      REAL,
+    opacity         REAL,
+    timestamp       DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+\end{lstlisting}
+
+Die Tabelle \texttt{messages1} dient der persistenten Speicherung von Nachrichten, die über den
+Nachrichtenkanal der Companion~App eingehen. Die Tabelle \texttt{teleprompter\_history}
+protokolliert jede von der Companion~App übertragene Teleprompter-Konfiguration mit Zeitstempel
+und ermöglicht so eine Wiederverwendung früherer Einstellungen. Der Zugriff auf die Datenbank
+erfolgt ausschließlich über das Python-Backend mittels der Python-Standardbibliothek
+\texttt{sqlite3}; auf ein ORM-Framework wurde bewusst verzichtet, um die Systemabhängigkeiten
+minimal zu halten.
+
+\subsection{Companion --- React Native Implementierung}
 \label{subsec:ReactNativeImplementierung}
+Die Companion~App dient als mobile Steuerzentrale für die AR-Brille und ermöglicht dem Nutzer die
+Konfiguration und Steuerung aller AR-Features über ein Smartphone. Im Verlauf der
+Prototypenentwicklung wurden verschiedene Technologiestacks evaluiert: Ein früher Prototyp wurde
+als Vue.js-Webapp realisiert (\texttt{Software\slash{}Companion\_Prototype\slash{}Vue\_Companion\_App\slash{}}),
+der die grundlegende REST-Kommunikation mit dem Python-Backend testete. Parallel dazu wurden
+Python-basierte Desktop-Tests zur Bluetooth-GATT-Kommunikation durchgeführt
+(\texttt{Software\slash{}Companion\_Prototype\slash{}PythonTesting\slash{}}). Im finalen Konzept
+ist die Companion~App als native React-Native-Anwendung (\texttt{Aris\_Companion}) vorgesehen,
+da nur ein nativer App-Kontext den Zugriff auf die Bluetooth-Low-Energy-APIs des Betriebssystems
+erlaubt, welche für die Verbindung mit dem GATT-Server des Raspberry~Pi erforderlich sind.
+
+Die Companion~App kommuniziert mit dem Backend über zwei Kanäle: Über WLAN werden REST-Anfragen
+an das Flask-Backend gestellt; über BLE wird der GATT-Server des Raspberry~Pi angesprochen. Die
+HTTP-Kommunikation wird bevorzugt eingesetzt, wenn beide Geräte im selben Netzwerk erreichbar
+sind, da sie höhere Datenübertragungsraten bietet; BLE dient als Rückfallkanal für Szenarien ohne
+gemeinsame Netzwerkinfrastruktur.
 
 \subsection{Pixel Streaming Implementierung}
 \label{subsec:PixelStreamingImplementierung}
-Die Pixelstreaming Komponente wurde wegen der Zeitkomponente und den Technischen Herausforderungen nur vorbereitet, jedoch nicht umgesetzt oder getestet. Es gibt jedoch im Code bereits eine Anbindungsstelle, welche die Verbindung mit einem im Netz verfügbaren PixelStreaming Streams ermöglicht. Pixelstreaming ermöglicht das Streamen einer Unreal Engine Datei, welche auf einem externen Rechner gerendert und ausgeführt wird. Dies ermöglicht das einfache Bauen von zum Beispiel Anleitungen für eine Produktionsstätte oder der Wartung von Maschinen. Eine Anleitung könnte dabei in Unreal Engine Schritt für Schritt oder per Video angezeigt werden.
+Die Pixel-Streaming-Komponente wurde innerhalb des Projektzeitraums aufgrund des verbleibenden
+Zeit- und Ressourcenbudgets nicht vollständig implementiert und getestet. Im Svelte-Frontend ist
+jedoch eine Anbindungsstelle vorbereitet, die die Integration eines im lokalen Netzwerk
+verfügbaren Pixel-Streaming-Streams ermöglicht. Pixel Streaming bezeichnet das Verfahren, eine
+in Unreal Engine ausgeführte interaktive 3D-Anwendung serverseitig zu rendern und das komprimierte
+Videosignal in Echtzeit per WebRTC an einen Browser-Client zu übertragen, wo es ohne lokale
+GPU-Leistung dargestellt werden kann (vgl.\ Abschnitt~\ref{sec:pixelStreaming}). In einem
+vollständig implementierten Systemausbau würde dies die Darstellung komplexer, industriell
+relevanter AR-Inhalte --- etwa maschinenspezifischer Wartungsanleitungen oder Montagesequenzen ---
+ermöglichen, die auf einem externen Rechner vorgerendert und auf der AR-Brille dargestellt werden.
