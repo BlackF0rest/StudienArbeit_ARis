@@ -22,7 +22,6 @@ from .hardware import (
     HardwareEventPublisher,
     HIDInputAdapter,
     NavigationSubscription,
-    PressSemantics,
     SensorAdapter,
     TeleprompterSubscription,
 )
@@ -48,7 +47,6 @@ __all__ = [
     "RuntimeEvent",
     "SharedEventBus",
     "HardwareEvent",
-    "PressSemantics",
     "HIDInputAdapter",
     "SensorAdapter",
     "BME280Adapter",

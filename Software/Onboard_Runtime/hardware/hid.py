@@ -2,14 +2,8 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
-from enum import Enum
 
 from .events import HardwareEvent
-
-
-class PressSemantics(str, Enum):
-    SHORT = "short_press"
-    LONG = "long_press"
 
 
 @dataclass
@@ -17,18 +11,26 @@ class _PressState:
     started_at: datetime
 
 
+@dataclass
+class _TapState:
+    tap_count: int
+    first_tap_at: datetime
+    last_tap_duration_ms: int
+
+
 class HIDInputAdapter:
-    """Processes raw button transitions into debounced short/long press events."""
+    """Processes raw button transitions into debounced single/double tap gestures."""
 
     def __init__(
         self,
         debounce_window_ms: int = 50,
-        long_press_threshold_ms: int = 600,
+        double_tap_window_ms: int = 350,
     ) -> None:
         self._debounce_window = timedelta(milliseconds=debounce_window_ms)
-        self._long_press_threshold = timedelta(milliseconds=long_press_threshold_ms)
+        self._double_tap_window = timedelta(milliseconds=double_tap_window_ms)
         self._active_presses: dict[str, _PressState] = {}
         self._last_transition: dict[str, datetime] = {}
+        self._pending_taps: dict[str, _TapState] = {}
 
     def ingest_transition(
         self,
@@ -49,24 +51,80 @@ class HIDInputAdapter:
         if active is None:
             return None
 
-        duration = timestamp - active.started_at
-        press_type = (
-            PressSemantics.LONG if duration >= self._long_press_threshold else PressSemantics.SHORT
+        duration_ms = round((timestamp - active.started_at).total_seconds() * 1000)
+
+        pending = self._pending_taps.get(button_id)
+        if pending is None:
+            # First valid tap: keep pending and wait for second tap in configured window.
+            self._pending_taps[button_id] = _TapState(
+                tap_count=1,
+                first_tap_at=timestamp,
+                last_tap_duration_ms=duration_ms,
+            )
+            return None
+
+        if timestamp - pending.first_tap_at <= self._double_tap_window:
+            self._pending_taps.pop(button_id, None)
+            return self._build_event(
+                button_id=button_id,
+                timestamp=timestamp,
+                gesture="double",
+                tap_count=2,
+                duration_ms=duration_ms,
+            )
+
+        # Outside window: emit previous pending single tap now and start a new pending tap.
+        single_event = self._build_event(
+            button_id=button_id,
+            timestamp=timestamp,
+            gesture="single",
+            tap_count=pending.tap_count,
+            duration_ms=pending.last_tap_duration_ms,
         )
+        self._pending_taps[button_id] = _TapState(
+            tap_count=1,
+            first_tap_at=timestamp,
+            last_tap_duration_ms=duration_ms,
+        )
+        return single_event
 
-        control_value: str | float
-        if press_type is PressSemantics.LONG:
-            control_value = "toggle_pause_resume"
-        else:
-            control_value = "speed_up"
+    def collect_timeout_events(self, at: datetime | None = None) -> list[HardwareEvent]:
+        """Emit single tap events for all buttons whose double tap window has expired."""
+        timestamp = at or datetime.now(tz=timezone.utc)
+        events: list[HardwareEvent] = []
 
+        for button_id, pending in list(self._pending_taps.items()):
+            if timestamp - pending.first_tap_at < self._double_tap_window:
+                continue
+            self._pending_taps.pop(button_id, None)
+            events.append(
+                self._build_event(
+                    button_id=button_id,
+                    timestamp=timestamp,
+                    gesture="single",
+                    tap_count=pending.tap_count,
+                    duration_ms=pending.last_tap_duration_ms,
+                )
+            )
+
+        return events
+
+    def _build_event(
+        self,
+        button_id: str,
+        timestamp: datetime,
+        gesture: str,
+        tap_count: int,
+        duration_ms: int,
+    ) -> HardwareEvent:
         return HardwareEvent(
             event_type="input.control",
             source=f"hid:{button_id}",
             value={
-                "press": press_type.value,
-                "duration_ms": round(duration.total_seconds() * 1000),
-                "control": control_value,
+                "gesture": gesture,
+                "tap_count": tap_count,
+                "duration_ms": duration_ms,
+                "source": f"hid:{button_id}",
             },
             unit=None,
             timestamp=timestamp,
