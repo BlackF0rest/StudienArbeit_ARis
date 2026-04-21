@@ -25,7 +25,7 @@ criteria:
     severity: P1
     automatable: true
   - id: SMK-001
-    description: Short smoke checks execute API health and reset flows.
+    description: Single/Double gesture smoke checks execute API health, reset flows, and HID gesture normalization.
     type: integration
     severity: P0
     automatable: true
@@ -35,7 +35,7 @@ criteria:
     severity: P1
     automatable: false
   - id: MAN-002
-    description: Physical HID button/interaction behavior on target hardware is correct.
+    description: Physical HID button interactions map to canonical Single/Double gestures on target hardware.
     type: manual
     severity: P1
     automatable: false

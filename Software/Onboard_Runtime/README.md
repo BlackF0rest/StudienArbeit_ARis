@@ -19,6 +19,7 @@
    - normalized hardware event
 4. **Hardware service modules**
    - HID input adapter with debouncing + canonical `input.control.value.gesture` semantics (`single`/`double`)
+   - legacy HID press aliases (`short_press`/`long_press`) are normalized to canonical gestures (`single`/`double`)
    - sensor interfaces/adapters for BME280 + gyro (extensible via `SensorAdapter`)
    - `HardwareEvent` schema (`event_type`, `source`, `value`, `unit`, `timestamp`)
    - `HardwareEventPublisher` for publishing hardware events to runtime bus

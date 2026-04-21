@@ -116,6 +116,7 @@ The onboard platform is organized into the following modules and boundaries:
 
 **Contract:**
 - HID emits discrete events (`PRESS`, `RELEASE`, `LONG_PRESS`, `GESTURE`) with source and timestamp.
+- HID emits normalized `input.control` events with `value.gesture` in the canonical set (`single`, `double`).
 - Sensors emit sampled records with sequence number and confidence.
 - Feature-runtime consumes via subscriptions with explicit backpressure policy (`drop_oldest` default).
 - Event ordering is guaranteed per source stream.
