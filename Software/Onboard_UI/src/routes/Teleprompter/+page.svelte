@@ -14,7 +14,7 @@
 
 {#if debugMode}
 	<Header />
-	<HudScaffold title="Teleprompter Runtime" subtitle="Live scroll mode · press long to return home">
+	<HudScaffold title="Teleprompter Runtime" subtitle="Live scroll mode · double press to open navigation">
 		<svelte:fragment slot="header">
 			<StatusPill text="Debug Overlay Enabled" tone="info" />
 		</svelte:fragment>
