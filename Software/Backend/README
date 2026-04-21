@@ -34,3 +34,31 @@ der den Initialisierungsstatus von GPIO und I2C ausgibt.
 
 Zusätzlich liefert `GET /api/status` im Feld `hardware_ready` den aktuellen
 Hardware-Status (GPIO/I2C inklusive Fehlerdetails).
+
+## Companion Session-Auth (lokal)
+
+Neuer Auth-Flow für Companion-Clients:
+
+1. `POST /api/auth/pairing/start` mit `device_id` (optional `device_name`) erzeugt einen kurzlebigen Pairing-Code.
+2. `POST /api/auth/pairing/exchange` mit `device_id` + `pairing_code` tauscht den Code gegen ein Bearer-Token.
+3. Schreibende und sensible Endpunkte erwarten `Authorization: Bearer <token>`.
+
+Sicherheitsdetails:
+
+- Pairing-Codes und Tokens werden nur gehasht + gesalzen in SQLite gespeichert.
+- Bei neuem Device-Pairing werden aktive Tokens anderer Geräte automatisch mit Grund `device_switch` invalidiert.
+- Token-Ablauf ist konfigurierbar (`AUTH_TOKEN_TTL_DAYS`, Default 30 Tage).
+
+## Harte Schutzmaßnahmen
+
+- Companion-Clients (`X-Client-Type: companion`) dürfen nur freigegebene Pfadpräfixe aufrufen (`COMPANION_WHITELIST_PATHS`).
+- Schreibende API-Requests (`POST/PUT/PATCH/DELETE`) sind per In-Memory Rate-Limit geschützt (`WRITE_RATE_LIMIT_PER_MINUTE`).
+- Debug-Endpunkte (`/api/debug/*`) sind bei `DEBUG=false` deaktiviert.
+
+## Neue Umgebungsvariablen
+
+- `AUTH_PAIRING_TTL_SECONDS` (Default: `300`)
+- `AUTH_TOKEN_TTL_DAYS` (Default: `30`)
+- `AUTH_REQUIRED_PATHS` (CSV)
+- `COMPANION_WHITELIST_PATHS` (CSV)
+- `WRITE_RATE_LIMIT_PER_MINUTE` (Default: `60`)
