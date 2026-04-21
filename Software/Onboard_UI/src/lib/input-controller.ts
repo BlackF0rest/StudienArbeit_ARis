@@ -22,7 +22,6 @@ interface AppActionHandlers {
 }
 
 const HOME_APPS = [
-	{ route: '/Navigation', name: 'Navigation' },
 	{ route: '/Teleprompter', name: 'Teleprompter' },
 	{ route: '/Messages', name: 'Messages/HUD' }
 ] as const;

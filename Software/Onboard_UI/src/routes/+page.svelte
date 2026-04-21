@@ -12,10 +12,15 @@
 	} from '$lib/input-controller';
 
 	const apps = [
-		{ name: 'Navigation', route: '/Navigation', info: 'Pfeile, Kompass und Richtung' },
 		{ name: 'Teleprompter', route: '/Teleprompter', info: 'Text groß und klar anzeigen' },
 		{ name: 'Messages', route: '/Messages', info: 'Kurze Mitteilungen lesen' }
 	] as const;
+
+	const navigationInfo = {
+		name: 'Navigation',
+		route: '/Navigation',
+		info: 'Nur per Double-Tap öffnen'
+	} as const;
 
 	let selectedIndex = 0;
 	let pulseCard = false;
@@ -26,10 +31,10 @@
 
 	onMount(() => {
 		setInputContext('home');
-		selectedIndex = get(homeCarouselIndex);
+		selectedIndex = get(homeCarouselIndex) % apps.length;
 
 		const unsubscribeIndex = homeCarouselIndex.subscribe((index) => {
-			selectedIndex = index;
+			selectedIndex = index % apps.length;
 		});
 
 		const unsubscribePulse = shortPressPulse.subscribe(() => {
@@ -52,10 +57,10 @@
 
 <main class="main-compact">
 	<section class="focus-card {pulseCard ? 'pulse' : ''}">
-		<p class="label">Aktive Ansicht</p>
+		<p class="label">Single-Tap: Seitenaktion / Weiter</p>
 		<h1>{selectedApp.name}</h1>
 		<p class="description">{selectedApp.info}</p>
-		<a class="open-link" href={selectedApp.route}>Öffnen</a>
+		<a class="open-link" href={selectedApp.route}>Mit Single öffnen / weiter</a>
 	</section>
 
 	<section class="quick-grid">
@@ -65,6 +70,10 @@
 				<span class="quick-route">{app.route}</span>
 			</a>
 		{/each}
+		<div class="quick-item nav-info" aria-label="Navigation nur per Double-Tap verfügbar">
+			<span class="quick-title">{navigationInfo.name}</span>
+			<span class="quick-route">{navigationInfo.route} · Double-Tap</span>
+		</div>
 	</section>
 
 	<footer class="hint-wrap">
@@ -146,6 +155,12 @@
 	.quick-item.is-active {
 		border-color: var(--hud-border-accent);
 		background: #0f1b0f;
+	}
+
+	.quick-item.nav-info {
+		border-style: dashed;
+		opacity: 0.85;
+		cursor: default;
 	}
 
 	.quick-title {
