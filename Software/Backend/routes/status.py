@@ -53,6 +53,20 @@ def get_status():
             "app": "AR-Brille Backend",
             "version": "1.0",
             "health": "ok",
+            "handshake": {
+                "protocol": "status-handshake-v1",
+                "device": {
+                    "device_id": "ar-brille-backend",
+                    "friendly_name": "AR Brille",
+                    "firmware_version": "1.0.0",
+                    "app_version": "1.0",
+                    "capabilities": [
+                        "teleprompter",
+                        "messages",
+                        "sensors",
+                    ],
+                },
+            },
             "hardware_ready": hardware_ready,
             "endpoints": {
                 "messages": "/api/messages",
