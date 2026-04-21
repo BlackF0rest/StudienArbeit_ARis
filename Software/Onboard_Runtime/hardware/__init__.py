@@ -1,5 +1,5 @@
 from .events import HardwareEvent
-from .hid import HIDInputAdapter, PressSemantics
+from .hid import HIDInputAdapter
 from .publisher import HardwareEventPublisher
 from .sensors import (
     BME280Adapter,
@@ -16,7 +16,6 @@ from .subscriptions import (
 
 __all__ = [
     "HardwareEvent",
-    "PressSemantics",
     "HIDInputAdapter",
     "SensorAdapter",
     "BME280Adapter",
