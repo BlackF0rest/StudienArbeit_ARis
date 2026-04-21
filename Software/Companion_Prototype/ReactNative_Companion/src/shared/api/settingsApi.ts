@@ -4,6 +4,8 @@ export type DeviceSettings = {
   brightness?: number;
   volume?: number;
   language?: string;
+  flags?: Record<string, boolean>;
+  runtime_flags?: Record<string, boolean>;
   [key: string]: unknown;
 };
 
