@@ -1,36 +1,58 @@
 import { apiRequest } from '@shared/api/client';
 
 export type TeleprompterConfig = {
-  speed?: number;
-  font_size?: number;
-  mirror?: boolean;
-  [key: string]: unknown;
+  text: string;
+  speed: number;
+  fontSize: number;
+  fontColor: string;
+  backgroundColor: string;
+  fontFamily: string;
+  lineHeight: number;
+  opacity: number;
 };
 
-export type TeleprompterEntry = {
-  id?: string | number;
-  text?: string;
-  created_at?: string;
-  [key: string]: unknown;
+export type TeleprompterHistoryEntry = {
+  id: number;
+  text: string;
+  speed: number;
+  fontSize: number;
+  timestamp: string;
 };
 
 export type SendTeleprompterPayload = {
   text: string;
   speed?: number;
-  [key: string]: unknown;
+  fontSize?: number;
+  fontColor?: string;
+  backgroundColor?: string;
+  fontFamily?: string;
+  lineHeight?: number;
+  opacity?: number;
+};
+
+export type TeleprompterSendResponse = {
+  status: 'success';
+  message: string;
+  timestamp: string;
+  warnings?: string[];
+};
+
+export type TeleprompterResetResponse = {
+  status: 'reset';
+  config: TeleprompterConfig;
 };
 
 export const teleprompterApi = {
   getConfig: () => apiRequest<TeleprompterConfig>('/api/teleprompter'),
-  getCurrent: () => apiRequest<TeleprompterEntry>('/api/teleprompter/current'),
-  getHistory: () => apiRequest<TeleprompterEntry[]>('/api/teleprompter/history'),
+  getCurrent: () => apiRequest<TeleprompterConfig>('/api/teleprompter/current'),
+  getHistory: () => apiRequest<TeleprompterHistoryEntry[]>('/api/teleprompter/history'),
   sendToGlasses: (payload: SendTeleprompterPayload) =>
-    apiRequest<TeleprompterEntry>('/api/teleprompter/send', {
+    apiRequest<TeleprompterSendResponse>('/api/teleprompter/send', {
       method: 'POST',
       body: payload
     }),
   reset: () =>
-    apiRequest<TeleprompterEntry>('/api/teleprompter/reset', {
+    apiRequest<TeleprompterResetResponse>('/api/teleprompter/reset', {
       method: 'POST'
     })
 };

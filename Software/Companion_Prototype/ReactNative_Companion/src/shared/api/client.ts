@@ -28,14 +28,23 @@ export class ApiClientError extends Error {
   readonly status?: number;
   readonly details?: unknown;
   readonly traceId?: string;
+  readonly backendCode?: string;
 
-  constructor(params: { code: ApiErrorCode; message: string; status?: number; details?: unknown; traceId?: string }) {
+  constructor(params: {
+    code: ApiErrorCode;
+    message: string;
+    status?: number;
+    details?: unknown;
+    traceId?: string;
+    backendCode?: string;
+  }) {
     super(params.message);
     this.name = 'ApiClientError';
     this.code = params.code;
     this.status = params.status;
     this.details = params.details;
     this.traceId = params.traceId;
+    this.backendCode = params.backendCode;
   }
 }
 
@@ -110,7 +119,8 @@ const parseEnvelope = <T>(payload: unknown, fallbackTraceId?: string): { data: T
       code: 'http_error',
       message: envelope.error?.message ?? 'Backend returned an error response',
       details: envelope.error?.details,
-      traceId
+      traceId,
+      backendCode: envelope.error?.code
     });
   }
 
@@ -169,7 +179,8 @@ export const apiRequest = async <T>(path: string, options: RequestOptions = {}):
           message: envelope?.error?.message ?? `Request failed with HTTP ${response.status}`,
           status: response.status,
           details: envelope?.error?.details,
-          traceId: envelope?.trace_id ?? response.headers.get('X-Trace-ID') ?? traceId
+          traceId: envelope?.trace_id ?? response.headers.get('X-Trace-ID') ?? traceId,
+          backendCode: envelope?.error?.code
         });
       }
 
