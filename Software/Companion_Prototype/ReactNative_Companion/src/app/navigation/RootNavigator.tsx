@@ -3,6 +3,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 import { ConnectionScreen } from '@app/screens/ConnectionScreen';
 import { HomeScreen } from '@app/screens/HomeScreen';
+import { NavigationScreen } from '@app/screens/NavigationScreen';
 import { SettingsScreen } from '@app/screens/SettingsScreen';
 import { TeleprompterScreen } from '@app/screens/TeleprompterScreen';
 import { RootStackParamList } from '@shared/types/navigation';
@@ -29,6 +30,7 @@ export const RootNavigator = () => (
     >
       <Stack.Screen name="Home" component={HomeScreen} />
       <Stack.Screen name="Connection" component={ConnectionScreen} />
+      <Stack.Screen name="Navigation" component={NavigationScreen} />
       <Stack.Screen name="Teleprompter" component={TeleprompterScreen} />
       <Stack.Screen name="Settings" component={SettingsScreen} />
     </Stack.Navigator>

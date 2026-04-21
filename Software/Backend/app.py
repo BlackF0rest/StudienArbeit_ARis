@@ -9,9 +9,11 @@ from werkzeug.exceptions import HTTPException
 from config import AppConfig
 from repositories.sqlite_repo import SQLiteRepository
 from routes.messages import bp as messages_bp
+from routes.navigation import bp as navigation_bp
 from routes.status import bp as status_bp
 from routes.teleprompter import bp as teleprompter_bp
 from services.message_service import MessageService
+from services.navigation_service import NavigationService
 from services.sensor_service import SensorService
 from services.teleprompter_service import TeleprompterService
 
@@ -40,6 +42,7 @@ def create_app(config: AppConfig | None = None) -> Flask:
             strict_validation=app_config.strict_teleprompter_validation,
         ),
         "sensor": sensor_service,
+        "navigation": NavigationService(sensor_service),
     }
 
     hardware_readiness = sensor_service.get_hardware_readiness()
@@ -132,6 +135,7 @@ def create_app(config: AppConfig | None = None) -> Flask:
     app.register_blueprint(messages_bp)
     app.register_blueprint(teleprompter_bp)
     app.register_blueprint(status_bp)
+    app.register_blueprint(navigation_bp)
 
     return app
 

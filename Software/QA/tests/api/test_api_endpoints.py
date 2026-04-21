@@ -52,6 +52,18 @@ def run_api_tests() -> list[TestResult]:
         except Exception as exc:  # noqa: BLE001
             results.append(TestResult(name="sensors_snapshot", passed=False, reason=str(exc)))
 
+
+        try:
+            navigation_response = request_json(server.base_url, "GET", "/api/navigation/current")
+            navigation = _unwrap_ok_payload(navigation_response)
+            assert_true("heading" in navigation, "Navigation payload missing heading")
+            assert_true("orientation" in navigation, "Navigation payload missing orientation")
+            assert_true("timestamp" in navigation, "Navigation payload missing timestamp")
+            assert_true("source" in navigation, "Navigation payload missing source")
+            results.append(TestResult(name="navigation_current_snapshot", passed=True))
+        except Exception as exc:  # noqa: BLE001
+            results.append(TestResult(name="navigation_current_snapshot", passed=False, reason=str(exc)))
+
         try:
             diagnostics_response = request_json(server.base_url, "GET", "/api/debug/diagnostics")
             assert_true(

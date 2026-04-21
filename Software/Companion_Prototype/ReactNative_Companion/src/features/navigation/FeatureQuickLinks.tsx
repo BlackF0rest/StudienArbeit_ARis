@@ -10,7 +10,7 @@ type QuickLinksProps = {
 export const FeatureQuickLinks = ({ navigation }: QuickLinksProps) => (
   <View style={styles.container}>
     <Text style={styles.title}>Schnellzugriff</Text>
-    {['Connection', 'Teleprompter', 'Settings'].map(route => (
+    {['Connection', 'Navigation', 'Teleprompter', 'Settings'].map(route => (
       <Pressable
         key={route}
         onPress={() => navigation.navigate(route as keyof RootStackParamList)}
