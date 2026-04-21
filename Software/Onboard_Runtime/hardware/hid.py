@@ -2,8 +2,11 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
+from typing import Literal
 
 from .events import HardwareEvent
+
+SwitchState = Literal["high", "low"]
 
 
 @dataclass
@@ -23,6 +26,8 @@ class HIDInputAdapter:
 
     Final runtime contract for ``event_type="input.control"``:
     - Producer writes ``payload["value"]["gesture"]`` with one of ``"single"`` or ``"double"``.
+    - Producer writes ``payload["value"]["switch_state"]`` with a latched stable state:
+      ``"high"`` or ``"low"``.
     - ``tap_count`` and ``duration_ms`` are auxiliary metadata.
     - Legacy fields such as ``press`` / ``short_press`` / ``long_press`` are not emitted anymore.
     """
@@ -37,6 +42,7 @@ class HIDInputAdapter:
         self._active_presses: dict[str, _PressState] = {}
         self._last_transition: dict[str, datetime] = {}
         self._pending_taps: dict[str, _TapState] = {}
+        self._switch_states: dict[str, SwitchState] = {}
 
     def ingest_transition(
         self,
@@ -77,15 +83,18 @@ class HIDInputAdapter:
                 gesture="double",
                 tap_count=2,
                 duration_ms=duration_ms,
+                switch_state=self._get_switch_state(button_id),
             )
 
         # Outside window: emit previous pending single tap now and start a new pending tap.
+        next_switch_state = self._toggle_switch_state(button_id)
         single_event = self._build_event(
             button_id=button_id,
             timestamp=timestamp,
             gesture="single",
             tap_count=pending.tap_count,
             duration_ms=pending.last_tap_duration_ms,
+            switch_state=next_switch_state,
         )
         self._pending_taps[button_id] = _TapState(
             tap_count=1,
@@ -103,6 +112,7 @@ class HIDInputAdapter:
             if timestamp - pending.first_tap_at < self._double_tap_window:
                 continue
             self._pending_taps.pop(button_id, None)
+            next_switch_state = self._toggle_switch_state(button_id)
             events.append(
                 self._build_event(
                     button_id=button_id,
@@ -110,6 +120,7 @@ class HIDInputAdapter:
                     gesture="single",
                     tap_count=pending.tap_count,
                     duration_ms=pending.last_tap_duration_ms,
+                    switch_state=next_switch_state,
                 )
             )
 
@@ -122,6 +133,7 @@ class HIDInputAdapter:
         gesture: str,
         tap_count: int,
         duration_ms: int,
+        switch_state: SwitchState,
     ) -> HardwareEvent:
         return HardwareEvent(
             event_type="input.control",
@@ -129,6 +141,7 @@ class HIDInputAdapter:
             value={
                 # Canonical payload contract for all producers.
                 "gesture": gesture,
+                "switch_state": switch_state,
                 "tap_count": tap_count,
                 "duration_ms": duration_ms,
                 "source": f"hid:{button_id}",
@@ -136,6 +149,15 @@ class HIDInputAdapter:
             unit=None,
             timestamp=timestamp,
         )
+
+    def _get_switch_state(self, button_id: str) -> SwitchState:
+        return self._switch_states.get(button_id, "low")
+
+    def _toggle_switch_state(self, button_id: str) -> SwitchState:
+        current = self._get_switch_state(button_id)
+        next_state: SwitchState = "high" if current == "low" else "low"
+        self._switch_states[button_id] = next_state
+        return next_state
 
     def _is_debounced(self, button_id: str, timestamp: datetime) -> bool:
         previous = self._last_transition.get(button_id)

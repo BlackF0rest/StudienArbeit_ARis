@@ -30,30 +30,34 @@ class _BaseSubscription:
 
 
 def _normalize_input_control_value(value: Any) -> dict[str, Any]:
-    """Normalize `input.control` values to the canonical `gesture` contract.
+    """Normalize `input.control` values to the canonical gesture + switch contract.
 
     Transition phase behavior:
     - Prefer `gesture` when already present.
     - If only legacy `press` data is present (e.g. `short_press`/`long_press`), map it to `gesture`.
-    - Always return a payload that writes `gesture` as the canonical field.
+    - Prefer `switch_state` when present and valid (`high`/`low`).
+    - If `switch_state` is absent in legacy payloads, derive a stable fallback (`low`).
+    - Always return a payload that writes `gesture` and `switch_state` as canonical fields.
     """
     if not isinstance(value, dict):
-        return {}
+        return {"switch_state": "low"}
 
     normalized = dict(value)
     gesture = normalized.get("gesture")
-    if isinstance(gesture, str) and gesture:
-        return normalized
+    if not (isinstance(gesture, str) and gesture):
+        legacy_press = normalized.get("press")
+        if isinstance(legacy_press, str):
+            legacy_to_gesture = {
+                "short_press": "single",
+                "long_press": "double",
+            }
+            mapped = legacy_to_gesture.get(legacy_press, legacy_press)
+            if mapped:
+                normalized["gesture"] = mapped
 
-    legacy_press = normalized.get("press")
-    if isinstance(legacy_press, str):
-        legacy_to_gesture = {
-            "short_press": "single",
-            "long_press": "double",
-        }
-        mapped = legacy_to_gesture.get(legacy_press, legacy_press)
-        if mapped:
-            normalized["gesture"] = mapped
+    switch_state = normalized.get("switch_state")
+    if switch_state not in {"high", "low"}:
+        normalized["switch_state"] = "low"
 
     return normalized
 
