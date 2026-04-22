@@ -32,6 +32,8 @@ class BackendServer:
         self.base_url = self.external_base_url or f"http://127.0.0.1:{self.port}"
         self.db_path = REPO_ROOT / "Software" / "QA" / "reports" / f"qa_backend_{self.port}.db"
         self.proc: subprocess.Popen[str] | None = None
+        self.auth_token: str | None = None
+        self.default_headers: dict[str, str] = {}
 
     def __enter__(self) -> "BackendServer":
         if self.external_base_url:
@@ -92,15 +94,57 @@ class BackendServer:
             time.sleep(0.2)
         raise RuntimeError(f"Backend did not become ready: {last_error}")
 
+    def bootstrap_auth(self, device_id: str = "qa-harness", device_name: str = "QA Harness") -> str:
+        start_response = request_json(
+            self.base_url,
+            "POST",
+            "/api/auth/pairing/start",
+            payload={"device_id": device_id, "device_name": device_name},
+        )
+        if start_response["status"] != 201:
+            raise RuntimeError(f"pairing/start failed with status {start_response['status']}")
 
-def request_json(base_url: str, method: str, path: str, payload: dict[str, Any] | None = None) -> dict[str, Any]:
+        pairing_code = start_response["json"].get("data", {}).get("pairing_code")
+        if not pairing_code:
+            raise RuntimeError("pairing/start response did not include pairing_code")
+
+        exchange_response = request_json(
+            self.base_url,
+            "POST",
+            "/api/auth/pairing/exchange",
+            payload={"device_id": device_id, "pairing_code": pairing_code},
+        )
+        if exchange_response["status"] != 201:
+            raise RuntimeError(f"pairing/exchange failed with status {exchange_response['status']}")
+
+        token = exchange_response["json"].get("data", {}).get("access_token")
+        if not token:
+            raise RuntimeError("pairing/exchange response did not include access_token")
+
+        self.auth_token = token
+        self.default_headers = {"Authorization": f"Bearer {token}"}
+        return token
+
+
+def request_json(
+    base_url: str,
+    method: str,
+    path: str,
+    payload: dict[str, Any] | None = None,
+    default_headers: dict[str, str] | None = None,
+    headers: dict[str, str] | None = None,
+) -> dict[str, Any]:
     url = urllib.parse.urljoin(base_url, path)
     body = None
-    headers = {"Content-Type": "application/json"}
+    request_headers = {"Content-Type": "application/json"}
+    if default_headers:
+        request_headers.update(default_headers)
+    if headers:
+        request_headers.update(headers)
     if payload is not None:
         body = json.dumps(payload).encode("utf-8")
 
-    request = urllib.request.Request(url=url, data=body, headers=headers, method=method)
+    request = urllib.request.Request(url=url, data=body, headers=request_headers, method=method)
     try:
         with urllib.request.urlopen(request, timeout=10) as response:
             raw = response.read().decode("utf-8")

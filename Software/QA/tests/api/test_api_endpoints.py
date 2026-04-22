@@ -33,6 +33,14 @@ def run_api_tests() -> list[TestResult]:
     results: list[TestResult] = []
 
     with BackendServer() as server:
+        auth_headers = {}
+        try:
+            server.bootstrap_auth()
+            auth_headers = server.default_headers
+            results.append(TestResult(name="auth_pairing_bootstrap", passed=True))
+        except Exception as exc:  # noqa: BLE001
+            results.append(TestResult(name="auth_pairing_bootstrap", passed=False, reason=str(exc)))
+
         try:
             status_response = request_json(server.base_url, "GET", "/api/status")
             status_data = _unwrap_ok_payload(status_response)
@@ -43,7 +51,7 @@ def run_api_tests() -> list[TestResult]:
 
 
         try:
-            sensors_response = request_json(server.base_url, "GET", "/api/sensors")
+            sensors_response = request_json(server.base_url, "GET", "/api/sensors", default_headers=auth_headers)
             sensors_data = _unwrap_ok_payload(sensors_response)
             assert_true("button" in sensors_data, "Sensors payload missing button field")
             assert_true("mpu6050" in sensors_data, "Sensors payload missing mpu6050 field")
@@ -54,7 +62,12 @@ def run_api_tests() -> list[TestResult]:
 
 
         try:
-            navigation_response = request_json(server.base_url, "GET", "/api/navigation/current")
+            navigation_response = request_json(
+                server.base_url,
+                "GET",
+                "/api/navigation/current",
+                default_headers=auth_headers,
+            )
             navigation = _unwrap_ok_payload(navigation_response)
             assert_true("heading" in navigation, "Navigation payload missing heading")
             assert_true("orientation" in navigation, "Navigation payload missing orientation")
@@ -87,7 +100,7 @@ def run_api_tests() -> list[TestResult]:
             results.append(TestResult(name="unknown_route_404", passed=False, reason=str(exc)))
 
         try:
-            delete_response = request_json(server.base_url, "DELETE", "/api/messages")
+            delete_response = request_json(server.base_url, "DELETE", "/api/messages", default_headers=auth_headers)
             _unwrap_ok_payload(delete_response)
 
             post_response = request_json(
@@ -95,10 +108,11 @@ def run_api_tests() -> list[TestResult]:
                 "POST",
                 "/api/messages",
                 payload={"content": "qa-message"},
+                default_headers=auth_headers,
             )
             _unwrap_ok_payload(post_response)
 
-            get_response = request_json(server.base_url, "GET", "/api/messages")
+            get_response = request_json(server.base_url, "GET", "/api/messages", default_headers=auth_headers)
             messages = _unwrap_ok_payload(get_response)
             assert_true(isinstance(messages, list), "Messages response data must be list")
             assert_true(any(msg.get("content") == "qa-message" for msg in messages), "Posted message not found")
@@ -117,15 +131,31 @@ def run_api_tests() -> list[TestResult]:
                 "lineHeight": 1.2,
                 "opacity": 1,
             }
-            send_response = request_json(server.base_url, "POST", "/api/teleprompter/send", payload=send_payload)
+            send_response = request_json(
+                server.base_url,
+                "POST",
+                "/api/teleprompter/send",
+                payload=send_payload,
+                default_headers=auth_headers,
+            )
             _unwrap_ok_payload(send_response)
 
-            current_response = request_json(server.base_url, "GET", "/api/teleprompter/current")
+            current_response = request_json(
+                server.base_url,
+                "GET",
+                "/api/teleprompter/current",
+                default_headers=auth_headers,
+            )
             current = _unwrap_ok_payload(current_response)
             assert_true(set(current.keys()) == EXPECTED_TP_KEYS, "Current teleprompter schema mismatch")
             assert_true(current["text"] == send_payload["text"], "Current config did not update after send")
 
-            history_response = request_json(server.base_url, "GET", "/api/teleprompter/history")
+            history_response = request_json(
+                server.base_url,
+                "GET",
+                "/api/teleprompter/history",
+                default_headers=auth_headers,
+            )
             history = _unwrap_ok_payload(history_response)
             assert_true(isinstance(history, list), "Teleprompter history must be list")
             assert_true(len(history) >= 1, "Teleprompter history should contain at least one item")
@@ -134,7 +164,12 @@ def run_api_tests() -> list[TestResult]:
             results.append(TestResult(name="teleprompter_send_current_history", passed=False, reason=str(exc)))
 
         try:
-            reset_response = request_json(server.base_url, "POST", "/api/teleprompter/reset")
+            reset_response = request_json(
+                server.base_url,
+                "POST",
+                "/api/teleprompter/reset",
+                default_headers=auth_headers,
+            )
             reset_data = _unwrap_ok_payload(reset_response)
             assert_true(reset_data.get("status") == "reset", "Reset endpoint did not return reset status")
             assert_true(set(reset_data.get("config", {}).keys()) == EXPECTED_TP_KEYS, "Reset config schema mismatch")
