@@ -6,11 +6,11 @@ Wants=network-online.target
 [Service]
 Type=simple
 User=admin
-WorkingDirectory=/home/StudienArbeit_ARis/Software/Backend
+WorkingDirectory=/home/admin/StudienArbeit_ARis/Software/Backend
 Environment=HOST=127.0.0.1
 Environment=PORT=5000
-Environment=DB_PATH=/home/StudienArbeit_ARis/Software/Backend/data.db
-ExecStart=/home/StudienArbeit_ARis/Software/Backend/.venv/bin/python /home/StudienArbeit_ARis/Software/Backend/run.py
+Environment=DB_PATH=/home/admin/StudienArbeit_ARis/Software/Backend/data.db
+ExecStart=/home/admin/StudienArbeit_ARis/Software/Backend/.venv/bin/python /home/admin/StudienArbeit_ARis/Software/Backend/run.py
 Restart=always
 RestartSec=2
 
