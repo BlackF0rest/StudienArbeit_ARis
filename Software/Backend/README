@@ -1,5 +1,33 @@
 # Backend (Flask)
 
+## Reproduzierbare Python-Umgebung
+
+Die Python-Abhängigkeiten für Backend und QA-Skripte sind in `requirements.txt` festgelegt.
+
+### Setup (venv)
+
+```bash
+cd Software/Backend
+python3 -m venv .venv
+source .venv/bin/activate
+pip install --upgrade pip
+pip install -r requirements.txt
+```
+
+### Backend starten
+
+```bash
+cd Software/Backend
+python run.py
+```
+
+### QA-Harness gegen lokales Backend ausführen
+
+```bash
+# aus dem Repo-Root, mit aktiver venv
+python Software/QA/scripts/backend_test_harness.py
+```
+
 ## Pflichtabhängigkeiten für Raspberry Pi Hardwarezugriff
 
 Für GPIO- und I2C-Sensorik müssen auf dem Zielsystem folgende Python-Pakete installiert sein:

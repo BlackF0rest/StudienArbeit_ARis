@@ -29,3 +29,39 @@ The following legacy prototypes were archived (not hard-deleted) to:
 Planned lifecycle:
 1. Keep archived assets for one successful release cycle.
 2. Permanently delete archived legacy paths after that release cycle.
+
+
+## Python Backend: reproduzierbare Umgebung
+
+Für Backend und QA-Harness ist eine gemeinsame, reproduzierbare Python-Umgebung hinterlegt:
+
+- Dependency-Definition: `Software/Backend/requirements.txt`
+
+### Setup (venv)
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+pip install --upgrade pip
+pip install -r Software/Backend/requirements.txt
+```
+
+### Backend starten
+
+```bash
+cd Software/Backend
+python run.py
+```
+
+### QA Backend Harness reproduzierbar ausführen
+
+```bash
+python Software/QA/scripts/backend_test_harness.py
+```
+
+Optional (gleiche Umgebung):
+
+```bash
+python Software/QA/scripts/criteria_mapper.py
+python Software/QA/scripts/run_acceptance_gate.py
+```
