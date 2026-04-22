@@ -203,6 +203,7 @@ def build_criterion_summary() -> dict[str, Any]:
 
     criterion_map = {
         "API-001": ["status_endpoint", "messages_get_post_delete", "teleprompter_send_current_history", "teleprompter_reset"],
+        "API-002": ["debug_diagnostics_endpoint"],
         "INT-001": ["teleprompter_send_current_history", "scenario_a_send_then_current"],
         "INT-002": ["scenario_a_send_then_current", "scenario_b_reset_defaults"],
         "REG-001": ["messages_get_post_delete", "scenario_c_messages_roundtrip"],
