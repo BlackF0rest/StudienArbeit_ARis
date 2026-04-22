@@ -11,12 +11,14 @@ from repositories.sqlite_repo import SQLiteRepository
 from routes.auth import bp as auth_bp
 from routes.messages import bp as messages_bp
 from routes.navigation import bp as navigation_bp
+from routes.settings import bp as settings_bp
 from routes.status import bp as status_bp
 from routes.teleprompter import bp as teleprompter_bp
 from services.auth_service import AuthService
 from services.message_service import MessageService
 from services.navigation_service import NavigationService
 from services.sensor_service import SensorService
+from services.device_settings_service import DeviceSettingsService
 from services.rate_limiter import InMemoryRateLimiter
 from services.teleprompter_service import TeleprompterService
 
@@ -63,6 +65,7 @@ def create_app(config: AppConfig | None = None) -> Flask:
         "sensor": sensor_service,
         "navigation": NavigationService(sensor_service),
         "auth": auth_service,
+        "settings": DeviceSettingsService(repo),
     }
     app.extensions["write_rate_limiter"] = InMemoryRateLimiter(
         limit=app_config.write_rate_limit_per_minute,
@@ -266,6 +269,7 @@ def create_app(config: AppConfig | None = None) -> Flask:
     app.register_blueprint(messages_bp)
     app.register_blueprint(teleprompter_bp)
     app.register_blueprint(status_bp)
+    app.register_blueprint(settings_bp)
     app.register_blueprint(navigation_bp)
 
     return app
