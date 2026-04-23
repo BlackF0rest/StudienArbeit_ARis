@@ -1,3 +1,4 @@
+import json
 import sqlite3
 from typing import Any
 
@@ -45,6 +46,15 @@ class SQLiteRepository:
                     status TEXT NOT NULL DEFAULT 'open',
                     expires_at TEXT NOT NULL,
                     created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+                )
+                """
+            )
+            c.execute(
+                """
+                CREATE TABLE IF NOT EXISTS device_settings (
+                    id INTEGER PRIMARY KEY CHECK (id = 1),
+                    payload TEXT NOT NULL,
+                    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
                 )
                 """
             )
@@ -269,5 +279,37 @@ class SQLiteRepository:
                 WHERE token_id = ?
                 """,
                 (reason, token_id),
+            )
+            conn.commit()
+
+    def get_device_settings(self) -> dict[str, Any] | None:
+        with sqlite3.connect(self.db_path) as conn:
+            c = conn.cursor()
+            c.execute("SELECT payload FROM device_settings WHERE id = 1")
+            row = c.fetchone()
+
+        if not row:
+            return None
+
+        try:
+            parsed = json.loads(row[0])
+        except json.JSONDecodeError:
+            return None
+
+        return parsed if isinstance(parsed, dict) else None
+
+    def save_device_settings(self, payload: dict[str, Any]) -> None:
+        with sqlite3.connect(self.db_path) as conn:
+            c = conn.cursor()
+            serialized = json.dumps(payload)
+            c.execute(
+                """
+                INSERT INTO device_settings (id, payload)
+                VALUES (1, ?)
+                ON CONFLICT(id) DO UPDATE SET
+                    payload = excluded.payload,
+                    updated_at = CURRENT_TIMESTAMP
+                """,
+                (serialized,),
             )
             conn.commit()

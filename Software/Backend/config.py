@@ -16,7 +16,7 @@ class AppConfig:
     strict_teleprompter_validation: bool = False
     auth_pairing_ttl_seconds: int = 300
     auth_token_ttl_days: int = 30
-    auth_required_paths: list[str] = field(default_factory=lambda: ["/api/messages", "/api/teleprompter", "/api/navigation", "/api/sensors"])
+    auth_required_paths: list[str] = field(default_factory=lambda: ["/api/messages", "/api/teleprompter", "/api/navigation", "/api/sensors", "/api/settings"])
     companion_whitelist_paths: list[str] = field(default_factory=lambda: [
         "/api/status",
         "/api/mainInfo",
@@ -24,6 +24,8 @@ class AppConfig:
         "/api/teleprompter",
         "/api/navigation/current",
         "/api/sensors",
+        "/api/settings/device",
+        "/health",
         "/api/auth/pairing/start",
         "/api/auth/pairing/exchange",
         "/api/auth/session/revoke",
@@ -38,12 +40,12 @@ class AppConfig:
             cors_origins = ["*"]
 
         auth_required_paths = [
-            part.strip() for part in os.getenv("AUTH_REQUIRED_PATHS", "/api/messages,/api/teleprompter,/api/navigation,/api/sensors").split(",") if part.strip()
+            part.strip() for part in os.getenv("AUTH_REQUIRED_PATHS", "/api/messages,/api/teleprompter,/api/navigation,/api/sensors,/api/settings").split(",") if part.strip()
         ]
         companion_whitelist_paths = [
             part.strip() for part in os.getenv(
                 "COMPANION_WHITELIST_PATHS",
-                "/api/status,/api/mainInfo,/api/messages,/api/teleprompter,/api/navigation/current,/api/sensors,/api/auth/pairing/start,/api/auth/pairing/exchange,/api/auth/session/revoke",
+                "/api/status,/api/mainInfo,/api/messages,/api/teleprompter,/api/navigation/current,/api/sensors,/api/settings/device,/health,/api/auth/pairing/start,/api/auth/pairing/exchange,/api/auth/session/revoke",
             ).split(",") if part.strip()
         ]
 

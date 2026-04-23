@@ -81,6 +81,8 @@ def get_status():
                 "teleprompter_reset": "/api/teleprompter/reset (POST)",
                 "sensors": "/api/sensors",
                 "navigation_current": "/api/navigation/current",
+                "settings_device": "/api/settings/device",
+                "health": "/health",
                 "debug_diagnostics": "/api/debug/diagnostics" if current_app.config["APP_CONFIG"].debug else None,
             },
             "pinmap": PINMAP_RESPONSE,
