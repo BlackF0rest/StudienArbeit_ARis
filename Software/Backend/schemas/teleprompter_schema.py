@@ -1,3 +1,4 @@
+from __future__ import annotations
 from typing import Any
 
 TELEPROMPTER_FIELDS: dict[str, type] = {
