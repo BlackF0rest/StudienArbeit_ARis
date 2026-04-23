@@ -10,7 +10,8 @@ User=admin
 WorkingDirectory=/home/admin/StudienArbeit_ARis/Software/Onboard_UI
 Environment=HOST=127.0.0.1
 Environment=PORT=4173
-ExecStart=/usr/bin/npm run preview -- --host 127.0.0.1 --port 4173
+ExecStart=/home/admin/.nvm/versions/node/v20.20.2/bin/npm run preview -- --host 0.0.0.0 --port 4173
+Restart=always
 Restart=always
 RestartSec=2
 
