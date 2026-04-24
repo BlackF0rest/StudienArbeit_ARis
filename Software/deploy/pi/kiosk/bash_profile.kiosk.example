@@ -12,9 +12,8 @@ fi
 
 # Auto-start ARIS kiosk only on local tty1 login
 if [ -z "${DISPLAY:-}" ] && [ "$(tty)" = "/dev/tty1" ]; then
-  export ARIS_APP_URL="http://127.0.0.1:4173"
-  export ARIS_BACKEND_STATUS_URL="http://127.0.0.1:5000/api/status"
-  export ARIS_KIOSK_BROWSER="midori"
+  export ARIS_FRONTEND_URL="http://127.0.0.1:4173"
+  export ARIS_BACKEND_URL="http://127.0.0.1:5000/api/status"
   export ARIS_DISPLAY_ROTATION="inverted"
   export XAUTHORITY="/home/admin/.Xauthority"
 
