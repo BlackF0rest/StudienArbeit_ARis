@@ -22,7 +22,7 @@ install_apt_dependencies() {
   apt-get update
   apt-get install -y \
     python3 python3-pip python3-venv sqlite3 \
-    xserver-xorg xinit openbox chromium-browser unclutter curl git \
+    xserver-xorg xinit openbox midori flatpak unclutter curl git \
     ca-certificates fonts-dejavu
 
   if ! command -v node >/dev/null 2>&1 || ! command -v npm >/dev/null 2>&1; then

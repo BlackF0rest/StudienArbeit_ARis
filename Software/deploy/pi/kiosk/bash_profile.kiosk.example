@@ -1,6 +1,6 @@
 # ~/.bash_profile
 #
-# ARIS kiosk fallback startup via tty1 login.
+# ARIS kiosk fallback startup via tty1 login (Midori-only).
 # Use this only when aris-kiosk.service is intentionally disabled or unavailable.
 
 # Optional debug log for startup diagnostics
@@ -16,6 +16,7 @@ if [ -z "${DISPLAY:-}" ] && [ "$(tty)" = "/dev/tty1" ]; then
   export ARIS_BACKEND_URL="http://127.0.0.1:5000/api/status"
   export ARIS_DISPLAY_ROTATION="inverted"
   export XAUTHORITY="/home/admin/.Xauthority"
+  unset ARIS_KIOSK_BROWSER
 
- /usr/bin/startx /home/admin/Studienarbeit_ARis/Software/deploy/pi/kiosk/start_onboard.sh -- :0 vt1 >> /home/admin/aris-kiosk.log 2>&1
+  /usr/bin/startx /home/admin/Studienarbeit_ARis/Software/deploy/pi/kiosk/start_onboard.sh -- :0 vt1 >> /home/admin/aris-kiosk.log 2>&1
 fi

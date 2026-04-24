@@ -24,7 +24,7 @@ Install required system packages:
 ```bash
 sudo apt update
 sudo apt install -y python3 python3-pip python3-venv sqlite3 \
-  xserver-xorg xinit openbox unclutter curl git \
+  xserver-xorg xinit openbox midori flatpak unclutter curl git \
   ca-certificates fonts-dejavu
 ```
 
@@ -81,7 +81,7 @@ Notes:
 - `update_onboard.sh` performs a fast-forward-only `git pull`, rebuilds `Software/Onboard_UI`, and restarts `aris-backend`, `aris-ui`, and `aris-kiosk`.
 
 
-### Midori-only deployment
+### Midori-only Betriebsmodus
 
 The kiosk launcher (`Software/deploy/pi/kiosk/start_onboard.sh`) is intentionally **Midori-only**.
 It no longer supports runtime browser switching via `ARIS_KIOSK_BROWSER`.
@@ -91,11 +91,11 @@ Startup order is fixed:
 1. Flatpak: `org.midori_browser.Midori` (if installed)
 2. Native binary: `midori` or `midori-browser`
 
-If Midori is not available, startup fails with `exit 1` (no fallback to Chromium/Cog/other browsers).
-
-> **Known limitation:** Chromium/Cog are not reliable on the target hardware and are therefore intentionally disabled.
+If Midori is not available, startup fails with `exit 1` (no fallback to other browsers).
 
 The launcher also applies display rotation on startup via `xrandr`. By default it uses a 180° rotation (`ARIS_DISPLAY_ROTATION=inverted`).
+
+#### Install
 
 To configure rotation without editing tracked service files, create a systemd override:
 
@@ -108,6 +108,8 @@ Add:
 ```ini
 [Service]
 Environment=ARIS_DISPLAY_ROTATION=inverted
+# Deprecated/no effect in Midori-only mode:
+# Environment=ARIS_KIOSK_BROWSER=chromium
 ```
 
 Then reload + restart:
@@ -130,11 +132,20 @@ sudo apt install -y flatpak
 flatpak install -y flathub org.midori_browser.Midori
 ```
 
+#### Verify
+
 Verify Midori availability with:
 
 ```bash
 command -v midori || command -v midori-browser || true
 flatpak info org.midori_browser.Midori || true
+```
+
+Verify kiosk startup logs after restart:
+
+```bash
+sudo systemctl restart aris-kiosk.service
+journalctl -u aris-kiosk -b --no-pager | tail -n 100
 ```
 
 To disable rotation, set:
@@ -143,6 +154,15 @@ To disable rotation, set:
 [Service]
 Environment=ARIS_DISPLAY_ROTATION=normal
 ```
+
+#### Failure Modes
+
+- Midori is unavailable (`exit 1` in `start_onboard.sh`).
+  - Install native Midori or Flatpak Midori and restart kiosk.
+- Flatpak runtime exists but `flatpak run org.midori_browser.Midori` fails.
+  - Check Flatpak remotes/runtime and reinstall package.
+- `ARIS_KIOSK_BROWSER` is configured in old service overrides.
+  - This variable is deprecated and ignored in Midori-only mode; remove it from overrides to avoid confusion.
 
 
 ### Fallback: kiosk startup via `~/.bash_profile` (tty1)
@@ -161,7 +181,7 @@ chown admin:admin /home/admin/.bash_profile
 
 Important notes:
 - This fallback depends on local login on `/dev/tty1` and **must not** run in parallel with an enabled `aris-kiosk.service`.
-- The template already exports the required variables (`ARIS_FRONTEND_URL`, `ARIS_BACKEND_URL`, `ARIS_DISPLAY_ROTATION`, `XAUTHORITY`) before calling `start_onboard.sh`.
+- The template already exports the required variables (`ARIS_FRONTEND_URL`, `ARIS_BACKEND_URL`, `ARIS_DISPLAY_ROTATION`, `XAUTHORITY`) and unsets deprecated `ARIS_KIOSK_BROWSER` before calling `start_onboard.sh`.
 - `start_onboard.sh` also supports overriding these values via environment variables, so you can tune behavior without changing the script.
 
 ## 6. Verification
