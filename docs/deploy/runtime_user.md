@@ -17,3 +17,7 @@ id admin
 
 - Wenn der User `pi` nicht existiert, dürfen systemd Units **nicht** `User=pi` enthalten.
 - In diesem Repository sind die Deploy-Units auf `User=admin` umgestellt.
+
+## Kanonischer Installationspfad
+
+- `/home/admin/Studienarbeit_ARis`

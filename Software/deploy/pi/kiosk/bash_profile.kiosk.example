@@ -17,5 +17,5 @@ if [ -z "${DISPLAY:-}" ] && [ "$(tty)" = "/dev/tty1" ]; then
   export ARIS_DISPLAY_ROTATION="inverted"
   export XAUTHORITY="/home/admin/.Xauthority"
 
- /usr/bin/startx /home/StudienArbeit_ARis/Software/deploy/pi/kiosk/start_onboard.sh -- :0 vt1 >> /home/admin/aris-kiosk.log 2>&1
+ /usr/bin/startx /home/admin/Studienarbeit_ARis/Software/deploy/pi/kiosk/start_onboard.sh -- :0 vt1 >> /home/admin/aris-kiosk.log 2>&1
 fi

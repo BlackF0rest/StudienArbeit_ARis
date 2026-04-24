@@ -43,12 +43,12 @@ node -v && npm -v
 Clone the repository and install UI/backend dependencies (single deploy user: `admin`):
 
 ```bash
-git clone <YOUR_REPO_URL> /home/admin/aris
-cd /home/admin/aris/Software/Onboard_UI
+git clone <YOUR_REPO_URL> /home/admin/Studienarbeit_ARis
+cd /home/admin/Studienarbeit_ARis/Software/Onboard_UI
 npm ci
 npm run build
 
-cd /home/admin/aris/Software/Backend
+cd /home/admin/Studienarbeit_ARis/Software/Backend
 python3 -m venv .venv
 source .venv/bin/activate
 pip install flask flask-cors
@@ -172,7 +172,11 @@ Run these checks:
 curl -s http://127.0.0.1:5000/api/status
 curl -sI http://127.0.0.1:4173
 systemctl status aris-backend aris-ui aris-kiosk --no-pager
+systemctl cat aris-backend aris-ui aris-kiosk
+systemctl cat aris-backend aris-ui aris-kiosk | grep -F "/home/admin/Studienarbeit_ARis"
 ```
+
+Ensure there are no references to alternative project roots (for example `/home/admin/aris` or `/home/admin/StudienArbeit_ARis`) in the `systemctl cat` output.
 
 ## 7. Troubleshooting
 
@@ -184,6 +188,6 @@ systemctl status aris-backend aris-ui aris-kiosk --no-pager
   - Reinstall Midori and restart the service: `sudo systemctl restart aris-kiosk`.
 - **Backend down**
   - Check backend logs: `journalctl -u aris-backend -b --no-pager`.
-  - Verify Python virtualenv and dependencies are installed in `/home/admin/aris/Software/Backend`.
+  - Verify Python virtualenv and dependencies are installed in `/home/admin/Studienarbeit_ARis/Software/Backend`.
 - **AV mode mismatch**
   - Re-check `/boot/config.txt` values (`enable_tvout=1`, `sdtv_mode=2`) and reboot.

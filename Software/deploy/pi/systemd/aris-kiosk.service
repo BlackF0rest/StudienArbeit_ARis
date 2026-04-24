@@ -8,9 +8,9 @@ Type=simple
 User=admin
 Environment=HOME=/home/admin
 Environment="DISPLAY=:0"
-Environment="XAUTHORITY=/home/pi/.Xauthority"
+Environment="XAUTHORITY=/home/admin/.Xauthority"
 WorkingDirectory=/home/admin
-ExecStart=/home/admin/StudienArbeit_ARis/Software/deploy/pi/kiosk/start_onboard.sh
+ExecStart=/home/admin/Studienarbeit_ARis/Software/deploy/pi/kiosk/start_onboard.sh
 Restart=always
 RestartSec=3
 
