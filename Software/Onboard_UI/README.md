@@ -1,38 +1,88 @@
-# sv
+# ARIS Onboard UI
 
-Everything you need to build a Svelte project, powered by [`sv`](https://github.com/sveltejs/cli).
+Dieses Modul enthält die Onboard-Bedienoberfläche für ARIS (SvelteKit/Vite). Das UI ist für den Einsatz auf dem Zielgerät (u. a. Raspberry Pi Zero 2 W im Kiosk-Betrieb) ausgelegt und trennt klar zwischen launch-relevanten Bedienrouten und Entwicklungs-/Debug-Oberflächen.
 
-## Creating a project
+## Zweck und Launch-Scope
 
-If you're seeing this, you've probably already done this step. Congrats!
+Die Launch-Freigabe umfasst ausschließlich diese produktiven Bedienrouten:
 
-```sh
-# create a new project in the current directory
-npx sv create
+- `/` – Home/HUD-Einstieg
+- `/Navigation` – Navigationsansicht
+- `/Teleprompter` – Teleprompter-Ansicht
+- `/Messages` – Nachrichten/Kommunikation
 
-# create a new project in my-app
-npx sv create my-app
-```
+Referenz für den offiziell freigegebenen Umfang:
 
-## Developing
+- `docs/release/onboard_route_manifest.md`
 
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
+## Abgrenzung: Launch-Routen vs. Dev/Debug
 
-```sh
+Nicht Teil des Launch-Scopes sind:
+
+- `/Debug` – Operator-/Debug-Route
+- `/dev/*` – Entwicklungs-Namespace
+
+Diese Routen sind für Entwicklung, Diagnose und interne Verifikation gedacht und dürfen nicht mit der Launch-Freigabe verwechselt werden.
+
+## Voraussetzungen
+
+- Node.js 20.x (empfohlen)
+- npm (zu Node passend)
+
+## Lokale Entwicklung
+
+Aus dem Verzeichnis `Software/Onboard_UI`:
+
+```bash
+npm ci
 npm run dev
-
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
 ```
 
-## Building
+Danach ist das UI im lokalen Dev-Server erreichbar (Standard bei Vite: `http://localhost:5173`).
 
-To create a production version of your app:
+## Build (Production)
 
-```sh
+```bash
 npm run build
 ```
 
-You can preview the production build with `npm run preview`.
+Erzeugt den produktionsnahen Build für das Deployment.
 
-> To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
+## Preview (Production-Build lokal testen)
+
+```bash
+npm run preview
+```
+
+Startet eine lokale Vorschau des zuvor gebauten Artefakts (typisch auf Port `4173`).
+
+## Umgebungsvariablen (`.env.example`)
+
+Lege für lokale Läufe eine `.env` basierend auf `.env.example` an.
+
+Aktuell sind folgende Variablen vorgesehen:
+
+- `DATABASE_URL`  
+  Beispiel: `mysql://root:mysecretpassword@localhost:3306/local`  
+  Verbindungsstring für lokale DB-/Persistenzfunktionen.
+- `AR_COMPACT` (`"true"`/`"false"`)  
+  Schaltet kompakte UI-Darstellung um.
+- `DEBUG_UI` (`"true"`/`"false"`)  
+  Aktiviert/gatet Debug-bezogene UI-Elemente.
+
+Hinweis: Defaultwerte und Beispielwerte stehen in `Software/Onboard_UI/.env.example`.
+
+## Deployment-Referenz
+
+Für das Zielsystem-Deployment (Pi Zero 2 W, Bullseye Lite) siehe:
+
+- `docs/deploy/pi_zero2w_bullseye_lite.md`
+
+## QA- und Launch-Kriterien
+
+Für Launch-Bewertung und Freigabe sind insbesondere diese Dokumente maßgeblich:
+
+- `docs/release/onboard_launch_visual_review_2026-04-12.md` (Visual-Review inkl. P0-Checks)
+- `docs/release/onboard_design_signoff.md` (Sign-off-Entscheidung/Status)
+
+Wichtige Leitplanke: Launch-Checks beziehen sich auf die vier freigegebenen Routen (`/`, `/Navigation`, `/Teleprompter`, `/Messages`) im definierten Zielprofil.
