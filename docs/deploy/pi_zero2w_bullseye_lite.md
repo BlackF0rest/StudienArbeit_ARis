@@ -24,7 +24,7 @@ Install required system packages:
 ```bash
 sudo apt update
 sudo apt install -y python3 python3-pip python3-venv sqlite3 \
-  xserver-xorg xinit openbox chromium-browser unclutter curl git \
+  xserver-xorg xinit openbox unclutter curl git \
   ca-certificates fonts-dejavu
 ```
 
@@ -81,17 +81,23 @@ Notes:
 - `update_onboard.sh` performs a fast-forward-only `git pull`, rebuilds `Software/Onboard_UI`, and restarts `aris-backend`, `aris-ui`, and `aris-kiosk`.
 
 
-### Browser selection (Chromium, Cog, Midori)
+### Midori-only deployment
 
-The kiosk launcher (`Software/deploy/pi/kiosk/start_onboard.sh`) supports three modes:
+The kiosk launcher (`Software/deploy/pi/kiosk/start_onboard.sh`) is intentionally **Midori-only**.
+It no longer supports runtime browser switching via `ARIS_KIOSK_BROWSER`.
 
-- `ARIS_KIOSK_BROWSER=chromium` (default): launches the real Chromium binary and skips Raspberry Pi wrapper scripts that show the `<1GB RAM` popup.
-- `ARIS_KIOSK_BROWSER=cog`: launches [Cog](https://wpewebkit.org/) (WPE WebKit), which is typically lighter than Chromium for kiosk-style single-page apps.
-- `ARIS_KIOSK_BROWSER=midori`: launches Midori in fullscreen app mode (lightweight GTK WebKit browser).
+Startup order is fixed:
+
+1. Flatpak: `org.midori_browser.Midori` (if installed)
+2. Native binary: `midori` or `midori-browser`
+
+If Midori is not available, startup fails with `exit 1` (no fallback to Chromium/Cog/other browsers).
+
+> **Known limitation:** Chromium/Cog are not reliable on the target hardware and are therefore intentionally disabled.
 
 The launcher also applies display rotation on startup via `xrandr`. By default it uses a 180° rotation (`ARIS_DISPLAY_ROTATION=inverted`).
 
-To switch browser without editing tracked service files, create a systemd override:
+To configure rotation without editing tracked service files, create a systemd override:
 
 ```bash
 sudo systemctl edit aris-kiosk.service
@@ -101,7 +107,6 @@ Add:
 
 ```ini
 [Service]
-Environment=ARIS_KIOSK_BROWSER=midori
 Environment=ARIS_DISPLAY_ROTATION=inverted
 ```
 
@@ -112,17 +117,24 @@ sudo systemctl daemon-reload
 sudo systemctl restart aris-kiosk.service
 ```
 
-If you use `cog` or `midori`, install them first:
+Install Midori before enabling kiosk startup:
 
 ```bash
-sudo apt install -y cog midori
+sudo apt install -y midori
 ```
 
-If one package is not available in your current Debian/Raspberry Pi release, keep the other and verify via:
+If your distribution does not provide a native Midori package, install Flatpak Midori instead:
 
 ```bash
-command -v cog || true
+sudo apt install -y flatpak
+flatpak install -y flathub org.midori_browser.Midori
+```
+
+Verify Midori availability with:
+
+```bash
 command -v midori || command -v midori-browser || true
+flatpak info org.midori_browser.Midori || true
 ```
 
 To disable rotation, set:
@@ -149,7 +161,7 @@ chown admin:admin /home/admin/.bash_profile
 
 Important notes:
 - This fallback depends on local login on `/dev/tty1` and **must not** run in parallel with an enabled `aris-kiosk.service`.
-- The template already exports the required variables (`ARIS_APP_URL`, `ARIS_BACKEND_STATUS_URL`, `ARIS_KIOSK_BROWSER`, `ARIS_DISPLAY_ROTATION`, `XAUTHORITY`) before calling `start_onboard.sh`.
+- The template already exports the required variables (`ARIS_FRONTEND_URL`, `ARIS_BACKEND_URL`, `ARIS_DISPLAY_ROTATION`, `XAUTHORITY`) before calling `start_onboard.sh`.
 - `start_onboard.sh` also supports overriding these values via environment variables, so you can tune behavior without changing the script.
 
 ## 6. Verification
@@ -167,13 +179,9 @@ systemctl status aris-backend aris-ui aris-kiosk --no-pager
 - **Blank screen / no X**
   - Check X packages were installed (`xserver-xorg`, `xinit`, `openbox`).
   - Review kiosk/UI logs: `journalctl -u aris-kiosk -u aris-ui -b --no-pager`.
-- **Chromium `<1GB RAM` popup blocks startup**
-  - Confirm the kiosk unit runs `Software/deploy/pi/kiosk/start_onboard.sh` (this script now skips low-RAM wrapper scripts automatically).
-  - Check logs for wrapper detection: `journalctl -u aris-kiosk -b --no-pager | grep -i wrapper`.
-  - If Chromium remains unstable on Pi Zero 2 W, switch to `ARIS_KIOSK_BROWSER=midori` or `ARIS_KIOSK_BROWSER=cog` using the override shown above.
-- **Chromium crash loop**
-  - Verify Chromium/Cog package installation and launch flags in kiosk startup/service scripts.
-  - Confirm enough free memory/storage (`free -h`, `df -h`).
+- **Midori not found / kiosk exits immediately**
+  - Verify either Flatpak Midori (`flatpak info org.midori_browser.Midori`) or native Midori (`command -v midori` / `command -v midori-browser`) is available.
+  - Reinstall Midori and restart the service: `sudo systemctl restart aris-kiosk`.
 - **Backend down**
   - Check backend logs: `journalctl -u aris-backend -b --no-pager`.
   - Verify Python virtualenv and dependencies are installed in `/home/admin/aris/Software/Backend`.

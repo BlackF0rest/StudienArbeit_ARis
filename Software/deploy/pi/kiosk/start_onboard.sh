@@ -7,6 +7,8 @@ export DBUS_SESSION_BUS_ADDRESS="${DBUS_SESSION_BUS_ADDRESS:-unix:path=/run/user
 
 BACKEND_URL="${ARIS_BACKEND_URL:-http://127.0.0.1:5000/api/status}"
 FRONTEND_URL="${ARIS_FRONTEND_URL:-http://127.0.0.1:4173}"
+# Deprecated: browser switching is intentionally disabled.
+unset ARIS_KIOSK_BROWSER || true
 
 find_midori_binary() {
   local candidate=""
@@ -38,7 +40,7 @@ fi
 
 BROWSER_BIN="$(find_midori_binary || true)"
 if [[ -z "$BROWSER_BIN" ]]; then
-  echo "Midori wurde nicht gefunden (weder Flatpak noch native Binary)."
+  echo "Fehler: Midori wurde nicht gefunden (Flatpak org.midori_browser.Midori oder Binary midori/midori-browser erforderlich)."
   exit 1
 fi
 
