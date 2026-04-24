@@ -11,7 +11,7 @@ Environment=ARIS_KIOSK_BROWSER=cog
 Environment=ARIS_COG_LAUNCHER=cage
 Environment=ARIS_DISPLAY_ROTATION=inverted
 WorkingDirectory=/home/admin
-ExecStart=/home/StudienArbeit_ARis/Software/deploy/pi/kiosk/start_onboard.sh
+ExecStart=/home/admin/StudienArbeit_ARis/Software/deploy/pi/kiosk/start_onboard.sh
 Restart=always
 RestartSec=3
 
