@@ -25,7 +25,7 @@ Install required system packages:
 sudo apt update
 sudo apt install -y python3 python3-pip python3-venv sqlite3 \
   xserver-xorg xinit openbox unclutter curl git \
-  ca-certificates fonts-dejavu
+  ca-certificates fonts-dejavu flatpak
 ```
 
 ## 3. Node install (Pi-friendly)
@@ -117,18 +117,16 @@ sudo systemctl daemon-reload
 sudo systemctl restart aris-kiosk.service
 ```
 
-Install Midori before enabling kiosk startup:
+Install Midori before enabling kiosk startup.
 
-```bash
-sudo apt install -y midori
-```
+### Midori install matrix (eindeutig)
 
-If your distribution does not provide a native Midori package, install Flatpak Midori instead:
+| Fall | Verfügbarkeit | Was tun | Laufzeitpfad in `start_onboard.sh` |
+| --- | --- | --- | --- |
+| **A** | Native Midori-Paket vorhanden (`apt install midori` funktioniert) | `sudo apt install -y midori` | Native Binary (`midori` oder `midori-browser`) |
+| **B** | Native Midori-Paket **nicht** vorhanden (`Unable to locate package midori`) | `flatpak install -y flathub org.midori_browser.Midori` | Flatpak-App `org.midori_browser.Midori` |
 
-```bash
-sudo apt install -y flatpak
-flatpak install -y flathub org.midori_browser.Midori
-```
+> Hinweis: `start_onboard.sh` prüft zuerst Flatpak Midori und startet danach (falls Flatpak nicht verfügbar ist) die native Midori-Binary.
 
 Verify Midori availability with:
 
@@ -136,6 +134,11 @@ Verify Midori availability with:
 command -v midori || command -v midori-browser || true
 flatpak info org.midori_browser.Midori || true
 ```
+
+Interpretation für den Startpfad:
+- Wenn `flatpak info org.midori_browser.Midori` erfolgreich ist, nutzt `start_onboard.sh` den Flatpak-Start (`flatpak run org.midori_browser.Midori`).
+- Wenn Flatpak Midori nicht verfügbar ist, aber `command -v midori` oder `command -v midori-browser` erfolgreich ist, wird die native Binary genutzt.
+- Wenn beides fehlschlägt, beendet sich `start_onboard.sh` mit Fehler (`exit 1`).
 
 To disable rotation, set:
 
