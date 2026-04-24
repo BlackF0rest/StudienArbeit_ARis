@@ -7,7 +7,9 @@ export DBUS_SESSION_BUS_ADDRESS="${DBUS_SESSION_BUS_ADDRESS:-unix:path=/run/user
 
 BACKEND_URL="${ARIS_BACKEND_URL:-http://127.0.0.1:5000/api/status}"
 FRONTEND_URL="${ARIS_FRONTEND_URL:-http://127.0.0.1:4173}"
-# Deprecated: browser switching is intentionally disabled.
+# Midori-only mode: browser switching is intentionally disabled.
+# Deprecated compatibility cleanup for legacy profiles/services:
+#   ARIS_KIOSK_BROWSER is ignored and removed from the environment.
 unset ARIS_KIOSK_BROWSER || true
 
 find_midori_binary() {
