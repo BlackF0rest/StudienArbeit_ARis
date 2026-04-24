@@ -5,7 +5,7 @@ export DISPLAY="${DISPLAY:-:0}"
 export XAUTHORITY="${XAUTHORITY:-${HOME:-/home/admin}/.Xauthority}"
 export DBUS_SESSION_BUS_ADDRESS="${DBUS_SESSION_BUS_ADDRESS:-unix:path=/run/user/$(id -u)/bus}"
 
-BACKEND_URL="${ARIS_BACKEND_URL:-http://127.0.0.1:5000}"
+BACKEND_URL="${ARIS_BACKEND_URL:-http://127.0.0.1:5000/api/status}"
 FRONTEND_URL="${ARIS_FRONTEND_URL:-http://127.0.0.1:4173}"
 
 find_midori_binary() {
