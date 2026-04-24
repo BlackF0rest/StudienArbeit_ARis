@@ -7,13 +7,12 @@ Requires=aris-ui.service
 Type=simple
 User=admin
 Environment=HOME=/home/admin
-Environment=ARIS_KIOSK_BROWSER=cog
-Environment=ARIS_COG_LAUNCHER=cage
-Environment=ARIS_DISPLAY_ROTATION=inverted
+Environment="DISPLAY=:0"
+Environment="XAUTHORITY=/home/pi/.Xauthority"
 WorkingDirectory=/home/admin
 ExecStart=/home/admin/StudienArbeit_ARis/Software/deploy/pi/kiosk/start_onboard.sh
 Restart=always
 RestartSec=3
 
 [Install]
-WantedBy=multi-user.target
+WantedBy=graphical.target
