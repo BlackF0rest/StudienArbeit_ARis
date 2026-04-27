@@ -13,14 +13,9 @@
 
 	const apps = [
 		{ name: 'Teleprompter', route: '/Teleprompter', info: 'Text groß und klar anzeigen' },
-		{ name: 'Messages', route: '/Messages', info: 'Kurze Mitteilungen lesen' }
+		{ name: 'Messages / HUD', route: '/Messages', info: 'HUD-Mitteilungen lesen' },
+		{ name: 'Demo', route: '/Demo', info: 'Sensor-Rondell Demo anzeigen' }
 	] as const;
-
-	const navigationInfo = {
-		name: 'Navigation',
-		route: '/Navigation',
-		info: 'Nur per Double-Tap öffnen'
-	} as const;
 
 	let selectedIndex = 0;
 	let pulseCard = false;
@@ -57,10 +52,10 @@
 
 <main class="main-compact">
 	<section class="focus-card {pulseCard ? 'pulse' : ''}">
-		<p class="label">Single-Tap: Seitenaktion / Weiter</p>
+		<p class="label">Single-Tap: Weiter · Double-Tap: Öffnen</p>
 		<h1>{selectedApp.name}</h1>
 		<p class="description">{selectedApp.info}</p>
-		<a class="open-link" href={selectedApp.route}>Mit Single öffnen / weiter</a>
+		<a class="open-link" href={selectedApp.route}>Direkt öffnen</a>
 	</section>
 
 	<section class="quick-grid">
@@ -70,10 +65,6 @@
 				<span class="quick-route">{app.route}</span>
 			</a>
 		{/each}
-		<div class="quick-item nav-info" aria-label="Navigation nur per Double-Tap verfügbar">
-			<span class="quick-title">{navigationInfo.name}</span>
-			<span class="quick-route">{navigationInfo.route} · Double-Tap</span>
-		</div>
 	</section>
 
 	<footer class="hint-wrap">
@@ -155,12 +146,6 @@
 	.quick-item.is-active {
 		border-color: var(--hud-border-accent);
 		background: #0f1b0f;
-	}
-
-	.quick-item.nav-info {
-		border-style: dashed;
-		opacity: 0.85;
-		cursor: default;
 	}
 
 	.quick-title {
