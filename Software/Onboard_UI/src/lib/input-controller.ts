@@ -5,7 +5,7 @@ import { writable } from 'svelte/store';
 export type InputGesture = 'single' | 'double';
 export type InputSwitchState = 'high' | 'low';
 export type InputFsmState = 'home-carousel' | 'feature-active';
-export type AppContext = 'home' | 'teleprompter' | 'navigation' | 'messages' | 'chat' | 'debug';
+export type AppContext = 'home' | 'teleprompter' | 'navigation' | 'messages' | 'chat' | 'debug' | 'demo';
 
 export interface InputHint {
 	single: string;
@@ -25,7 +25,8 @@ interface AppActionHandlers {
 
 const HOME_APPS = [
 	{ route: '/Teleprompter', name: 'Teleprompter' },
-	{ route: '/Messages', name: 'Messages/HUD' }
+	{ route: '/Messages', name: 'Messages/HUD' },
+	{ route: '/Demo', name: 'Demo' }
 ] as const;
 
 export const inputFsmState = writable<InputFsmState>('home-carousel');
@@ -53,18 +54,18 @@ function normalizeSwitchState(payload: unknown): InputSwitchState | null {
 	return null;
 }
 
-function triggerGlobalNavigation(): void {
+function triggerGlobalHudHome(): void {
 	inputFsmState.set('feature-active');
-	inputStatus.set('Opening navigation…');
+	inputStatus.set('Opening HUD…');
 	if (inputStatusTimer) clearTimeout(inputStatusTimer);
 	inputStatusTimer = setTimeout(() => {
 		inputStatus.set('');
 	}, 950);
-	void goto('/Navigation');
+	void goto('/');
 }
 
 export function openNavigationViaInput(): void {
-	triggerGlobalNavigation();
+	triggerGlobalHudHome();
 }
 
 function onHomeSingle(): void {
@@ -74,14 +75,23 @@ function onHomeSingle(): void {
 function onGesture(gesture: InputGesture): void {
 	if (gesture === 'double') {
 		if (currentContext === 'home') {
-			triggerGlobalNavigation();
+			const selectedApp = HOME_APPS[get(homeCarouselIndex) % HOME_APPS.length];
+			if (selectedApp) {
+				inputFsmState.set('feature-active');
+				inputStatus.set(`Opening ${selectedApp.name}…`);
+				if (inputStatusTimer) clearTimeout(inputStatusTimer);
+				inputStatusTimer = setTimeout(() => {
+					inputStatus.set('');
+				}, 950);
+				void goto(selectedApp.route);
+			}
 			return;
 		}
 		if (handlers.onDouble) {
 			handlers.onDouble();
 			return;
 		}
-		triggerGlobalNavigation();
+		triggerGlobalHudHome();
 		return;
 	}
 
@@ -163,32 +173,37 @@ export function getHintForContext(context: AppContext): InputHint {
 		case 'home':
 			return {
 				single: 'select next app in carousel',
-				double: 'open navigation screen'
+				double: 'open selected app'
 			};
 		case 'teleprompter':
 			return {
 				single: 'increase speed and advance one step',
-				double: 'open navigation screen'
+				double: 'open HUD home'
 			};
 		case 'navigation':
 			return {
 				single: 'cycle to next info panel',
-				double: 'reopen navigation home'
+				double: 'open HUD home'
 			};
 		case 'messages':
 			return {
 				single: 'switch to next message section',
-				double: 'open navigation screen'
+				double: 'open HUD home'
 			};
 		case 'chat':
 			return {
 				single: 'no action in chat',
-				double: 'open navigation screen'
+				double: 'open HUD home'
 			};
 		case 'debug':
 			return {
 				single: 'refresh diagnostics view',
-				double: 'open navigation screen'
+				double: 'open HUD home'
+			};
+		case 'demo':
+			return {
+				single: 'show next sensor tile',
+				double: 'open HUD home'
 			};
 	}
 }
