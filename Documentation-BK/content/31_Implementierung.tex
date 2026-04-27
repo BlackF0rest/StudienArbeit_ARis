@@ -1,49 +1,360 @@
-%!TEX root = ../main.tex
+% ============================================================
+%  Kapitel 5: Implementierung und Entwicklung
+%  ARis -- AR-Brille Studienarbeit | Bastian Kiefer
+%  Überarbeitete Fassung, April 2026
+% ============================================================
 
-\chapter{Implementierung und Entwicklung (10-12S)}
-\label{chap:ImplementierungundEntwicklung}
+\chapter{Implementierung und Entwicklung}
+\label{chap:implementierung}
 
+% ---------------------------------------------------------------------------
 \section{Optische Implementierung}
 \label{sec:optischeImplementierung}
-Die Implementierung des Opitschen Konzepts wurde recht schnell und einfach umgesetzt. Nach der Initialen Recherche wurden verschiedene Hauptbereiche festgestellt. Die erste Herausforderung war das finden einer passenden Display und Linsen kombi, welche auf dem kleinen Raum funktionieren würde. In diesem Bereich wurde recht schnell eine Lösung im Form von Viewfindern von neueren Digitalen Kameras gefunden. Diese beinhalten eine Linse und das dazu passende Display. Gerade zu Beginn des Projekts wurde versucht durch sponsoring oder Spenden eine Waveguide Linse zu erhalten, welche den Innovativen Character der Brille um eineiges erhöhrt hätten. Leider beginnen diese Preislich bei ca. 1000€, selbst wenn direkt mit Chinesischen Firmen gesprochen wurde. Nach einigen absagen wurde diese Idee verworfen und die Einfache sowie Kostengünstige Lösung eines Viewfinder Pakets wurde bevorzugt. Wie in \ref{apx:1} zu sehen betrafne die Kosten dafür gerade mal 50€ wobei vergleichbare eigene Konfigurationen mit Micro-Displays und Linsen sehr viel teurer waren. Der Andere Teil der Optischen Implementierung waren die benötigten Spiegel. Wie in \ref{subsec:FreeSpaceCombiner} beschrieben muss hier ein richtiger Spiegel gefunden werden, um halbdurchsichtig zu sein. Dafür wurde recht schnell eine kostengünstige option genommen, welche im Dunkeln ebenfalls als Spiegel benutzt werden kann. Dadurch konnten Kosten gespart werden und ein effizienterer UMsetzungsprozess erreicht werden.
-Mit dem ankommen der einzelnen Teile wurden diese in den mechanischen Aufbau integriert und waren voll funktionsfähig.
 
-\section{Software Implementierung}
+Der in Abschnitt~\ref{subsec:FreeSpaceCombiner} beschriebene Free-Space-Combiner-Aufbau
+wurde mit bewusst kostengünstigen Komponenten realisiert, um die Machbarkeit des
+Gesamtsystems innerhalb der gegebenen Budgetgrenzen nachzuweisen.
+Als Lösung für das Mikrodisplay-Linsensystem erwies sich der elektronische
+Sucher (\ac{EVF}) einer modernen Digitalkamera als geeignete, sofort einsatzbereite
+Einheit.
+Viewfinder moderner Systemkameras integrieren ein Micro-OLED-Display sowie ein
+abgestimmtes Okular in einem kompakten Gehäuse und sind damit funktional äquivalent
+zu eigens konfigurierten NED-Komponenten, jedoch zu einem Bruchteil der Kosten.
+
+Zu Beginn der Projektlaufzeit wurde die Beschaffung einer Waveguide-Linse angestrebt,
+welche aufgrund ihrer Dünnheit den Innovationscharakter des Systems erheblich
+gesteigert hätte.
+Entsprechende Anfragen bei Zulieferern ergaben jedoch Mindestpreise von
+ca.\ 1.000,-€ pro Einheit, sodass diese Option im Rahmen des Projektbudgets
+verworfen wurde.
+Der halbdurchlässige Combiner-Spiegel wurde als handelsüblicher Einwegspiegel
+beschafft, der die in Abschnitt~\ref{subsec:FreeSpaceCombiner} beschriebene
+See-Through-Eigenschaft des optischen Systems bei geringen Kosten hinreichend
+realisiert.
+Nach Eingang aller Komponenten wurden diese in den mechanischen Trägerrahmen
+integriert und die optische Funktion des Gesamtaufbaus qualitativ und iterativ
+verifiziert.
+
+Ein unerwartetes Ergebnis dieser Verifikationsphase war die geringe effektive
+Vergrößerung des gewählten Viewfinder-Okulars: Die tatsächlich wahrgenommene
+Bildgröße auf dem Combiner-Spiegel fiel deutlich kleiner aus als erwartet worden war, sodass das Bild lediglich
+einen kleinen Ausschnitt des Sichtfeldes bedeckte.
+Dies ist auf die kurze Brennweite des verbauten Okulars zurückzuführen,
+die zwar eine entspannte Augenakkommodation ermöglicht, jedoch das
+erreichbare Field of View im gewählten Aufbau begrenzt (vgl.~Abschnitt~\ref{subsec:FoV}).
+\newpage
+Mit mehr Zeit und Budget könnte hier durch ein Okular mit angepasster Brennweite das tatsächlich angezeigte Bild
+deutlich vergrößert und damit der konzipierte Anzeigebereich vollständig genutzt werden. Ebenso würde ein längerer Strahlengang zu einem größeren Bild führen. Dies war Anfangs von der Optik auch vorgesehen (wie in \ref{img:optischesgesamtkonzept} gezeigt), wurde jedoch im mechanischen Design nicht so umgesetzt. Das seitliche Design wurde durch einen verkleinerten frontalen Aufsatz ersetzt, was der mobilität hilft, jedoch die Ausbreitung des Bildes verhindert.
+
+Als pragmatische Konsequenz dieser Erkenntnis wurde eine dedizierte Demo-Seite
+in der Onboard-UI entwickelt (vgl.~Abschnitt~\ref{subsec:demoSeite}), die den
+verfügbaren Anzeigebereich durch eine kompakte, informationsdichte Darstellung
+optimal ausnutzt.
+Das vollständige Benutzerinterface lässt sich alternativ über einen HDMI-Ausgang
+an einem externen Monitor darstellen und testen, da der Raspberry~Pi~Zero~2\,W
+einen entsprechenden Ausgang bereitstellt.
+
+% ---------------------------------------------------------------------------
+\section{Software-Implementierung}
 \label{sec:softwareImplementierung}
-Das Softwaredesign wurde nach der Konzeption nicht direkt umgesetzt. Zuerst wurden einige Tests mit den verschiedenen Komponenten, Libraries und Hardwarekomponenten durchgeführt. 
 
-Dabei wurden anfänglich noch verschiedene Libraries und Frameworks getestet, um zu der letztendlich erarbeiteten Struktur zu kommen. Diese wird in den folgenden unterkapiteln beschrieben. Hauptsächlich behandeln die Kapitel also die tatsächliche LÖsung und das abgegebene nur in Spezialfällen den Weg zu dieser.
+Die Softwareentwicklung verlief nicht als linearer Prozess, sondern reflektiert
+die realen Randbedingungen eines iterativen Prototypenprojekts.
+In einer ersten Phase wurden Frontend-Grundstruktur und Backend-Konzept weitgehend
+parallel und zunächst systemgetrennt -- ohne physische Hardware -- entwickelt.
+Dabei wurden auch verschiedene Technologiealternativen evaluiert: Ein früher
+Frontend-Prototyp entstand als Vue.js-Webapp
+(\texttt{Companion\_Prototype/Vue\_Companion\_App/}), die grundlegende
+REST-Kommunikation mit dem Backend erprobte, bevor der endgültige
+SvelteKit-Stack festgelegt wurde.
 
-Zu beginn der Entwicklungszeit wurde der Grundstein der Software gelegt während die verschiedenen Bauteile ankamen. Dabei wurden die verschiedenen Hardwarekomponenten einzeln getestet. Nach dem Abschluss dieser Tests wurden die Bauteile abgegeben, um in die Brille zusammengebaut zu werden. Während dieser Zeit wurden die verschiedenen Softwareteile wie Frontend und Backend systemabgesondert entwickelt. Nach dem Abschluss der Hardwareentwicklung konnte die Finale Softwareintegration beginnen. Dabei wurden einige Herausforderungen bezüglich der tatsächlichen Größe des Displays und der Verbindung mit dessen und dem Raspberry Pi gefunden. Deshalb wurde das Feature Set reduziert, um mehr Zeit zum debugging und Lösen dieser Themen zu schaffen. Dies wird im späteren Verlauf der Arbeit noch weiter besprocheh sowie dessen genaue ausmaße auf das gesamte System.
+Mit Eingang des Raspberry~Pi und des Displays begann die zweite Phase, in der
+Hardware-Tests durchgeführt und das Backend auf die reale Zielplattform abgestimmt
+wurden.
+Die Hardwarekomponenten wurden anschließend an die für die Mechanik verantwortliche
+Projektpartnerin übergeben, was die weitere Softwareentwicklung temporär unterbrach.
+In der abschließenden Integrationsphase -- in der Woche vor der Abgabe -- wurde
+das Gesamtsystem nach Rückgabe der Brille zusammengeführt und auf dem Raspberry~Pi
+deployed.
 
-Zu bemerken ist, dass der Code hier nur Beispielhaft oder prinzipiell besprochen wird und nicht auf spezifischen Code eingegangen wird. Dies liegt der Komplexität und dem Wiederholenden Character von Code zugrunde. Hier geht es mehr um das verständnis der Funktion und der Umsetzung - nicht der genauen Zeilen. Dafür bitte in den Code selbst schauen, da dieser gut Dokummentiert ist, um für zukünftige Erweiterungen offen zu sein.
+Diese letzte Phase brachte unerwartete Deployment-Herausforderungen mit sich:
+Neuere Builds des Raspberry~Pi~OS deaktivieren standardmäßig den analogen
+AV-Ausgang, was die Ansteuerung des verbauten Displays verhinderte.
+Ein Downgrade auf ein älteres Image war notwendig, das wiederum ältere
+Paketversionen -- darunter Python~3.9 und ältere \texttt{npm}-Versionen --
+mitbrachte, welche Kompatibilitätsprobleme mit den verwendeten Bibliotheken
+verursachten.
+Die Auflösung dieser Abhängigkeitskonflikte erforderte erheblichen Aufwand;
+die resultierende, reproduzierbare Installationsanleitung ist im begleitenden
+GitHub-Repository dokumentiert.
 
-\subsection{Frontend - Svelte Implementierung}
-\label{subsec:SvelteImplemeniterung}
-Das Frontend, welches in der Brille zu sehen ist, wurde nach einem recht einfachen Design umgesetzt. Um komplizierte Darstellungen und unklare Menüführung zu verhindern wurde die Hauptfarbe auf Grün gesetzt. Diese sticht aus dem Umfeld meist heraus und ist leicht ersichtlich. Ein Design in z.B. weiß ist schwer von einem Hintergrund zu unterscheiden. Das Design behält eine Standard Informationansicht immer am oberen Teil des Bildschirms mit der geradigen Batteriekapazität, der Temperatur und feuchtigkeit sowie anderen wichtigen Daten. Diese Darstellung bleibt durch alle Apps und darstellungen bestehen bis auf die Pixel Streaming einbindung.
+Der knappe Zeitrahmen der Integrationsphase führte dazu, dass der Fokus auf
+die Vervollständigung des Grundsystems -- stabiler Start, funktionierender
+Datenpfad vom Backend zum Display -- gelegt wurde, anstatt alle konzipierten
+Features vollständig zu finalisieren.
+Auf die konkreten Auswirkungen dieser Entscheidungen auf den Funktionsumfang
+wird in Abschnitt~\ref{chap:Diskussion} eingegangen.
 
-Svelte an sich ist recht einfach aufgebaut. Neben den verschiedenen Konfigurationsdateien für npm und weitere ist der eigentliche bearbeitete Code in "src" zu finden. Der sich hier befindene Code beeinflusst die ganze Website durch CSS und Typescript. Unter "routes" sind dann die einzelnen Seiten sowie die Hauptseite zu finden. Jeder Ordner stellt eine Seite dar, welche mithilfe von "/" und dem Namen der .svelte Datei angezeigt werden kann. Dies ist ein recht einfacher weg, um seiten hinzuzufügen oder zu löschen. Die Svelte Dateien basieren auf Typescript oder Javascript um zum Beispiel das Backend hier einzubinden und dem eigentlichen Svelte Teil, um einen  \todo{Beispiel Svelte Code zeigen um grundsatz zu erklären}.
-Nach diesem Prinzip wurden alle Seiten entwickelt. 
-In dem Verzeichnis routes befindet sich ebenfalls die Datei "+layout.svelte", welche das generelle Layout der Seiten bestimmt. Diese wirken sich auf die ganze Website aus. Dies ist ebenfalls für header.svete der fall.
-Die einzelnen Svelte Seiten erhalten die von diesen benötigten Dateien immer durch das Python backend und die dazugehörigen REST abfragen. Diese werden zu beginn der Svelte Dateien durch typescript oder Javascript gezogen.
+Der gesamte Code wurde unter Einsatz moderner KI-gestützter Entwicklungswerkzeuge
+erstellt.
+Tools wie ChatGPT Codex und vergleichbare Assistenzsysteme ermöglichen es,
+auch in weniger vertrauten Frameworks produktiv zu arbeiten, indem sie
+Boilerplate-Code generieren, Bibliotheks-APIs erklären und beim Debugging
+unterstützen.
+Dies ist als genuiner Vorteil moderner Softwareentwicklung zu verstehen:
+Die eingesetzte Technologiekombination -- Svelte, Flask, React Native -- hätte ohne diese Unterstützung selbst für einen gelernten Softwareentwickler eine Herausforderung dargestellt und somit konnte der Fokus weniger auf Wiederholungen von Basis-Code und mehr auf die spezifischen Herausforderungen des Gesamtsystems fokussiert werden.
+Der vollständig dokumentierte Quellcode ist im begleitenden GitHub-Repository
+einsehbar; im vorliegenden Kapitel wird der Code ausschließlich prinzipiell
+und exemplarisch behandelt.
+\newpage
+% ---------------------------------------------------------------------------
+\subsection{Modulübersicht}
+\label{subsec:moduluebersicht}
 
-Die Projektstruktur folgt dem SvelteKit-Dateisystem-Routing: Alle Seiten befinden sich unter
-\texttt{src/routes/}, wobei jeder Unterordner eine eigenständige Route repräsentiert, die über
-den Pfad \texttt{/[Ordnername]} im Browser erreichbar ist. Die globale Layoutdatei
-\texttt{+layout.svelte} bindet systemweit gültige Styles und den persistenten Header ein, sodass
-dieser über alle App-Seiten hinweg konsistent angezeigt wird. Der Header-Baustein
-(\texttt{header.svelte}) ruft über \texttt{onMount} alle fünf Sekunden den REST-Endpunkt
-\texttt{/api/mainInfo} des Python-Backends ab und stellt die empfangenen Systemdaten --- Uhrzeit,
-Akkustand, Temperatur und Luftfeuchtigkeit --- in einer einzeiligen Statusleiste dar. Das
-folgende Listing zeigt das Grundprinzip einer Svelte-Komponente am Beispiel des Headers:
+Das Gesamtsystem besteht aus vier klar getrennten Softwaremodulen
+(vgl.\ Abbildung~\ref{fig:modulmap}):
 
-\begin{lstlisting}[
-    language=HTML,
-    caption={Svelte-Komponente \texttt{header.svelte}: Datenabruf und reaktive Darstellung},
-    label={lst:svelteHeader}
-]
+\begin{enumerate}
+  \item \textbf{Backend} (\texttt{Software/Backend/}) -- Flask-basierter
+    Python-Server auf dem Raspberry~Pi, der alle Dienste koordiniert und die
+    REST-API bereitstellt.
+  \item \textbf{Onboard-UI} (\texttt{Software/Onboard\_UI/}) -- SvelteKit-Applikation,
+    die als lokaler Webserver auf dem Raspberry~Pi läuft und die AR-Anzeige
+    auf dem Display ausgibt.
+  \item \textbf{Onboard-Runtime} (\texttt{Software/Onboard\_Runtime/}) -- Python-Paket,
+    das gemeinsam genutzte Laufzeitdienste kapselt: Modulverwaltung, Ereignisbus,
+    Kommunikationsadapter und Hardware-Abstraktion.
+  \item \textbf{Companion-App} (\texttt{Software/Aris\_Companion/}) -- React-Native-
+    Anwendung auf dem Mobilgerät des Nutzers zur Konfiguration und Fernsteuerung.
+\end{enumerate}
+
+\newpage
+\begin{landscape}
+\begin{figure}[htbp]
+  \centering
+  \begin{tikzpicture}[
+      node distance=0.6cm and 1.4cm,
+      box/.style={draw, rounded corners=3pt, minimum width=3.0cm,
+                  minimum height=0.65cm, font=\small, fill=green!8},
+      grp/.style={draw, dashed, rounded corners=4pt, inner sep=6pt,
+                  fill=gray!5},
+      arr/.style={->, >=stealth, thick},
+      lbl/.style={font=\footnotesize\itshape}
+    ]
+    % --- Backend (links) ---
+    \node[box] (flask)    {Flask App};
+    \node[box, below=of flask]   (router)   {Route-Blueprints};
+    \node[box, below=of router]  (services) {Services};
+    \node[box, below=of services](repo)     {SQLiteRepository};
+    \node[box, below=of repo]    (sqlite)   {SQLite (data.db)};
+    \draw[arr] (flask)--(router);
+    \draw[arr] (router)--(services);
+    \draw[arr] (services)--(repo);
+    \draw[arr] (repo)--(sqlite);
+
+    % --- Onboard-Runtime (Mitte) ---
+    \node[box, right=1.8cm of flask]  (runtime) {OnboardRuntime};
+    \node[box, below=of runtime]      (ebus)    {SharedEventBus};
+    \node[box, below=of ebus]         (comm)    {Comm-Adapter (BT / WiFi / USB)};
+    \node[box, below=of comm]         (hw)      {Hardware-Adapter (I2C / GPIO)};
+    \draw[arr] (runtime)--(ebus);
+    \draw[arr] (ebus)--(comm);
+    \draw[arr] (ebus)--(hw);
+
+    % --- Onboard-UI (rechts) ---
+    \node[box, right=1.8cm of runtime] (svelte) {SvelteKit (Onboard-UI)};
+    \node[box, below=of svelte]        (fhost)  {FeatureHost};
+    \node[box, below=of fhost]         (input)  {InputController (Taster-FSM)};
+    \draw[arr] (svelte)--(fhost);
+    \draw[arr] (fhost)--(input);
+
+    % --- Companion (ganz rechts) ---
+    \node[box, right=1.8cm of svelte] (companion) {Companion App (React Native)};
+
+    % --- Querverbindungen ---
+    \draw[arr, dashed] (svelte.west) -- node[above,lbl]{REST} (runtime.east);
+    \draw[arr, dashed] (runtime.west) -- node[above,lbl]{REST} (flask.east);
+    \draw[arr, dashed] (companion.west) -- node[above,lbl]{REST / BLE}
+      (svelte.east);
+  \end{tikzpicture}
+  \caption{Modulkarte des ARis-Softwaresystems.}
+  \label{fig:modulmap}
+\end{figure}
+\end{landscape}
+
+Die Kommunikationspfade folgen dem in Kapitel~\ref{sec:Software-Architektur} beschriebenen
+Architekturprinzip der losen Kopplung: Jedes Modul kommuniziert ausschließlich
+über definierte Schnittstellen mit den anderen, was eine unabhängige Entwicklung
+und Erweiterung der einzelnen Komponenten ermöglicht.
+
+% ---------------------------------------------------------------------------
+\subsection{Onboard-Runtime}
+\label{subsec:onboardRuntime}
+
+Die \texttt{Onboard\_Runtime} ist ein eigenständiges Python-Paket, das
+systemübergreifende Laufzeitdienste kapselt, die weder zum Backend noch zur UI
+gehören.
+Sie bildet das verbindende Rückgrat, auf das alle anderen Onboard-Module
+zurückgreifen können, ohne direkte Abhängigkeiten untereinander einzugehen.
+
+Kernkomponente ist der \texttt{SharedEventBus} (\texttt{event\_bus.py}),
+ein In-Prozess-Nachrichtenbus nach dem Publish/Subscribe-Muster.
+Dabei abonnieren Module Ereignisse eines bestimmten Typs -- etwa
+\texttt{BUTTON\_PRESS} oder \texttt{SENSOR\_UPDATE} -- und werden bei deren
+Auftreten aufgerufen, ohne den Sender kennen zu müssen.
+Dieses Entkopplungsprinzip trennt die Hardwareschicht vollständig von der
+Anzeigelogik: Ein Tasterdruck löst ein Ereignis aus, das der EventBus an
+alle registrierten Empfänger weiterleitet, ohne dass der Taster-Code
+wissen muss, welche Funktion er damit auslöst.
+
+Die \texttt{OnboardRuntime}-Klasse (\texttt{runtime.py}) orchestriert den
+Startablauf und verwaltet alle Kernmodule über einen einheitlichen Lebenszyklus
+mit den Phasen \texttt{init}, \texttt{start}, \texttt{stop} und \texttt{health}.
+Startup-Profile (\texttt{dev}, \texttt{demo}, \texttt{headless}) ermöglichen
+einen kontextabhängigen Betrieb, beispielsweise für Entwicklungsumgebungen ohne
+angeschlossene Hardware.
+
+Das Kommunikationssubsystem (\texttt{comm/}) enthält Adapter für Bluetooth
+(GATT-Server), WiFi sowie einen USB-Debug-Adapter für die Entwicklungsphase.
+Ein \texttt{TransportTranslator} normalisiert die unterschiedlichen
+Transportformate auf ein einheitliches internes Kommandoformat, sodass höhere
+Schichten transportagnostisch implementiert werden können und ein späterer
+Wechsel des Kommunikationskanals -- etwa von WiFi zu Bluetooth -- keine
+Änderungen in der Anwendungslogik erfordert.
+
+% ---------------------------------------------------------------------------
+\subsection{Python-Backend}
+\label{subsec:backendImpl}
+
+Das Python-Backend ist als Flask-Applikation realisiert und bildet die zentrale
+Koordinationsschicht des Systems.
+Um eine klare Trennung der Verantwortlichkeiten zu erreichen, folgt es einer
+dreischichtigen Struktur: Route-Handler nehmen HTTP-Anfragen entgegen und
+delegieren an Service-Klassen, die ihrerseits ausschließlich über eine
+\texttt{SQLiteRepository}-Klasse auf die Datenbank zugreifen.
+Jede dieser Schichten kann damit unabhängig getestet und ausgetauscht werden,
+ohne die anderen Schichten zu berühren.
+
+Um Seitenstartcode zu vermeiden und das spätere Testen einzelner Komponenten zu
+vereinfachen, wird die Flask-Anwendung über eine Factory-Funktion
+(\texttt{create\_app()} in \texttt{app.py}) erzeugt, die alle Abhängigkeiten
+konfiguriert und die Route-Blueprints registriert.
+Blueprints sind Flask-eigene Module zur Gruppierung thematisch zusammengehöriger
+Endpunkte -- beispielsweise alle Teleprompter-bezogenen Routen in einem
+\texttt{teleprompter\_bp}-Blueprint -- und ermöglichen so eine übersichtliche
+Strukturierung des Backend-Codes.
+
+Tabelle~\ref{tab:endpoints} gibt einen Überblick über die implementierten
+REST-API-Endpunkte des Systems.
+Die Endpunkte decken alle konzipierten Funktionsbereiche ab: Systemstatus und
+Sensorik, persistente Nachrichten, Teleprompter-Steuerung, Navigation sowie
+Geräteeinstellungen.
+
+\begin{table}[htbp]
+  \centering
+  \caption{Implementierte REST-API-Endpunkte des ARis-Backends.}
+  \label{tab:endpoints}
+  \begin{tabularx}{\textwidth}{@{} l l X @{}}
+    \toprule
+    \textbf{Endpunkt} & \textbf{Methode(n)} & \textbf{Funktion} \\
+    \midrule
+    \texttt{/api/mainInfo}               & GET              & Akkustand, Temperatur, Luftfeuchtigkeit \\
+    \texttt{/api/status}                 & GET              & Systemstatus, Hardware-Readiness \\
+    \texttt{/api/sensors}                & GET              & I2C-Sensor-Snapshot (MPU-6050, GY-63) \\
+    \texttt{/api/messages}               & GET, POST, DELETE & Persistente Nachrichten \\
+    \texttt{/api/teleprompter/send}      & POST             & Neue Konfiguration von Companion App \\
+    \texttt{/api/teleprompter/current}   & GET              & Polling-Endpunkt für AR-Brille \\
+    \texttt{/api/teleprompter/history}   & GET              & Letzte gespeicherte Konfigurationen \\
+    \texttt{/api/teleprompter/reset}     & POST             & Zurücksetzen auf Standardwerte \\
+    \texttt{/api/navigation/current}     & GET              & Orientierungsdaten aus MPU-6050 \\
+    \texttt{/api/settings/device}        & GET, PUT         & Geräteeinstellungen \\
+    \texttt{/health}                     & GET              & Liveness-Probe \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+\subsubsection{Hardware-Abstraktion und Sensorik}
+\label{subsubsec:hardwareImpl}
+
+Die Hardwareanbindung ist vollständig im \texttt{SensorService} gekapselt,
+der als einzige Schicht direkten Zugriff auf die GPIO- und I2C-Schnittstellen
+des Raspberry~Pi hat.
+Der Dienst abstrahiert drei Komponenten: den physischen Taster
+(Board-Pin~40) mit Software-Entprellung, den MPU-6050 über I2C für
+Beschleunigung und Gyroskop sowie den GY-63/BMP085 über I2C als
+Umgebungssensor für Temperatur und Luftfeuchtigkeit.
+Alle Hardware-Pin-Zuweisungen sind in einer zentralen \texttt{pinmap.py} definiert,
+sodass eine Portierung auf abweichende Hardware keine Änderungen im
+Service-Code erfordert -- lediglich die Pinbelegung muss angepasst werden.
+
+Besonders praktisch in der Entwicklung: Die Erweiterbarkeit des Systems durch weitere Sensoren, wie zum Beispiel ein BME280, wird durch das modulare Design vereinfacht. Mit dem passenden Eintrag in die \texttt{pinmap.py} und die entsprechende Erweiterung von \texttt{sensor\_service.py} kann das Auslesen eines neuen Sensors und dessen Verarbeitung einfach ermöglicht werden. Die Änderungen des \texttt{SensorService} wird der Sensor REST-Endpoint erweitert und benötigt keine tiefgründigeren Änderungen. Anschließend können die Daten auf der gewünschten Seite abgefragt werden.
+
+\subsection{Datenhaltung}
+\label{subsec:datenbankImpl}
+
+Die Datenhaltung erfolgt über eine eingebettete SQLite-Datenbank
+(\texttt{data.db}), die ohne separaten Datenbankserver direkt im Dateisystem
+des Raspberry~Pi persistiert wird.
+SQLite wurde aufgrund seiner geringen Ressourcenanforderungen gewählt, die dem
+eingeschränkten Rechenumfeld des Raspberry~Pi~Zero~2\,W entgegenkommen.
+Der gesamte Datenbankzugriff erfolgt über die Klasse \texttt{SQLiteRepository},
+die alle Operationen hinter semantischen Methoden kapselt und die
+Anwendungslogik damit vollständig von der konkreten Speichertechnologie trennt.
+Das Schema umfasst vier Tabellen mit klar abgegrenzten Aufgaben: 
+
+\begin{itemize}
+  \item \textbf{messages} speichert eingehende Textnachrichten, die über
+    die Companion App übermittelt und auf der AR-Brille angezeigt werden.
+    Die Tabelle kann über den DELETE-Endpunkt vollständig geleert werden.
+  \item \textbf{teleprompter\_history} protokolliert jede von der Companion App
+    gesendete Teleprompter-Konfiguration mit vollständigem Parametersatz
+    (Text, Geschwindigkeit, Schriftgröße, Farbe, Schriftart, Zeilenabstand,
+    Transparenz) und Zeitstempel, was die Wiederverwendung früherer Einstellungen
+    ermöglicht.
+  \item \textbf{pairing\_sessions} verwaltet laufende und abgeschlossene
+    Pairing-Vorgänge zwischen Companion App und Backend.
+  \item \textbf{auth\_tokens} speichert ausgestellte Authentifizierungstoken
+    als Hash und ermöglicht eine gesicherte Kommunikation
+    zwischen Companion und Backend.
+\end{itemize}
+
+% ---------------------------------------------------------------------------
+\subsection{Frontend -- SvelteKit Onboard-UI}
+\label{subsec:frontendImpl}
+
+Das AR-Frontend ist als SvelteKit-Applikation realisiert, die auf dem
+Raspberry~Pi als lokal servierter Webserver läuft und deren Ausgabe direkt
+auf dem im Brillengehäuse verbauten Display dargestellt wird.
+Das visuelle Design orientiert sich an den Anforderungen eines
+Head-up-Displays: Grüne Schrift (\texttt{\#0f0}) auf schwarzem Hintergrund
+(\texttt{\#000}) stellt einen hohen Kontrast zum realen Umgebungsdurchblick
+sicher und minimiert die Verwechslung virtueller Inhalte mit realen Szenen.
+Alle Farbwerte sind über CSS-Variablen in einer globalen Stylesheet-Datei
+zentralisiert und können damit systemweit konsistent angepasst werden.
+
+\subsubsection{Aufbau einer Svelte-Komponente}
+\label{subsubsec:svelteAufbau}
+
+SvelteKit organisiert die Anwendung über ein Dateisystem-basiertes Routing:
+Jeder Unterordner unter \texttt{src/routes/} entspricht einer eigenständigen
+Route, die über den Pfad \texttt{/[Ordnername]} im Browser erreichbar ist.
+Jede Seite besteht aus einer \texttt{+page.svelte}-Datei, die den typischen
+dreiteiligen Aufbau einer Svelte-Komponente trägt (siehe \ref{lst:svelteHeader}).
+Der \texttt{<script>}-Block enthält die TypeScript-Logik; der Markup-Teil darunter
+definiert die Darstellung.
+Reaktive Datenbindungen werden in Svelte durch einfache Variablenzuweisung
+ausgedrückt -- ohne separates State-Management-Framework.
+Sobald sich der Wert von \texttt{data} ändert, aktualisiert Svelte automatisch
+nur die betroffenen DOM-Stellen.
+Eine globale Layout-Datei (\texttt{+layout.svelte}) bindet den beschriebenen
+Header systemweit ein, sodass er über alle Seiten hinweg konsistent erscheint.
+
+\newpage
+\begin{lstlisting}[language=HTML, caption={Grundstruktur einer Svelte-Komponente am Beispiel des System-Headers.}, label=lst:svelteHeader]
 <script lang="ts">
   import { onMount } from 'svelte';
+
+  // reaktive Zustandsvariable
   let data: { Battery?: string; Temperature?: string; Humidity?: string } = {};
 
   async function fetchData() {
@@ -51,168 +362,120 @@ folgende Listing zeigt das Grundprinzip einer Svelte-Komponente am Beispiel des 
     data = await res.json();
   }
 
+  // onMount: wird einmalig nach dem Einbinden der Komponente ausgefuehrt
   onMount(() => {
     fetchData();
     const interval = setInterval(fetchData, 5000);
-    return () => clearInterval(interval);
+    return () => clearInterval(interval); // Cleanup beim Entfernen
   });
 </script>
 
+<!-- Markup-Block: reaktiv gebunden an "data" -->
 <div id="interface">
-  <h1>{data.Battery ?? '?'} | {data.Temperature ?? '?'}</h1>
+  <h1>
+    Akku: {data.Battery ?? '?'} |
+    Temp: {data.Temperature ?? '?'} |
+    Hum: {data.Humidity ?? '?'}
+  </h1>
 </div>
 \end{lstlisting}
+\newpage
 
-Der \texttt{<script>}-Block enthält die TypeScript-Logik inklusive reaktiver Zustandsvariablen,
-während der untere Markup-Teil die Darstellung definiert. Reaktive Abhängigkeiten werden in
-Svelte durch das \texttt{\$:}-Präfix deklariert, wodurch eine automatische Neuberechnung bei
-Zustandsänderungen ausgelöst wird --- ohne expliziten State-Management-Code.
+\subsubsection{Implementierte Seiten}
+\label{subsubsec:implementierteSeiten}
 
-Im finalen Stand sind die folgenden Seiten implementiert und durch das Backend unterstützt:
+Im finalen Stand sind die folgenden Seiten implementiert:
 
-\begin{description}
-    \item[\textbf{Hub} (\texttt{/})] Die Startseite der AR-Brille, die grundlegende
-        Systeminformationen und die Navigationsübersicht darstellt.
-    \item[\textbf{Navigation} (\texttt{/Navigation})] Ermöglicht eine schrittweise
-        Turn-by-Turn-Navigation auf Basis von Daten, die über die Companion~App übermittelt
-        werden.
-    \item[\textbf{(AI-)Chat} (\texttt{/Messages})] Eine Chatfunktion, die via Companion~App an
-        externe KI-APIs (z.\,B.\ OpenAI ChatGPT) angebunden werden kann.
-    \item[\textbf{Teleprompter} (\texttt{/Teleprompter})] Stellt einen von der Companion~App
-        konfigurierbaren, scrollenden Text dar; Geschwindigkeit, Schriftgröße und Farbe sind
-        vollständig parametrisierbar.
-\end{description}
+\begin{itemize}
+  \item \textbf{Hub} (\texttt{/}) -- Startseite mit karussellartiger
+    App-Auswahl; Einstiegspunkt für alle weiteren Seiten.
+  \item \textbf{Teleprompter} (\texttt{/Teleprompter}) -- Scrollender Text
+    mit vollständig konfigurierbaren Parametern (Geschwindigkeit, Schriftgröße,
+    Farbe); die Konfiguration wird von der Companion App übermittelt und
+    sekündlich vom Backend abgerufen.
+    Der Teleprompter ist funktionsfähig implementiert; aufgrund des
+    beschränkten Zeitrahmens in der Integrationsphase wurde jedoch kein
+    vollständiger Systemtest auf der finalen Hardware durchgeführt.
+  \item \textbf{Messages} (\texttt{/Messages}) -- Anzeige persistierter Nachrichten, welche
+    mit der Companion App in einem KI-Chat erhalten wurden. Diese Seite ist vorbereitet, bietet jedoch noch keine implementierte Funktionalität.
+  \item \textbf{Navigation} (\texttt{/Navigation}) -- Darstellung von
+    Orientierungsdaten aus dem MPU-6050 sowie Navigationsdaten der Companion App; die Seite ist strukturell vorbereitet, eine vollständige Navigationsfunktion wurde im Rahmen
+    des Projekts jedoch nicht implementiert.
+  \item \textbf{Debug} (\texttt{/Debug}) -- Hardware- und Sensor-Diagnosepanel,
+    das den vollständigen Systemstatus des Backends visualisiert und für den
+    Produktionsbetrieb deaktiviert werden kann.
+  \item \textbf{Demo} (\texttt{/Demo}) -- kompakt gestaltete Seite, die als
+    Reaktion auf die unerwartet kleine Bildgröße des Viewfinder-Okulars
+    entwickelt wurde (vgl.~Abschnitt~\ref{sec:optischeImplementierung}).
+    Sie zeigt die wichtigsten Systemdaten -- Akkustand, Sensorwerte,
+    Zeit -- auf minimalem Bildschirmraum und demonstriert gleichzeitig
+    die Interaktionsmöglichkeit über den physischen Taster.
+    \label{subsec:demoSeite}
+\end{itemize}
 
-Neue Seiten lassen sich durch Anlegen eines neuen Ordners mit einer \texttt{+page.svelte}-Datei
-unter \texttt{src/routes/} hinzufügen, ohne weitere Konfigurationsänderungen vornehmen zu müssen;
-die Einbindung in die Navigationsstruktur erfordert lediglich eine Ergänzung im
-Navigationsmenü des Hubs.
+Neue Seiten lassen sich durch Anlegen eines neuen Ordners mit einer
+\texttt{+page.svelte}-Datei unter \texttt{src/routes/} hinzufügen, ohne
+weitere Konfigurationsänderungen vornehmen zu müssen. Unter \ref{apx:implementierteseiten} finden sich Screenshots einiger implementierter Seiten.
 
-\subsection{Python Implementierung}
-\label{subsec:PythongImplementierung}
-Das Python-Backend bildet die zentrale Koordinationsschicht des ARis-Softwaresystems. Es wurde als Flask-Applikation realisiert, die alle Datenflüsse zwischen den Systemkomponenten — Frontend, Companion App, Bluetooth-Modul und Datenbank — orchestriert und über ein REST-API nach außen exponiert . Flask-CORS ist aktiviert, um Cross-Origin-Anfragen des im Browser laufenden Svelte-Frontends zu erlauben.
+\subsubsection{Eingabesteuerung}
+\label{subsubsec:inputController}
 
-Beim Start der Applikation wird die SQLite-Datenbank durch die Funktion \texttt{init\_db()}
-initialisiert, welche die benötigten Tabellen bei Bedarf anlegt
-(vgl.\ Abschnitt~\ref{subsec:DatenbankImplementierung}). Danach stellt der Flask-Server auf Port
-5000 die in Tabelle~\ref{tab:restEndpoints} aufgeführten REST-Endpunkte bereit.
+Da das Brillengehäuse keinen Touchscreen besitzt, basiert die gesamte
+Nutzerinteraktion auf einem einzigen physischen Taster.
+Das Modul \texttt{input-controller.ts} implementiert hierfür eine
+Finite-State-Machine, die verschiedene Eingabemuster -- Single-Tap und
+Double-Tap -- kontextabhängig unterschiedlich interpretiert.
+Im Hub-Kontext wechselt ein Single-Tap zwischen den verfügbaren Apps;
+ein Double-Tap wählt die entsprechende App aus.
+Im Feature-Kontext werden seitenspezifische Aktionen ausgelöst, etwa das
+Starten oder Stoppen des Teleprompters.
+Eingabeereignisse werden als Browser-Custom-Events über \texttt{window.dispatchEvent()}
+propagiert, sodass jede Seite eigene Handler registrieren kann, ohne direkt
+mit dem Input-Controller gekoppelt zu sein.
+Für Entwicklungsumgebungen ohne physischen Taster ist eine
+Tastatur-Emulation implementiert.
 
-\begin{comment}
-    \begin{table}[htbp]
-    \centering
-    \caption{REST-Endpunkte des Python-Backends}
-    \label{tab:restEndpoints}
-    \begin{tabularx}{\textwidth}{l l X}
-        \toprule
-        \textbf{Endpunkt} & \textbf{Methode(n)} & \textbf{Funktion} \\
-        \midrule
-        \texttt{/api/mainInfo}              & GET              & Liefert Akkustand, Temperatur, Luftfeuchtigkeit \\
-        \texttt{/api/messages}              & GET, POST, DELETE & Lese- und Schreibzugriff auf Nachrichten \\
-        \texttt{/api/teleprompter}          & GET              & Liefert aktuelle Teleprompter-Konfiguration \\
-        \texttt{/api/teleprompter/send}     & POST             & Companion~App setzt neue Konfiguration \\
-        \texttt{/api/teleprompter/current}  & GET              & Polling-Endpunkt für die AR-Brille \\
-        \texttt{/api/teleprompter/history}  & GET              & Letzte 10 gespeicherte Konfigurationen \\
-        \texttt{/api/teleprompter/reset}    & POST             & Setzt Konfiguration auf Standardwerte zurück \\
-        \texttt{/api/status}                & GET              & Debug-Endpunkt mit Systemstatus \\
-        \bottomrule
-    \end{tabularx}
-\end{table}
-\end{comment}
+% ---------------------------------------------------------------------------
+\subsection{Companion-App}
+\label{subsec:companionImpl}
 
-Die Teleprompter-Konfiguration wird zur Laufzeit als serverinternes Python-Dictionary
-(\texttt{current\_teleprompter\_config}) vorgehalten, das bei jedem POST auf
-\texttt{/api/teleprompter/send} mit den übertragenen Parametern überschrieben wird. Das
-Svelte-Frontend pollt den Endpunkt \texttt{/api/teleprompter/current} einmal pro Sekunde und
-rendert die jeweils aktuelle Konfiguration. Durch diesen Polling-Mechanismus wird eine annähernd
-Echtzeit-Synchronisation zwischen Companion~App und AR-Brille erreicht, ohne eine komplexere
-WebSocket-Infrastruktur einführen zu müssen.
+Die Companion App dient als mobile Steuerzentrale, über die der Nutzer alle
+AR-Features konfigurieren und steuern kann, ohne direkt mit dem Raspberry~Pi
+interagieren zu müssen.
+Im bisherigen Entwicklungsstand kommuniziert die App primär über WiFi mit dem
+Flask-Backend, da beide Geräte dabei im selben Netzwerk erreichbar sein müssen
+und die REST-Schnittstelle so ohne zusätzliche Konfiguration genutzt werden kann.
+Diese Lösung war für die Prototypenentwicklung funktional ausreichend, bringt
+jedoch die Einschränkung mit sich, dass der Raspberry~Pi zunächst über eine
+SSH-Verbindung oder eine lokale Session mit einem Netzwerk verbunden werden muss und keine einfache Input möglichkeit für die initiale Einrichtung zur Verfügung steht.
+\newpage
+Mittelfristig ist der Übergang zu einer primär Bluetooth-basierten Verbindung
+vorgesehen: Das Backend verfügt bereits über einen implementierten
+GATT-Server-Adapter in der Onboard-Runtime, der eine direkte BLE-Verbindung
+zwischen Smartphone und Raspberry~Pi ermöglicht -- unabhängig von einer
+gemeinsamen WLAN-Infrastruktur. Diese Bluetoothschnittstelle wurde bereits getestet, jedoch wegen des Zeitrahmens nicht final implementiert.
+Die finale Companion App ist als native React-Native-Anwendung ausgeführt,
+da nur ein nativer App-Kontext den erforderlichen Zugriff auf die
+Bluetooth-Low-Energy-APIs des Betriebssystems erlaubt.
+Im Laufe der Entwicklung wurde zunächst ein Vue.js-basierter Web-Prototyp
+eingesetzt, der die REST-Kommunikation mit dem Backend erprobte, bevor der
+endgültige Stack festgelegt wurde. Die React Native App kann einfach auf verschiedene Systeme portiert werden. Dabei müssen jedoch die jeweiligen Systemspezifischen Softwarespezifikationen beachtet werden. Dadurch können jedoch auch Features wie Benachrichtigungen oder Bluetooth-Verbindung ermöglicht werden.
 
-Neben der Flask-REST-Komponente enthält das Backend eine zweite, davon unabhängige Komponente:
-den Bluetooth-GATT-Server (\texttt{backend\_gatt\_server.py}), der über die Linux-D-Bus-Schnittstelle
-und den BlueZ-Bluetooth-Stack als nativer GATT-Server auf dem Raspberry~Pi registriert wird.
-Dieser implementiert zwei GATT-Services: einen \texttt{TextService} mit den Nordic-UART-Service-UUIDs
-(\texttt{6e400001-\ldots}) für den bidirektionalen Texttransfer sowie einen \texttt{TestService}
-zu Diagnosezwecken. Der \texttt{TextRxCharacteristic} empfängt Datenpakete von der Companion~App
-und interpretiert dabei ein einfaches Textprotokoll mit den Kommandos
-\texttt{CMD:TELEPROMPTER\_START}, \texttt{TXT:[chunk]} und \texttt{CMD:TELEPROMPTER\_END}, um den
-rekonstruierten Volltext an die weitere Verarbeitungslogik zu übergeben. Die
-\texttt{TextTxCharacteristic} ermöglicht Notifications vom Raspberry~Pi zur verbundenen App.
-Wie in \todo{Module Map} dargestellt besteht der in Python geschriebene Teil des Programms aus verschiedenen Modulen. Diese werden nun Stück für Stück vorgestellt:
+% ---------------------------------------------------------------------------
+\subsection{Pixel Streaming}
+\label{subsec:Pixel Streaming}
 
-Das \textbf{Python Backend} ist für die Zentrale Koordination des Programmes darin werden Zentrale Entscheidungen getroffen und die vers        
+Für \textbf{Pixel Streaming} ist eine Anbindungsstelle im Frontend
+vorbereitet, die einen lokal verfügbaren Unreal-Engine-Stream einbetten kann.
+Der entsprechende Backend-Endpunkt ist angelegt, jedoch wurden weder
+Implementierung noch Tests durchgeführt. Dabei können komplexe Szenen einfach in einem Unreal Engine gebaut und getestet werden und im Anschluss in 
+Diese und andere Erweiterungen werden in Abschnitt~\ref{chap:Diskussion}
+weiter diskutiert.
 
+\subsection{Raspberry Pi OS System}
+\label{subsec:RaspberryPiOs}
+Das Entwickelte System basiert auf einem RaspberryPi OS Build. Dabei wurde das zuletzt veröffentlichte Bullseye System genutzt. Dieses ist das letzte, welches die AV-Funktionalität nativ unterstützt. Sollte das System jemals neu aufgesetzt werden müssen, kann dies in der GitHub Repository gefunden werden. Die konfigurierten Zugangsdaten zu dem RaspberryPi Os sind:
 
-\subsection{Backend - Datenbank Implementierung}
-\label{subsec:DatenbankImplementierung}
-Die Datenhaltung erfolgt über eine eingebettete SQLite-Datenbank (\texttt{data.db}), die ohne
-separaten Datenbankserver direkt im Dateisystem des Raspberry~Pi persistiert wird. SQLite wurde
-aufgrund seiner geringen Ressourcenanforderungen und der fehlenden Notwendigkeit einer separaten
-Server-Infrastruktur ausgewählt, was dem eingeschränkten Rechenumfeld des Raspberry~Pi
-entgegenkommt.
+User: admin und Passwort:admin
 
-Das Datenbankschema umfasst zwei Tabellen, deren DDL-Definitionen in
-Listing~\ref{lst:dbSchema} dargestellt sind:
-
-\begin{lstlisting}[
-    language=SQL,
-    caption={SQLite-Datenbankschema des ARis-Backends},
-    label={lst:dbSchema}
-]
-CREATE TABLE IF NOT EXISTS messages1 (
-    id      INTEGER PRIMARY KEY AUTOINCREMENT,
-    content TEXT
-);
-
-CREATE TABLE IF NOT EXISTS teleprompter_history (
-    id              INTEGER PRIMARY KEY AUTOINCREMENT,
-    text            TEXT,
-    speed           REAL,
-    fontSize        REAL,
-    fontColor       TEXT,
-    backgroundColor TEXT,
-    fontFamily      TEXT,
-    lineHeight      REAL,
-    opacity         REAL,
-    timestamp       DATETIME DEFAULT CURRENT_TIMESTAMP
-);
-\end{lstlisting}
-
-Die Tabelle \texttt{messages1} dient der persistenten Speicherung von Nachrichten, die über den
-Nachrichtenkanal der Companion~App eingehen. Die Tabelle \texttt{teleprompter\_history}
-protokolliert jede von der Companion~App übertragene Teleprompter-Konfiguration mit Zeitstempel
-und ermöglicht so eine Wiederverwendung früherer Einstellungen. Der Zugriff auf die Datenbank
-erfolgt ausschließlich über das Python-Backend mittels der Python-Standardbibliothek
-\texttt{sqlite3}; auf ein ORM-Framework wurde bewusst verzichtet, um die Systemabhängigkeiten
-minimal zu halten.
-
-\subsection{Companion --- React Native Implementierung}
-\label{subsec:ReactNativeImplementierung}
-Die Companion~App dient als mobile Steuerzentrale für die AR-Brille und ermöglicht dem Nutzer die
-Konfiguration und Steuerung aller AR-Features über ein Smartphone. Im Verlauf der
-Prototypenentwicklung wurden verschiedene Technologiestacks evaluiert: Ein früher Prototyp wurde
-als Vue.js-Webapp realisiert (\texttt{Software\slash{}Companion\_Prototype\slash{}Vue\_Companion\_App\slash{}}),
-der die grundlegende REST-Kommunikation mit dem Python-Backend testete. Parallel dazu wurden
-Python-basierte Desktop-Tests zur Bluetooth-GATT-Kommunikation durchgeführt
-(\texttt{Software\slash{}Companion\_Prototype\slash{}PythonTesting\slash{}}). Im finalen Konzept
-ist die Companion~App als native React-Native-Anwendung (\texttt{Aris\_Companion}) vorgesehen,
-da nur ein nativer App-Kontext den Zugriff auf die Bluetooth-Low-Energy-APIs des Betriebssystems
-erlaubt, welche für die Verbindung mit dem GATT-Server des Raspberry~Pi erforderlich sind.
-
-Die Companion~App kommuniziert mit dem Backend über zwei Kanäle: Über WLAN werden REST-Anfragen
-an das Flask-Backend gestellt; über BLE wird der GATT-Server des Raspberry~Pi angesprochen. Die
-HTTP-Kommunikation wird bevorzugt eingesetzt, wenn beide Geräte im selben Netzwerk erreichbar
-sind, da sie höhere Datenübertragungsraten bietet; BLE dient als Rückfallkanal für Szenarien ohne
-gemeinsame Netzwerkinfrastruktur.
-
-\subsection{Pixel Streaming Implementierung}
-\label{subsec:PixelStreamingImplementierung}
-Die Pixel-Streaming-Komponente wurde innerhalb des Projektzeitraums aufgrund des verbleibenden
-Zeit- und Ressourcenbudgets nicht vollständig implementiert und getestet. Im Svelte-Frontend ist
-jedoch eine Anbindungsstelle vorbereitet, die die Integration eines im lokalen Netzwerk
-verfügbaren Pixel-Streaming-Streams ermöglicht. Pixel Streaming bezeichnet das Verfahren, eine
-in Unreal Engine ausgeführte interaktive 3D-Anwendung serverseitig zu rendern und das komprimierte
-Videosignal in Echtzeit per WebRTC an einen Browser-Client zu übertragen, wo es ohne lokale
-GPU-Leistung dargestellt werden kann (vgl.\ Abschnitt~\ref{sec:pixelStreaming}). In einem
-vollständig implementierten Systemausbau würde dies die Darstellung komplexer, industriell
-relevanter AR-Inhalte --- etwa maschinenspezifischer Wartungsanleitungen oder Montagesequenzen ---
-ermöglichen, die auf einem externen Rechner vorgerendert und auf der AR-Brille dargestellt werden.
+Durch das Anschließen des Systems an einen Monitor über die HDMI Schnittstelle können weiter Systemfunktionen konfiguriert werden und zum Beispiel die WIFI Verbindung zu einem neuen Netzwerk konfiguriert werden. In folgenden Iterationen könnte dies auch per Bluetooth funktionieren. 

@@ -1,10 +1,114 @@
 %!TEX root = ../main.tex
 
+% ============================================================
+%  Kapitel 8: Zusammenfassung und Ausblick
+%  ARis -- AR-Brille Studienarbeit | Bastian Kiefer
+% ============================================================
+
 \chapter{Zusammenfassung und Ausblick}
-Aufgabenstellung, Vorgehensweise und wesentliche Ergebnisse werden kurz und präzise dargestellt und kritisch reflektiert. Die Zusammenfassung ist eigenständig verständlich. Länge ca. 1 bis 1,5 Seiten (Problem, Ziele, Vorgehensweise, Ergebnisse und Ausblick).
+\label{chap:ZusammenfassungUndAusblick}
 
+% ---------------------------------------------------------------------------
 \section{Zusammenfassung}
+\label{sec:Zusammenfassung}
 
+Gegenstand dieser Studienarbeit war die Konzeption und prototypische Realisierung
+einer Augmented-Reality-Brille auf Basis des Free-Space-Combiner-Prinzips --
+im Rahmen eines arbeitsteiligen Projekts, das neben der hier behandelten
+Software- und Optikkomponente auch eine eigenständig bearbeitete Elektronik-
+und Mechanikkomponente umfasste.
+
+Die Problemstellung ergab sich aus der Frage, ob eine funktionsfähige,
+erweiterbare AR-Brille mit einem begrenzten Budget und handelsüblichen
+Komponenten realisierbar ist.
+Als konzeptioneller Ausgangspunkt wurde das Birdbath-\,/\,Free-Space-Combiner-Prinzip
+gewählt, bei dem ein Mikrodisplay über ein Okular kollimiert,
+durch einen Umlenkspiegel geführt und auf einem halbdurchlässigen Combiner-Spiegel
+im Sichtfeld des Nutzers überlagert wird.
+
+Im Rahmen der Anforderungsanalyse wurden die funktionalen und nicht-funktionalen
+Anforderungen nach der MoSCoW-Methode priorisiert.
+Auf dieser Grundlage wurden ein Software-Architekturkonzept sowie ein optisches
+Designkonzept entwickelt.
+Das realisierte Softwaresystem besteht aus vier Komponenten:
+einer Onboard-Runtime auf dem Raspberry~Pi~Zero~2\,W,
+einem Python-Flask-Backend zur Datenhaltung und Hardwaresteuerung,
+einem SvelteKit-Frontend zur Darstellung der AR-Benutzeroberfläche
+sowie einer React-Native-Companion-App zur drahtlosen Fernsteuerung.
+Optisch wurde ein elektronischer Kamera-Sucher (Viewfinder) als
+Mikrodisplay-Okular-Einheit eingesetzt und mit einem handelsüblichen
+Combinerspiegel kombiniert.
+
+Die Evaluierung zeigt, dass alle Must-Have-Anforderungen grundsätzlich erfüllt
+wurden: Das System ist freihand tragbar, akkubetrieben, über einen physischen
+Taster bedienbar und stellt ein HUD-ähnliches Bild im Combiner-Spiegel dar.
+\newpage
+Zentrale Einschränkungen bestehen in der geringen effektiven Bildgröße auf dem
+Combiner sowie der nicht optimalen simultanen Fokussierung auf Displaybild
+und reale Umgebung -- beide Limitationen sind auf die Kombination aus gewähltem
+Okular und mechanischem Aufbau zurückzuführen und technisch lösbar.
+Softwareseitig sind mehrere Features konzeptionell vorbereitet, aber noch nicht produktionsreif implementiert.
+
+% ---------------------------------------------------------------------------
 \section{Ausblick und Weiterentwicklung}
+\label{sec:AusblickUndWeiterentwicklung}
 
+Das entwickelte System bildet eine stabile Basis für eine Weiterentwicklung
+in mehreren Richtungen.
+
+\paragraph{Optische Verbesserung.}
+Die dringlichste Maßnahme ist die Anpassung des optischen Aufbaus.
+Ein Okular mit größerer Brennweite und ein entsprechend angepasster mechanischer
+Abstand zwischen Okular und Combiner-Spiegel würden die effektive Bildgröße
+deutlich erhöhen und das wahrgenommene FoV verbreitern.
+Langfristig wäre der Einsatz einer eigens für dieses System ausgelegten
+Linsenanordnung -- oder, bei verfügbarem Budget, einer Waveguide-Linse --
+eine konsequente Weiterentwicklung, die sowohl Bildgröße als auch
+Fokussierungsqualität auf ein mit kommerziellen Systemen vergleichbares
+Niveau heben würde.
+
+\paragraph{Software-Vervollständigung.}
+Die vorbereiteten, aber noch nicht fertiggestellten Features können ohne
+grundlegende Architekturänderungen implementiert werden:
+Die KI-Chat-Anbindung erfordert lediglich die Integration eines externen
+API-Aufrufs im Backend;
+die vollständige BLE-Kommunikation setzt die Fertigstellung des
+GATT-Server-Adapters voraus;
+Pixel Streaming kann über den bereits vorbereiteten Endpunkt im Backend
+und eine WebRTC-Verbindung zum Unreal-Engine-Server realisiert werden.
+\newpage
+\paragraph{Hardwareoptimierung.}
+Ein leistungsstärkerer Einplatinencomputer würde die Ressourcenengpässe auf der
+aktuellen Plattform beseitigen und rechenintensivere Anwendungsfälle wie
+lokale KI-Inferenz oder Pixel Streaming direkt auf dem Gerät ermöglichen. Gerade mit neueren Chips und Innovationen im Single Board Computer Bereich können in Zukunft große Fortschritte bringen.
+
+% ---------------------------------------------------------------------------
 \section{Fazit}
+\label{sec:Fazit}
+
+Das Projekt zeigt, dass die Realisierung einer funktionsfähigen
+AR-Brille auch mit handelsüblichen Komponenten und begrenztem Budget
+im Rahmen einer Studienarbeit möglich ist.
+Das entwickelte System ist freihand tragbar, zeigt ein HUD-ähnliches
+AR-Bild im Sichtfeld des Nutzers und verfügt über eine stabile,
+modular erweiterbare Softwarearchitektur -- Eigenschaften, die den
+Grundanforderungen einer AR-Brille entsprechen.
+
+Die identifizierten Limitationen -- insbesondere das eingeschränkte
+Sichtfeld und die Fokussierungscharakteristik der Optik -- sind
+keine Indikatoren eines grundlegend fehlerhaften Ansatzes, sondern
+direkte Konsequenzen des Kostenrahmens und des arbeitsteiligen
+Entwicklungsprozesses.
+Sie definieren einen klaren und technisch gangbaren Verbesserungspfad,
+der in einem Folgeprojekt mit vergleichsweise geringem Aufwand
+beschritten werden kann.
+
+Das Projekt liefert damit einen doppelten Beitrag:
+Zum einen den praktischen Nachweis, dass DIY-AR-Brillen mit
+einem Free-Space-Combiner-Aufbau auch außerhalb kommerzieller
+Fertigungsumgebungen realisierbar sind.
+Zum anderen eine erprobte, dokumentierte Softwarearchitektur,
+die als Ausgangspunkt für weiterführende Arbeiten im Bereich
+eingebetteter AR-Systeme dienen kann.
+
+

@@ -2,12 +2,186 @@
 
 \addchap{Anhang}
 \begin{itemize}
-	\item \ref{apx:1} Anhang 1 \dotfill{} \pageref{apx:1}
-	\item \ref{apx:2} Anhang 2 \dotfill{} \pageref{apx:2}
+	\item \ref{apx:anforderungen} Anforderungen \dotfill{} \pageref{apx:anforderungen}
+	\item \ref{apx:konzept_architektur} Konzeptionierte Architektur \dotfill{} \pageref{apx:konzept_architektur}
+	\item \ref{apx:implementierteseiten} Implementierte Seiten \dotfill{} \pageref{apx:implementierteseiten}
+	\item \ref{apx:optischetests} Optische Tests \dotfill{} \pageref{apx:optischetests}
+	\item \ref{apx:softwaretests} Software Tests \dotfill{} \pageref{apx:softwaretests}
 \end{itemize}
 
-\chapter{Anhang 1}
-\label{apx:1}
+\chapter{Anforderungen}
+\label{apx:anforderungen}
+\begin{figure}[H]
+    \includepdf[width=0.9\textwidth]{Anforderungen Moscow.pdf}
+\end{figure}
 
-\chapter{Anhang 2}
-\label{apx:2}
+\chapter{Konzeptionierte Architektur}
+\label{apx:konzept_architektur}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{ARis_Systemarchitektur.jpg}
+    \caption{Software-Architektur der AR-Brille}
+\end{figure}
+
+\chapter{Implementierte Seiten}
+\label{apx:implementierteseiten}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{HUD.jpeg}
+    \caption{Hauptseite mit verschiedenen Modulen}
+\end{figure}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{Teleprompter.jpeg}
+    \caption{Startseite des Teleprompters, wartet auf das Signal der Companion App}
+\end{figure}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{Navigation1.jpeg}
+    \caption{Mögliche Navigationsansicht}
+\end{figure}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{Navigation2.jpeg}
+    \caption{Mögliche Navigationsansicht}
+\end{figure}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{Navigation3.jpeg}
+    \caption{Mögliche Navigationsansicht}
+\end{figure}
+
+\chapter{Optische Tests}
+\label{apx:optischetests}
+\begin{table}[htbp]
+  \centering
+  \caption{Ergebnisse der optischen Komponententests.}
+  \begin{tabularx}{\textwidth}{@{} l X l @{}}
+    \toprule
+    \textbf{Prüfpunkt} & \textbf{Methode und Befund} & \textbf{Ergebnis} \\
+    \midrule
+    Display-Funktion &
+      Spannungsversorgung angelegt; Display leuchtet gleichmäßig auf.
+      Funktion im weiteren Betrieb bestätigt. &
+      Erfolgreich \\
+    \addlinespace
+    Display-Linsen-Abstand &
+      Ausgangsabstand des originalen Viewfinders als Startwert verwendet;
+      iterative Anpassung bis zum schärfsten Bild.
+      Scharfe Abbildung im eingestellten Abstand erreicht. &
+      Erfolgreich \\
+    \addlinespace
+    Spiegelwinkel &
+      Spiegel wurden auf ihre
+      konstruktiv vorgegebenen Winkel überprüft und justiert.
+      Korrekte Strahlführung zum Auge bestätigt. &
+      Erfolgreich \\
+    \addlinespace
+    See-Through-Funktion &
+      Durchblick auf reale Umgebung durch den halbdurchlässigen
+      Combiner-Spiegel bei gleichzeitiger Display-Anzeige qualitativ
+      geprüft. Überlagerung visuell erkennbar. &
+      Erfolgreich \\
+    \addlinespace
+    Bildgröße / FoV &
+      Das auf dem Combiner sichtbare Bild ist deutlich kleiner als
+      konzeptionell angestrebt. Die geringe Vergrößerung des
+      Viewfinder-Okulars sowie der kurze optische Weg zwischen
+      Display und Combiner führen dazu, dass nur ein
+      Ausschnitt des Displays im Spiegel erscheint
+      (vgl.~Abschnitt~\ref{sec:optischeImplementierung}). &
+      Teilweise erfolgreich \\
+    \addlinespace
+    Fokussierung &
+      Die Schärfentiefe des Systems erlaubt keine simultane Fokussierung
+      auf Display-Inhalt und reale Umgebung. Der Nutzer muss aktiv
+      zwischen Nah- und Fernfokus wechseln, was dem Ziel einer
+      entspannten Augenakkommodation widerspricht. &
+      Teilweise erfolgreich \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+\chapter{Software Tests}
+\label{apx:softwaretests}
+\begin{table}[htbp]
+  \centering
+  \caption{Ergebnisse der Software-Komponenten- und Systemtests.}
+  \begin{tabularx}{\textwidth}{@{} l X l @{}}
+    \toprule
+    \textbf{Testbereich} & \textbf{Befund} & \textbf{Ergebnis} \\
+    \midrule
+    Backend-Start \& API &
+      Flask-Backend startet stabil auf dem Raspberry~Pi; alle
+      REST-Endpunkte (vgl.~Tabelle~\ref{tab:endpoints}) antworten
+      korrekt auf HTTP-Anfragen vom lokalen Gerät. &
+      Erfolgreich \\
+    \addlinespace
+    Sensorik (MPU-6050, GY-63) &
+      Beide I2C-Sensoren werden beim Start korrekt initialisiert;
+      Messwerte für Temperatur, Luftfeuchtigkeit und
+      Beschleunigung werden über \texttt{/api/sensors} abrufbar. &
+      Erfolgreich \\
+    \addlinespace
+    Taster-Eingabe &
+      Single-Tap und Double-Tap werden von der Finite-State-Machine
+      zuverlässig unterschieden; Seitenwechsel im Hub-Kontext
+      funktioniert wie erwartet. &
+      Erfolgreich \\
+    \addlinespace
+    SvelteKit-Frontend / Hub &
+      Frontend startet als lokaler Webserver; Hub-Seite wird
+      korrekt gerendert und zeigt Header. &
+      Erfolgreich \\
+    \addlinespace
+    Demo-Seite &
+      Kompakte Demo-Seite zeigt Kerninformationen auf minimalem
+      Anzeigebereich; Taster-Interaktion funktioniert.
+      Erreichtes Ziel: Proof-of-Concept-Anzeige auf der physischen
+      Hardware. &
+      Erfolgreich \\
+    \addlinespace
+    Teleprompter &
+      Konfigurationsübertragung von der Companion App zum Backend
+      und Polling durch das Frontend funktionieren;
+      scrollende Textdarstellung im Browser verifiziert.
+      Vollständiger End-to-End-Test auf der finalen Hardware
+      nicht abgeschlossen. &
+      Teilweise erfolgreich \\
+    \addlinespace
+    KI-Chat &
+      Nachrichten können über die REST-API gespeichert und auf
+      der Messages-Seite angezeigt werden. Weitere Implementation ist nicht abgeschlossen &
+      Teilweise Erfolgreich \\
+    \addlinespace
+    Navigation &
+      Seite strukturell vorhanden; MPU-6050-Daten werden über
+      den Backend-Endpunkt bereitgestellt.
+      Eine vollständige Navigationsfunktion (Turn-by-Turn o.\,ä.)
+      wurde nicht implementiert. &
+      Teilweise erfolgreich \\
+    \addlinespace
+    Companion App (WiFi) &
+      REST-Kommunikation zwischen React-Native-App und Backend
+      über WiFi funktioniert. Weitere Funktionalitäten wurden nicht getestet &
+      Teilweise Erfolgreich \\
+    \addlinespace
+    Bluetooth / GATT-Server &
+      GATT-Server-Adapter ist in der Onboard-Runtime implementiert;
+      vollständiger BLE-Verbindungstest mit Companion App nicht
+      abgeschlossen. Jedoch wurde Prototypische Verbindung zu einem Companion gerät hergestellt &
+      Teilweise erfolgreich \\
+    \addlinespace
+    Pixel Streaming &
+      Endpunkt im Backend angelegt; keine Implementierung oder
+      Test durchgeführt. &
+      Nicht umgesetzt \\
+    \addlinespace
+    Grenzfälle / Fehlerverhalten &
+      Backend gibt bei fehlender Hardware (keine I2C-Sensoren)
+      strukturierte Fehlerobjekte zurück, anstatt abzustürzen.
+      Fehlende Companion-App-Verbindung wird toleriert. &
+      Erfolgreich \\
+    \bottomrule
+  \end{tabularx}
+\end{table}

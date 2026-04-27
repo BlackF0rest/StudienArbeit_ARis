@@ -1,34 +1,157 @@
 %!TEX root = ../main.tex
 
-\chapter{Testing und Evaluation (6-8S)}
+% ============================================================
+%  Kapitel 6: Testing und Evaluation
+%  ARis -- AR-Brille Studienarbeit | Bastian Kiefer
+% ============================================================
+
+\chapter{Testing und Evaluation}
 \label{chap:TestingundEvaluation}
-In diesem Kapitel werden alle druchgeführten Tests und deren Ergebnisse behandelt, welche durchgeführt wurden.
 
-\section{Test Methodik}
+Die Validierung des entwickelten Systems erfolgte auf Basis der in
+Abschnitt~\ref{sec:Anforderungsanalyse} definierten Anforderungen.
+Anstelle automatisierter Testsuites kamen aufgrund des prototypischen Charakters
+des Projekts qualitative Funktionstests zum Einsatz, die sowohl begleitend während
+der Entwicklung als auch in einer abschließenden Integrationsphase durchgeführt wurden.
+Die Ergebnisse geben damit Auskunft darüber, in welchem Umfang die formulierten
+Must-Have- und Should-Have-Anforderungen erfüllt wurden.
+
+% ---------------------------------------------------------------------------
+\section{Testmethodik}
 \label{sec:testmethodik}
-Die Tests wurden in einre nicht spezifischen Reihenfolge in generell recht Qualitativer Art und weise durchgeführt. Dabei wurden die zu Beginn definierten Anforderungen genutzt, um verschiedene qualitative Tests zu definieren. Diese wurden teilweise im Laufe der Entwicklung oder zum Ende der Entwicklung durchgeführt.
 
+Die Testmethodik orientiert sich am prototypischen Charakter des Projekts:
+Auf automatisierte Unit- oder Integrationstests wurde bewusst verzichtet, da der
+Fokus auf einer möglichst breiten funktionalen Abdeckung des Gesamtsystems lag und
+der verfügbare Zeitrahmen eine vollständige Testautomatisierung nicht zuließ.
+Stattdessen wurden drei Testkategorien definiert, die zeitlich gestaffelt durchgeführt
+wurden.
+
+\emph{Begleitende Tests} fanden während der gesamten Entwicklungsphase statt:
+Jede neu implementierte Komponente wurde
+unmittelbar nach ihrer Fertigstellung funktional überprüft, bevor die Entwicklung
+fortgesetzt wurde.
+\emph{Komponentenspezifische Tests} wurden am Ende der jeweiligen Entwicklungsabschnitte
+durchgeführt und prüften die Einzelkomponenten in isolation -- das Backend und das Frontend jeweils für sich.
+\emph{Systemtests} erfolgten nach der Systemintegration und überprüften das
+Zusammenspiel aller Komponenten im Gesamtbetrieb auf der Zielhardware.
+
+Die Bewertung der Testergebnisse erfolgt dreistufig:
+\textbf{Erfolgreich} bezeichnet eine vollständige und anforderungsgemäße Funktion,
+\textbf{Teilweise erfolgreich} bezeichnet eine grundsätzlich funktionierende, jedoch
+in Umfang oder Qualität eingeschränkte Funktion, und
+\textbf{Nicht umgesetzt} bezeichnet Funktionen, die im Projektzeitraum nicht
+implementiert oder getestet werden konnten.
+
+% ---------------------------------------------------------------------------
 \section{Optische Tests}
 \label{sec:optischeTests}
-Das Testen der Optik wurde laufen während zusammenstellen des gesamtsystems durchgeführt. Dabei wurden folgende Punkte getestet und teilweise damit auch eingestellt:
-\begin{description}
-    \item[Funktion des Display] - diese wurde durch eine optische funktionskontrolle getestet. Durch das beschalten des Displays mit Spannung konnte durch das aufleuchten diese geprüft werden. Dies bestätigte sich auch im weitern lauf der inbetriebnahme. \textbf{Erfolgreich}
-    \item[Entfernung Display zu Linse] - diese wurde beim mechanischen Zusammensetzen des Systems getestet. Dabei wurde als startpunkt die Entfernung des originalen Viewfinders verwendet und darauf basierend iterativ die perfekte entfernung für ein scharfes Bild erforscht. \textbf{Erfolgreich}
-    \item[Spiegelwinkel] - die Winkel der beiden Spiegel wurde zwar durch das mechanische Design schon vorgegeben, wurde jedoch trotzdem beim Systembau auf die richtige Einstellung überprüft. \textbf{Erfolgreich}
-\end{description}
 
-\section{Software Tests}
+Die optischen Tests wurden begleitend während des mechanischen Zusammenbaus des
+Gesamtsystems durchgeführt.
+Da optische Parameter wie Brennweite, Abstand und Spiegelwinkel im Prototypenbau
+nicht vollständig rechnerisch vorausberechnet werden konnten, wurden diese iterativ
+am realen System erprobt und angepasst.
+Tabelle~\ref{apx:optischetests} fasst die durchgeführten Tests und ihre Ergebnisse
+zusammen.
+
+Die Testergebnisse zeigen, dass die grundlegende optische Funktion des
+Free-Space-Combiner-Systems realisiert werden konnte: Das Display leuchtet,
+das Bild wird durch das Okular kollimiert, durch den Umlenkspiegel geführt
+und auf dem Combiner sichtbar gemacht, während die Umgebung gleichzeitig
+durchsichtig bleibt.
+Die wesentlichen Einschränkungen liegen in der Bildgröße und der Fokussierung,
+die auf die Kombination aus dem gewählten Okular und dem mechanischen Aufbau
+zurückzuführen sind.
+
+% ---------------------------------------------------------------------------
+\section{Software-Tests}
 \label{sec:SoftwareTests}
-Diese wurden neben der Iterativen Prüfung während der Entwicklung durch mehrere - manuelle Endtests ausgeführt. Folgende Tests wurden mit dem genannten Ergebnis durchgeführt:
-\begin{description}
-    \item[Gesamtsystem]
-    \item[Teleprompter App] 
-    \item[Navigation App]
-    \item[Pixel Streaming]
-    \item[Navigation]
-    \item[Grenzustände]      
-\end{description}
 
-\section{System Tests}
+Die Software-Tests gliederten sich in begleitende Entwicklungstests -- d.\,h.\
+manuelle Prüfungen nach jeder abgeschlossenen Implementierungseinheit -- sowie
+einen abschließenden manuellen Gesamttest auf der Zielhardware (Raspberry~Pi~Zero~2\,W
+mit angeschlossenem Display).
+Tabelle~\ref{apx:softwaretests} dokumentiert die Ergebnisse der wesentlichen
+Testbereiche.
+
+% ---------------------------------------------------------------------------
+\section{Systemtest}
 \label{sec:SystemTest}
-Nach dem fertigstellen des Gesamten Systems wurde ein Qualitativer Systemtest mit allen Funktionen durchgeführt.
+
+Nach Abschluss der Integrationsphase wurde ein qualitativer Gesamtsystemtest
+auf der physischen Zielplattform durchgeführt.
+Dabei wurden alle implementierten Softwaremodule gemeinsam im realen Betrieb
+auf dem Raspberry~Pi~Zero~2\,W erprobt.
+\newpage
+Der Test bestätigte, dass das Gesamtsystem als integrierte Einheit stabil läuft:
+Backend und Frontend starten gemeinsam, der Datenpfad von der Companion App über
+das Backend bis zur Darstellung auf dem Display funktioniert, und die
+Taster-Eingabe wird korrekt verarbeitet.
+Trotz der zuvor beschriebenen Deployment-Schwierigkeiten
+(vgl.~Abschnitt~\ref{sec:softwareImplementierung}) -- insbesondere dem erforderlichen
+OS-Downgrade und den damit verbundenen Paketkompatibilitätsproblemen -- läuft das
+System nach der Einrichtung stabil und reproduzierbar.
+
+Die optische Integration zeigte die in Abschnitt~\ref{sec:optischeTests} beschriebenen
+Einschränkungen: Das angezeigte Bild ist kleiner als konzeptionell vorgesehen, und
+die Fokussierung ist nicht für simultane Nah- und Fernwahrnehmung optimiert.
+Die Demo-Seite konnte jedoch als funktionierender Proof of Concept auf der
+physischen Hardware demonstriert werden -- ein AR-ähnliches HUD ist im Combiner-Spiegel
+sichtbar und interaktiv durch den Taster bedienbar.
+
+% ---------------------------------------------------------------------------
+\section{Anforderungsabgleich}
+\label{sec:anforderungsabgleich}
+
+Abschließend werden die Testergebnisse den zu Beginn definierten MoSCoW-Anforderungen
+gegenübergestellt.
+Tabelle~\ref{tab:anforderungsabgleich} gibt einen Überblick über den
+Erfüllungsgrad der Must-Have- und Should-Have-Anforderungen.
+
+\begin{table}[htbp]
+  \centering
+  \caption{Abgleich der Testergebnisse mit den MoSCoW-Anforderungen
+           (vgl.~Anhang~\ref{apx:anforderungen}).}
+  \label{tab:anforderungsabgleich}
+  \begin{tabularx}{\textwidth}{@{} l l X @{}}
+    \toprule
+    \textbf{Kategorie} & \textbf{Anforderung} & \textbf{Erfüllungsgrad} \\
+    \midrule
+    Must Have & Optische Sichtbarkeit der Anzeige &
+      Grundsätzlich erfüllt; Bildgröße eingeschränkt \\
+    Must Have & Freihand-Nutzbarkeit &
+      Erfüllt -- kein Handgerät für Betrieb nötig \\
+    Must Have & Mobile Verwendbarkeit &
+      Erfüllt -- Akku-Betrieb realisiert \\
+    Must Have & Eingabemöglichkeit (Taster) &
+      Erfüllt \\
+    Must Have & Verschiedene Darstellungsmodi &
+      Überwiegend erfüllt (Hub, Demo, Teleprompter, Messages) \\
+    Must Have & Physische Stabilität &
+      Erfüllt -- Gehäuse hält Betrieb stand \\
+    Must Have & Kosteneffizienz &
+      Erfüllt -- Realisierung mit handelsüblichen Komponenten und innerhalb des Budgets \\
+    \midrule
+    Should Have & Brillenähnliches Design &
+      Erfüllt \\
+    Should Have & Gyroskop / Lageerfassung &
+      Erfüllt -- MPU-6050 integriert und auslesbar \\
+    Should Have & Temperatur-/Feuchtigkeitssensoren &
+      Überwiegend Erfüllt -- GY-63 integriert und auslesbar erweiterbar durch z.B. BME280 \\
+    Should Have & Companion App &
+      Überwiegend erfüllt (WiFi-Kanal funktionsfähig) \\
+    Should Have & Möglichst hohe Displayauflösung &
+      Bedingt erfüllt -- Bildbereich eingeschränkt \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+Der Anforderungsabgleich zeigt, dass alle Must-Have-Anforderungen zumindest
+grundsätzlich erfüllt wurden -- mit der Einschränkung, dass die optische Bildgröße
+hinter den konzeptionellen Erwartungen zurückbleibt.
+Sämtliche Should-Have-Anforderungen wurden ebenfalls überwiegend realisiert.
+Die nicht umgesetzten Features (Feature Apps, Pixel Streaming, vollständige
+BLE-Verbindung) entstammen ausschließlich der Could-Have-Kategorie oder waren
+als konzeptionelle Vorbereitungen angelegt, ohne im Projektzeitraum vollständig
+realisiert werden zu können.

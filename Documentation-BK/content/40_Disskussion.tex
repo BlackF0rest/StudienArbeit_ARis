@@ -1,17 +1,211 @@
 %!TEX root = ../main.tex
 
-\chapter{Diskussion (4-6S)}
+% ============================================================
+%  Kapitel 7: Diskussion
+%  ARis -- AR-Brille Studienarbeit | Bastian Kiefer
+% ============================================================
+
+\chapter{Diskussion}
 \label{chap:Diskussion}
 
+Dieses Kapitel ordnet die in Kapitel~\ref{chap:TestingundEvaluation} dokumentierten
+Testergebnisse in einen breiteren Kontext ein.
+Dazu werden zunächst die Ergebnisse vor dem Hintergrund der ursprünglichen
+Zielsetzung bewertet, anschließend die wesentlichen Limitationen des Systems
+systematisch analysiert und abschließend eine Gesamteinschätzung des
+Projektergebnisses vorgenommen.
+
+% ---------------------------------------------------------------------------
 \section{Evaluation der Ergebnisse}
 \label{sec:EvaluationDerErgebnisse}
-Durch die verschiedenen Tests und das Betrachten des Endergebni
 
+Die Zielsetzung des Projekts -- formuliert in Abschnitt~\ref{sec:zielsetzung} --
+war die Entwicklung einer kostengünstigen, technologisch aktuellen und erweiterbaren
+AR-Brille, die virtuelle Inhalte im Sichtfeld des Nutzers darstellt.
+Bewertet man das Endergebnis vor diesem Hintergrund, ergibt sich ein
+differenziertes, aber insgesamt positives Bild.
+
+Das System erfüllt seinen konzeptionellen Kernauftrag:
+Es ist tragbar, freihand bedienbar, akkubetrieben und zeigt tatsächlich ein
+HUD-ähnliches Bild im halbdurchlässigen Combiner-Spiegel -- bei gleichzeitigem
+Durchblick auf die reale Umgebung.
+Alle Must-Have-Anforderungen wurden zumindest grundsätzlich erfüllt;
+die Should-Have-Anforderungen wurden überwiegend realisiert.
+Damit leistet das Projekt das, was ein Proof-of-Concept leisten soll:
+Es zeigt, dass das gewählte Konzept prinzipiell funktioniert und als Basis
+für eine weiterführende Entwicklung taugt.
+
+Gleichzeitig ist das System in seinem aktuellen Stand kein ausgereiftes Produkt.
+Die optische Bildgröße bleibt hinter den Erwartungen zurück,
+die Fokussierung ist nicht für den Simultangebrauch von Nah- und Fernbereich
+optimiert, und mehrere Software-Features konnten im verfügbaren Zeitrahmen
+nicht vollständig implementiert werden.
+Diese Lücken sind jedoch charakteristisch für einen iterativen Prototypenprozess
+und kein Zeichen eines grundsätzlich fehlerhaften Konzepts:
+Die gefundenen Probleme sind identifiziert, lokalisiert und technisch lösbar.
+
+Ein wesentlicher Erfolgsfaktor des Projekts ist die Kosteneffizienz:
+Mit handelsüblichen Komponenten -- einem Kamera-Viewfinder als Mikrodisplay-Okular-Einheit
+und einem einfachen Spiegel als Combiner -- wurde ein funktionierendes
+AR-System realisiert, dessen Gesamtkosten weit unter denen kommerzieller
+Referenzsysteme liegen.
+Dies bestätigt die Ausgangshypothese, dass der Bau einer AR-Brille auch
+ohne Spezialoptik und im DIY-Rahmen möglich ist.
+
+% ---------------------------------------------------------------------------
 \section{Limitationen}
-\label{sex:Limitationen}
-Hier muss getrennt werden, nach Software und Optischen limitationen. Optisch ist das System durch die Budgetgrenzen in einem bestimmten Rahmen gehalten. Der zuerst erdachte Weg über die Waveguide Linsen konnte leider nicht umgesetzt werden und es wurde auf eine einfacherere Umsetzung gesetzt. Diese ist durch die Spiegel in ihrer Helligkeit limitiert. Der sich im Gehäuse befindliche Reflektionsspiegel ist zwar in einem Dunklen gehäuse wodurch nicht all zu viel Licht verloren gehen sollte, jedoch kann hier durch einen Qualitativ höheren (besonders Glas-) Spiegel die Effizienz verbessert werden und somit mehr Licht in das Auge gebracht werden. Andererseits ist der Halbdurchlässige Spiegel vor dem Auge ebenfalls auf maximal 50\% Reflektionskraft gebunden. Dies liegt an der Natur eines Teildruchlässigen Spiegels. Die Summe dieser Kleinen Einflüsse macht es, dass die Helligkeit des Bildes nicht für alle Situationen ausreichen wird.
+\label{sec:Limitationen}
 
-Softwareseitig bestehen durch die endliche verfügbare Zeit und die Leistungsfähigkeit des Raspberry PIs mehrere Limitationen. Neben der noch nicht gnaz ausgereiften Software, welche bestimmt an noch vielen Ecken verbessert werden kann, bietet diese noch schier unendliche Erweiterungsmöglichkeiten, welche nicht ansatzweise ausgenutzt wurden konnten. Eine weitere Limitation gibt die Komplexität des Systems. Zwar öffnet dieses einige Möglichkeiten doch es kann nur wenige Änderungen benötigen um den Code komplett lahm zu legen. Ebenso sind die vielen verschiedenen Frameworks und Sprachen teilweise schwierig zu überblicken und in den Gesamtkontext zu setzen. Jedoch muss dazu gesagt werden, dass das komplexe Zusammenspiel der verschiednene Themenbereiche im Gesamten System diese Herausvorderung verkörpern. 
+Die Limitationen des Systems lassen sich in drei Bereiche gliedern:
+optische, softwareseitige und organisatorische Einschränkungen.
+Eine klare Unterscheidung ist wichtig, da die Ursachen und die erforderlichen
+Gegenmaßnahmen in jedem Bereich verschieden sind.
 
+\subsection{Optische Limitationen}
+\label{subsec:optischeLimitationen}
+
+Die optischen Einschränkungen des Systems sind primär auf den Kompromiss
+zwischen Kosteneffizienz und optischer Leistung zurückzuführen.
+
+Die grundlegendste Einschränkung ist die geringe effektive Bildgröße auf dem
+Combiner-Spiegel.
+Ursache ist das Zusammenspiel zweier Faktoren: die kurze Brennweite des
+eingesetzten Viewfinder-Okulars und der mechanisch bedingte kurze Abstand
+zwischen dem Okular und dem Combiner-Spiegel.
+Dadurch wird der kollimierte Lichtstrahl auf dem Combiner nur als kleines
+Bild sichtbar, was die wahrgenommene Bildfläche und damit die nutzbare
+Auflösung stark einschränkt.
+Dies ist kein konzeptioneller Fehler des Free-Space-Combiner-Ansatzes, sondern
+eine direkte Folge der Komponentenwahl und des Gehäusedesigns.
+
+Die Lichtausbeute des Systems ist durch zwei physikalische Grenzen begrenzt.
+Erstens reflektiert der halbdurchlässige Combiner-Spiegel konstruktionsbedingt
+maximal 50\,\% des auftreffenden Displaylichts in Richtung des Auges;
+die andere Hälfte wird transmittiert und geht damit für die Bilddarstellung verloren.
+\newpage
+Dies bedeutet, dass das System in hellen Umgebungen an seine
+Grenzen stößt, wo das Umgebungslicht die Leuchtstärke des Displays übersteigt.
+Ein qualitativ hochwertigerer Combiner mit optimierter Reflexionsbeschichtung würden die Lichtausbeute
+messbar verbessern.
+
+Schließlich erlaubt die aktuelle Optik keine simultane Fokussierung auf
+Display-Inhalt und reale Umgebung.
+Das Okular kollimiert das Displaylicht auf scheinbar unendliche Distanz,
+was für eine entspannte Akkommodation bei der Betrachtung des Bildes
+sorgt -- jedoch dazu führt, dass der Nutzer aktiv zwischen Nahfokus
+(Display) und Fernfokus (Umgebung) wechseln muss.
+Dieses Problem ist in der AR-Forschung bekannt und wird bei kommerziellen
+Systemen durch aufwendigere varifokale Optiken adressiert,
+die im Rahmen dieses Projekts nicht realisierbar waren.
+
+\subsection{Softwareseitige Limitationen}
+\label{subsec:softwareLimitationen}
+
+Die Softwarelimitationen des Systems sind im Wesentlichen auf drei Faktoren
+zurückzuführen: den begrenzten Zeitrahmen der Entwicklung, die
+Hardwareeinschränkungen des Raspberry~Pi~Zero~2\,W und die inhärente
+Komplexität des gewählten Technologiestacks.
+
+Der Raspberry~Pi~Zero~2\,W ist ein kostengünstiger Einplatinencomputer,
+der für einfache Aufgaben gut geeignet ist, jedoch in Rechenleistung
+und Arbeitsspeicher deutlich limitierter ist als desktop-artige Systeme.
+Dies setzt dem gleichzeitigen Betrieb von Backend-Server, SvelteKit-Frontend,
+Sensor-Polling und Bluetooth-Adapter praktische Grenzen und
+kann bei ressourcenintensiven Erweiterungen -- etwa Pixel Streaming --
+zu Engpässen führen.
+
+Die Komplexität des Technologiestacks ist zugleich Stärke und Schwäche des Systems.
+Einerseits ermöglicht die Kombination aus Python-Backend, SvelteKit-Frontend
+und React-Native-Companion-App eine klare Trennung der Verantwortlichkeiten
+und eine breite Erweiterbarkeit.
+Andererseits erfordert das Zusammenspiel verschiedener Sprachen, Frameworks
+und Kommunikationsprotokolle ein erhöhtes Maß an Überblick und erhöht
+die Fehleranfälligkeit bei Integrationsschritten.
+\newpage
+Diese Komplexität ist jedoch keine vermeidbare Eigenschaft des Systems,
+sondern spiegelt die inhärente Komplexität der Aufgabe wider: Ein integriertes
+AR-System verbindet Hardwarezugriff, Datenhaltung, Netzwerkkommunikation
+und interaktives User Interface in einer einzigen Einheit.
+
+Features wie KI-Chat-Anbindung und Pixel Streaming konnten konzeptionell
+vorbereitet, aber nicht fertiggestellt werden.
+Die vorbereitete Struktur im Code erlaubt es, diese Features in einem
+nächsten Entwicklungsschritt ohne grundlegende Architekturänderungen
+zu vervollständigen.
+
+In den letzten Tagen der Entwicklung ist mehrfach das Problem aufgekommen, dass das Display sich selbst ausgeschaltet hat oder das schwarze Bild in weiß invertiert wurde. Diese kleinen und nach einem neustart behobenen Bugs sind ebenfalls eine Limitation, welche mit der weiterentwicklung verbessert werden sollten.
+
+\subsection{Organisatorische Limitationen}
+\label{subsec:organisatorischeLimitationen}
+
+Neben den technischen Einschränkungen hatte die Projektorganisation
+einen erheblichen Einfluss auf den realisierten Funktionsumfang.
+Da das Projekt arbeitsteilig zwischen zwei Verantwortungsbereichen
+-- Software und Optik auf der einen, Elektronik und Mechanik auf der anderen Seite --
+aufgeteilt war, war die finale Integration von einem Zusammenspiel beider Teilnehmer abhängig. Zusätzlich zu den Herausforderungen einer solchen Zusammenarbeit waren beide Teilnehmer den Großteil der Zeit Geografisch getrennt, was zu einer Erschwerung des Projekts geführt hat. Bessere Kommunikation und das festlegen und einhalten von Meilensteinen hätten hier einen Vorteil bringen können.
+
+\newpage
+% ---------------------------------------------------------------------------
 \section{Ergebnisanalyse}
 \label{sec:Ergebnisanalyse}
+
+Die Gesamtbetrachtung des Projekts ergibt eine klare Einordnung:
+ARis ist ein funktionsfähiger Prototyp, der seinen Proof-of-Concept-Anspruch
+erfüllt, jedoch in zentralen Leistungsparametern -- insbesondere dem optischen
+Sichtfeld und dem Funktionsumfang der Software -- noch nicht das Niveau
+eines ausgereiften Systems erreicht.
+
+\subsection{Stärken des entwickelten Systems}
+\label{subsec:staerken}
+
+\begin{itemize}
+  \item \textbf{Funktionierender optischer Grundaufbau:}
+    Das Free-Space-Combiner-System funktioniert prinzipiell; ein AR-Bild
+    ist im Combiner sichtbar, und der See-Through-Effekt ist realisiert.
+  \item \textbf{Stabile, modulare Software:}
+    Backend, Frontend und Companion App laufen stabil zusammen;
+    die modulare Architektur mit klar definierten Schnittstellen schafft
+    eine solide Erweiterungsbasis.
+  \item \textbf{Kosteneffizienz:}
+    Das System wurde mit handelsüblichen Komponenten und ohne Spezialoptik
+    realisiert -- ein wesentlicher Nachweis der Machbarkeit im DIY-Kontext.
+  \item \textbf{Vollständige Hardware-Integration:}
+    Raspberry~Pi, Display, Sensoren (MPU-6050, GY-63) und Taster
+    arbeiten als integrierte Einheit auf einer stabilen Hardwarebasis.
+  \item \textbf{Erweiterbarkeit:}
+    Neue UI-Seiten, Sensoren und Kommunikationskanäle können mit
+    verhältnismäßig geringem Aufwand ergänzt werden.
+\end{itemize}
+
+\newpage
+\subsection{Verbesserungspotenzial}
+\label{subsec:verbesserungspotenzial}
+
+\begin{itemize}
+  \item \textbf{Optik:}
+    Ein Okular mit angepasster Brennweite sowie ein größerer Combiner-Spiegel
+    würden die Bildgröße deutlich erhöhen und die Fokussierungsproblematik
+    verbessern.
+  \item \textbf{Software-Features:}
+    KI-Chat-Anbindung, vollständige BLE-Kommunikation und Navigationsfunktion
+    sind konzeptionell vorbereitet und in einem nächsten Entwicklungsschritt
+    realisierbar.
+  \item \textbf{Integrationsmanagement:}
+    Eine frühzeitigere, strukturierte Integrationsphase mit definierten
+    Meilensteinen zwischen den Projektparteien würde in einem Folgeprojekt
+    die Qualität des Endergebnisses deutlich steigern.
+  \item \textbf{Systemtest:}
+    Ein ausgiebigerer und systematischerer Test -- idealerweise mit mehreren
+    Testpersonen und unter realen Nutzungsbedingungen -- würde eine
+    belastbarere Aussage über die Systemzuverlässigkeit ermöglichen.
+\end{itemize}
+
+Insgesamt zeigt das Projekt, dass die Konzeption und Realisierung einer
+funktionsfähigen AR-Brille auch mit begrenztem Budget und im Rahmen einer
+Studienarbeit möglich ist.
+Die identifizierten Probleme sind nicht irreparabel -- sie definieren einen
+klaren Entwicklungspfad, auf dem das System in einem nächsten Schritt
+signifikant verbessert werden kann.
+Software und Elektronik bilden dabei eine stabile und durchdachte Basis,
+auf der weitergebaut werden kann.
+
