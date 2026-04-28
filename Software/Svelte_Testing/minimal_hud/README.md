@@ -1,38 +1,69 @@
-# sv
+# Minimal HUD (SvelteKit)
 
-Everything you need to build a Svelte project, powered by [`sv`](https://github.com/sveltejs/cli).
+This project is configured for **static export** via `@sveltejs/adapter-static`.
+The production build is written to the `build/` directory and can be copied to a Raspberry Pi without running `npm run build` on the Pi.
 
-## Creating a project
-
-If you're seeing this, you've probably already done this step. Congrats!
-
-```sh
-# create a new project in the current directory
-npx sv create
-
-# create a new project in my-app
-npx sv create my-app
-```
-
-## Developing
-
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
+## Local development
 
 ```sh
+npm install
 npm run dev
-
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
 ```
 
-## Building
+## Production build (Windows dev machine)
 
-To create a production version of your app:
-
-```sh
+```powershell
+npm ci
 npm run build
 ```
 
-You can preview the production build with `npm run preview`.
+After build, verify `build/index.html` exists.
 
-> To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
+## Package build artifact (Windows PowerShell)
+
+```powershell
+cd C:\Projects\StudienArbeit_ARis\Software\Onboard_UI
+tar -czf onboard-ui-build.tar.gz -C . build
+```
+
+## Deploy on Raspberry Pi (via Tabby SSH)
+
+Copy artifact from Windows to Pi:
+
+```powershell
+scp .\onboard-ui-build.tar.gz admin@raspberrypi:/opt/aris-ui/releases/onboard-ui-build.tar.gz
+```
+
+Activate on Pi:
+
+```bash
+sudo mkdir -p /opt/aris-ui/releases /opt/aris-ui/current
+sudo chown -R admin:admin /opt/aris-ui
+rm -rf /opt/aris-ui/current/*
+tar -xzf /opt/aris-ui/releases/onboard-ui-build.tar.gz -C /opt/aris-ui
+cp -a /opt/aris-ui/build/. /opt/aris-ui/current/
+sudo systemctl restart aris-ui.service
+sudo systemctl status aris-ui.service --no-pager
+```
+
+## `aris-ui.service` (static hosting)
+
+Use a static web server instead of `npm run preview`:
+
+```ini
+[Unit]
+Description=ARIS UI (static)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=admin
+WorkingDirectory=/opt/aris-ui/current
+ExecStart=/usr/bin/python3 -m http.server 4173 --bind 127.0.0.1 --directory /opt/aris-ui/current
+Restart=always
+RestartSec=2
+
+[Install]
+WantedBy=multi-user.target
+```
